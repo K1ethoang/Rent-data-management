@@ -15,6 +15,7 @@ import java.util.List;
 public class CustomerController {
     private CustomerService customerService;
 
+    // [GET] /customers
     @GetMapping("") // Endpoint /customers
     // Trả về model là một List<Customer>
     public ResponseEntity<List<Customer>> getCustomerList() {
@@ -22,7 +23,7 @@ public class CustomerController {
             List<Customer> customers = customerService.getAll();
 
             if (customers.isEmpty()) {
-                return new ResponseEntity<>(customers, HttpStatus.NO_CONTENT);
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
             return new ResponseEntity<>(customers, HttpStatus.OK);
@@ -31,8 +32,9 @@ public class CustomerController {
         }
     }
 
-    @GetMapping("/{customerId}")
-    public ResponseEntity<Customer> getCustomer(@PathVariable("customerId") String _id) {
+    // [GET] /customers/:id
+    @GetMapping("/{id}")
+    public ResponseEntity<Customer> getCustomer(@PathVariable("id") String _id) {
         try {
             Customer customer = customerService.getOneById(_id);
 
@@ -46,10 +48,11 @@ public class CustomerController {
         }
     }
 
+    // [POST] /customers/add
     @PostMapping("/add")
     public ResponseEntity<Customer> save(@RequestBody Customer _customer) {
         try {
-            Customer customer = customerService.saveOrUpdate(_customer);
+            Customer customer = customerService.create(_customer);
 
             if (customer == null) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -61,10 +64,11 @@ public class CustomerController {
         }
     }
 
-    @PutMapping("/edit")
-    public ResponseEntity<Customer> update(@RequestBody Customer _customer) {
+    // [PUT] /customers/edit/:id
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<Customer> update(@PathVariable("id") String _id, @RequestBody Customer _customer) {
         try {
-            Customer customer = customerService.saveOrUpdate(_customer);
+            Customer customer = customerService.update(_id, _customer);
 
             if (customer == null) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -76,6 +80,8 @@ public class CustomerController {
         }
     }
 
+
+    // [DELETE] /customers/:id
     @DeleteMapping("/{id}")
     public ResponseEntity<HttpStatus> delete(@PathVariable("id") String _id) {
         try {

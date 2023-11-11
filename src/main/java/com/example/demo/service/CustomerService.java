@@ -20,7 +20,13 @@ public class CustomerService {
         return customerRepository.findById(_id).get();
     }
 
-    public Customer saveOrUpdate(Customer customer) {
+    public Customer create(Customer _customer) {
+        return customerRepository.save(_customer);
+    }
+
+    public Customer update(String _id, Customer _customer) {
+        Customer customer = getOneById(_id);
+        customer = _customer;
         return customerRepository.save(customer);
     }
 
