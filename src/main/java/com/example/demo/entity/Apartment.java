@@ -23,7 +23,6 @@ public class Apartment {
     @Column(updatable = false, insertable = false)
     private String id;
 
-    @Column(nullable = false)
     private String address;
 
     @Column(name = "retail_price")

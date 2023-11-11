@@ -21,17 +21,17 @@ public class Contract {
     @Column(updatable = false, insertable = false)
     private String id;
 
-    @Column(name="start_date",nullable = false)
+    @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Column(name="end_date",nullable = false)
+    @Column(name = "end_date")
     private LocalDate endDate;
 
     @ManyToOne
-    @JoinColumn(name="customer_id", foreignKey = @ForeignKey(name = "FkContract_Customer"))
+    @JoinColumn(name = "customer_id", foreignKey = @ForeignKey(name = "FkContract_Customer"))
     private Customer customer;
 
     @ManyToOne
-    @JoinColumn(name="apartment_id",foreignKey = @ForeignKey(name = "FkContract_Apartment"))
+    @JoinColumn(name = "apartment_id", foreignKey = @ForeignKey(name = "FkContract_Apartment"))
     private Apartment apartment;
 }
