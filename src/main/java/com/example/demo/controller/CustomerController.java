@@ -1,95 +1,96 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.Customer;
-import com.example.demo.service.CustomerService;
+import com.example.demo.service.implement.CustomerService;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController // @RestController dùng cho API còn @Controller dùng cho return View HTML
 @RequestMapping("/customers") // Endpoint gốc là /customers
 @AllArgsConstructor
+@Log4j2
 public class CustomerController {
-    private CustomerService customerService;
+    private final CustomerService customerService;
 
     // [GET] /customers
     @GetMapping("") // Endpoint /customers
     // Trả về model là một List<Customer>
     public ResponseEntity<List<Customer>> getCustomerList() {
+        log.info("GET /customers");
+        log.trace("GET /customers");
         try {
             List<Customer> customers = customerService.getAll();
 
             if (customers.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
 
-            return new ResponseEntity<>(customers, HttpStatus.OK);
+            return ResponseEntity.status(200).body(customers);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     // [GET] /customers/:id
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomer(@PathVariable("id") String _id) {
+    public ResponseEntity<Customer> getCustomer(@PathVariable("id") String id) {
         try {
-            Customer customer = customerService.getOneById(_id);
+            Customer customer = customerService.getOneById(id);
 
             if (customer == null) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
             }
 
-            return new ResponseEntity<>(customer, HttpStatus.OK);
+            return ResponseEntity.status(200).body(customer);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     // [POST] /customers/add
     @PostMapping("/add")
-    public ResponseEntity<Customer> save(@RequestBody Customer _customer) {
+    public ResponseEntity<Customer> save(@RequestBody Customer newCustomer) {
         try {
-            Customer customer = customerService.create(_customer);
+            Customer customer = customerService.create(newCustomer);
 
             if (customer == null) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
 
-            return new ResponseEntity<>(customer, HttpStatus.CREATED);
+            return ResponseEntity.status(200).body(customer);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    // [PUT] /customers/edit/:id
-    @PutMapping("/edit/{id}")
-    public ResponseEntity<Customer> update(@PathVariable("id") String _id, @RequestBody Customer _customer) {
+    // [PATCH] /customers/update/:id
+    @PostMapping("/update/{id}")
+    public ResponseEntity<Customer> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
         try {
-            Customer customer = customerService.update(_id, _customer);
+            Customer customer = customerService.update(id, payload);
 
-            if (customer == null) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-
-            return new ResponseEntity<>(customer, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(customer);
         } catch (Exception e) {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
 
-    // [DELETE] /customers/:id
-    @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> delete(@PathVariable("id") String _id) {
+    // [DELETE] /customers/delete/:id
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> delete(@PathVariable("id") String id) {
         try {
-            customerService.delete(_id);
+            customerService.delete(id);
 
-            return new ResponseEntity<>(HttpStatus.OK);
+            return ResponseEntity.status(200).body("Customer successfully deleted");
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 }
