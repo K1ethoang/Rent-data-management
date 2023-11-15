@@ -69,7 +69,7 @@ public class CustomerController {
         }
     }
 
-    // [PATCH] /customers/update/:id
+    // [POST] /customers/update/:id
     @PostMapping("/update/{id}")
     public ResponseEntity<Customer> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
         try {
