@@ -92,7 +92,7 @@ public class ApartmentService implements ApartmentInterface {
             throw new AppException(HttpStatus.BAD_REQUEST, ApartmentMessage.INVALID_DATA);
         }
 
-        apartment.setRetailPrice(String.valueOf(retailPrice));
+        apartment.setRetailPrice(MyUtils.formatMoney(retailPrice));
 
         return apartment;
     }

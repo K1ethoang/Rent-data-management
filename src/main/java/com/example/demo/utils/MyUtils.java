@@ -3,7 +3,6 @@ package com.example.demo.utils;
 import lombok.extern.log4j.Log4j2;
 
 import java.text.NumberFormat;
-import java.util.Locale;
 
 @Log4j2
 public final class MyUtils {
@@ -31,8 +30,8 @@ public final class MyUtils {
         }
     }
 
-    public static String formatCurrency(double money, Locale locale) {
-        NumberFormat formatter = NumberFormat.getCurrencyInstance(locale);
+    public static String formatMoney(double money) {
+        NumberFormat formatter = NumberFormat.getNumberInstance();
         return formatter.format(money);
     }
 }
