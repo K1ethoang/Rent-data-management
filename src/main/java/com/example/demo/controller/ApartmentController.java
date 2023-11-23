@@ -2,7 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Apartment;
 import com.example.demo.service.implement.ApartmentService;
+import com.example.demo.service.message.ApartmentMessage;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,78 +15,48 @@ import java.util.Map;
 @RestController
 @AllArgsConstructor
 @RequestMapping("apartments")
+@Log4j2
 public class ApartmentController {
     private final ApartmentService apartmentService;
 
     // [GET] /apartments/
     @GetMapping("") // Endpoint /apartments
-    public ResponseEntity<List<Apartment>> getApartmentList() {
-        try {
-            List<Apartment> apartments = apartmentService.getAll();
+    public ResponseEntity<Object> getApartmentList() {
+        List<Apartment> apartments = apartmentService.getAll();
 
-            if (apartments.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
-            return ResponseEntity.status(200).body(apartments);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(apartments);
     }
 
     // [GET] /apartments/:id
     @GetMapping("{id}")
-    public ResponseEntity<Apartment> getApartment(@PathVariable("id") String id) {
-        try {
-            Apartment apartment = apartmentService.getOne(id);
+    public ResponseEntity<Object> getApartment(@PathVariable("id") String id) {
+        Apartment apartment = apartmentService.getOne(id);
 
-            if (apartment == null) return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-
-            return ResponseEntity.status(200).body(apartment);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(apartment);
     }
 
     // [POST] /apartments/add
     @PostMapping("add")
-    public ResponseEntity<Apartment> save(@RequestBody Apartment newApartment) {
-        try {
-            Apartment apartment = apartmentService.create(newApartment);
+    public ResponseEntity<Object> save(@RequestBody Apartment newApartment) {
+        Apartment apartment = apartmentService.create(newApartment);
 
-            if (apartment == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
-
-            return ResponseEntity.status(200).body(apartment);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        log.info(ApartmentMessage.SUCCESS_CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(apartment);
     }
 
     // [POST] /apartments/update/:id
     @PostMapping("update/{id}")
-    public ResponseEntity<Apartment> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
-        try {
-            Apartment apartment = apartmentService.update(id, payload);
+    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
+        String message = apartmentService.update(id, payload);
 
-            if (apartment == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-
-            return ResponseEntity.status(200).body(apartment);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 
     // [DELETE] /apartments/delete/:id
     @DeleteMapping("delete/{id}")
-    public ResponseEntity<String> delete(@PathVariable String id) {
-        try {
-            apartmentService.delete(id);
+    public ResponseEntity<Object> delete(@PathVariable String id) {
+        String message = apartmentService.delete(id);
 
-            return ResponseEntity.status(200).body("Apartment successfully deleted");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
 }

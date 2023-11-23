@@ -12,7 +12,7 @@ public interface ApartmentInterface {
 
     Apartment create(Apartment apartment);
 
-    Apartment update(String id, Map<String, Object> payload);
+    String update(String id, Map<String, Object> payload);
 
-    void delete(String id);
+    String delete(String id);
 }
