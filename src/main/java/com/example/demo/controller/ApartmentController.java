@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.Apartment;
+import com.example.demo.message.ApartmentMessage;
 import com.example.demo.service.implement.ApartmentService;
-import com.example.demo.service.message.ApartmentMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;

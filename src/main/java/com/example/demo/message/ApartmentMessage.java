@@ -1,4 +1,4 @@
-package com.example.demo.service.message;
+package com.example.demo.message;
 
 import lombok.NoArgsConstructor;
 

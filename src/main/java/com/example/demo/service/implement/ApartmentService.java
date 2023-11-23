@@ -2,9 +2,9 @@ package com.example.demo.service.implement;
 
 import com.example.demo.entity.Apartment;
 import com.example.demo.exception.AppException;
+import com.example.demo.message.ApartmentMessage;
 import com.example.demo.repository.ApartmentRepository;
 import com.example.demo.service.interfaces.ApartmentInterface;
-import com.example.demo.service.message.ApartmentMessage;
 import com.example.demo.utils.MyUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -27,7 +27,7 @@ public class ApartmentService implements ApartmentInterface {
         List<Apartment> apartments = apartmentRepository.findAll();
 
         if (apartments.isEmpty())
-            throw new AppException(HttpStatus.BAD_REQUEST, ApartmentMessage.EMPTY_LIST);
+            throw new AppException(HttpStatus.OK, ApartmentMessage.EMPTY_LIST);
 
         return apartments;
     }
