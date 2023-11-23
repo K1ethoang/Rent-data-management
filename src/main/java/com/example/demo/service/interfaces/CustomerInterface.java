@@ -14,5 +14,5 @@ public interface CustomerInterface {
 
     Customer update(String id, Map<String, Object> payload);
 
-    void delete(String id);
+    String delete(String id);
 }

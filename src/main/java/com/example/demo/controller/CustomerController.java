@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.Customer;
+import com.example.demo.message.CustomerMessage;
 import com.example.demo.service.implement.CustomerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,75 +23,47 @@ public class CustomerController {
     @GetMapping("") // Endpoint /customers
     // Trả về model là một List<Customer>
     public ResponseEntity<List<Customer>> getCustomerList() {
-        log.info("GET /customers");
-        log.trace("GET /customers");
-        try {
-            List<Customer> customers = customerService.getAll();
+        List<Customer> customers = customerService.getAll();
 
-            if (customers.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
-            return ResponseEntity.status(200).body(customers);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        log.info(CustomerMessage.FOUND);
+        return ResponseEntity.status(HttpStatus.OK).body(customers);
     }
 
     // [GET] /customers/:id
     @GetMapping("/{id}")
     public ResponseEntity<Customer> getCustomer(@PathVariable("id") String id) {
-        try {
-            Customer customer = customerService.getOneById(id);
+        Customer customer = customerService.getOneById(id);
 
-            if (customer == null) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-            }
-
-            return ResponseEntity.status(200).body(customer);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        log.info(CustomerMessage.FOUND);
+        return ResponseEntity.status(HttpStatus.OK).body(customer);
     }
 
     // [POST] /customers/add
     @PostMapping("/add")
     public ResponseEntity<Customer> save(@RequestBody Customer newCustomer) {
-        try {
-            Customer customer = customerService.create(newCustomer);
+        Customer customer = customerService.create(newCustomer);
 
-            if (customer == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
-
-            return ResponseEntity.status(200).body(customer);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        log.info(CustomerMessage.SUCCESS_CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(customer);
     }
 
     // [POST] /customers/update/:id
     @PostMapping("/update/{id}")
-    public ResponseEntity<Customer> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
-        try {
-            Customer customer = customerService.update(id, payload);
+    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
+        Customer customer = customerService.update(id, payload);
 
-            return ResponseEntity.status(HttpStatus.OK).body(customer);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        log.info(CustomerMessage.SUCCESS_UPDATED);
+        return ResponseEntity.status(HttpStatus.OK).body(CustomerMessage.SUCCESS_UPDATED);
     }
 
 
     // [DELETE] /customers/delete/:id
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> delete(@PathVariable("id") String id) {
-        try {
-            customerService.delete(id);
+    public ResponseEntity<Object> delete(@PathVariable("id") String id) {
+        String message = customerService.delete(id);
 
-            return ResponseEntity.status(200).body("Customer successfully deleted");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        log.info(CustomerMessage.SUCCESS_DELETED);
+        return ResponseEntity.status(HttpStatus.OK).body(message);
     }
+
 }
