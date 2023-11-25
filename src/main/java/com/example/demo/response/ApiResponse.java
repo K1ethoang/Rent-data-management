@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResponseHandler {
+public class ApiResponse {
     public static ResponseEntity<Object> responseBuilder(HttpStatus httpStatus, String message, Object responseObject) {
         Map<String, Object> response = new HashMap<>();
         response.put("statusCode", httpStatus.value());

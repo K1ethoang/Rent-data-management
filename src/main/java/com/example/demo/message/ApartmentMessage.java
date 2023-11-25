@@ -1,9 +1,6 @@
 package com.example.demo.message;
 
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor
-public final class ApartmentMessage {
+public class ApartmentMessage {
     public static final String NOT_FOUND = "Apartment not found";
     public static final String FOUND = "Apartment founded";
     public static final String SUCCESS_DELETED = "Apartment deleted";

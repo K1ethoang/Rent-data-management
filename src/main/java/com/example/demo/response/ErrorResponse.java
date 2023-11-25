@@ -1,11 +1,11 @@
-package com.example.demo.exception;
+package com.example.demo.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class ErrorMessage {
+public class ErrorResponse {
     private int statusCode;
     private String message;
 }

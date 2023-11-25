@@ -2,6 +2,7 @@ package com.example.demo.service.implement;
 
 import com.example.demo.entity.Customer;
 import com.example.demo.exception.AppException;
+import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.model.DTO.CustomerDTO;
@@ -28,10 +29,10 @@ public class CustomerService implements CustomerInterface {
     private final ModelMapper mapper;
 
     @Override
-    public List<CustomerDTO> getAll() throws NotFoundException {
+    public List<CustomerDTO> getAll() throws NoContentException {
         List<Customer> customerList = customerRepository.findAll();
 
-        if (customerList.isEmpty()) throw new NotFoundException(CustomerMessage.NOT_FOUND);
+        if (customerList.isEmpty()) throw new NoContentException(CustomerMessage.EMPTY_LIST);
 
         return mapper.map(customerList, new TypeToken<List<CustomerDTO>>() {
         }.getType());
