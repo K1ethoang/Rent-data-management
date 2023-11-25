@@ -1,18 +1,18 @@
 package com.example.demo.service.interfaces;
 
-import com.example.demo.entity.Customer;
+import com.example.demo.model.DTO.CustomerDTO;
 
 import java.util.List;
 import java.util.Map;
 
 public interface CustomerInterface {
-    List<Customer> getAll();
+    List<CustomerDTO> getAll();
 
-    Customer getOneById(String id);
+    CustomerDTO getOneById(String id);
 
-    Customer create(Customer customer);
+    CustomerDTO create(CustomerDTO customerDTO);
 
-    Customer update(String id, Map<String, Object> payload);
+    CustomerDTO update(String id, Map<String, Object> payload);
 
-    String delete(String id);
+    CustomerDTO delete(String id);
 }

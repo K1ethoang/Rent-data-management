@@ -2,11 +2,16 @@ package com.example.demo.service.implement;
 
 import com.example.demo.entity.Customer;
 import com.example.demo.exception.AppException;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.message.CustomerMessage;
+import com.example.demo.model.DTO.CustomerDTO;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerInterface;
 import com.example.demo.utils.MyUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
@@ -17,34 +22,37 @@ import java.util.Map;
 
 @Service
 @AllArgsConstructor
+@Log4j2
 public class CustomerService implements CustomerInterface {
     private final CustomerRepository customerRepository;
+    private final ModelMapper mapper;
 
     @Override
-    public List<Customer> getAll() throws AppException {
-        List<Customer> customers = customerRepository.findAll();
+    public List<CustomerDTO> getAll() throws NotFoundException {
+        List<Customer> customerList = customerRepository.findAll();
 
-        if (customers.isEmpty()) throw new AppException(HttpStatus.OK, CustomerMessage.EMPTY_LIST);
+        if (customerList.isEmpty()) throw new NotFoundException(CustomerMessage.NOT_FOUND);
 
-        return customers;
+        return mapper.map(customerList, new TypeToken<List<CustomerDTO>>() {
+        }.getType());
     }
 
     @Override
-    public Customer getOneById(String id) throws AppException {
+    public CustomerDTO getOneById(String id) throws NotFoundException {
         Customer customer = customerRepository.findById(id).orElse(null);
 
-        if (customer != null) return customer;
+        if (customer != null) return customerEntityToDTO(customer);
         else
-            throw new AppException(HttpStatus.NOT_FOUND, CustomerMessage.NOT_FOUND);
+            throw new NotFoundException(CustomerMessage.NOT_FOUND);
     }
 
     @Override
-    public Customer create(Customer customer) throws AppException {
-        return customerRepository.save(validateObject(customer));
+    public CustomerDTO create(CustomerDTO customerDTO) throws AppException {
+        return customerEntityToDTO(customerRepository.save(validateObject(customerDTOtoEntity(customerDTO))));
     }
 
     @Override
-    public Customer update(String id, Map<String, Object> payload) throws AppException {
+    public CustomerDTO update(String id, Map<String, Object> payload) throws NotFoundException {
         Customer customerFromDB = customerRepository.findById(id).orElse(null);
 
         if (customerFromDB != null) {
@@ -57,21 +65,21 @@ public class CustomerService implements CustomerInterface {
                 }
             });
 
-            return customerRepository.save(validateObject(customerFromDB));
+
+            return customerEntityToDTO(customerRepository.save(validateObject(customerFromDB)));
         } else
-            throw new AppException(HttpStatus.NOT_FOUND, CustomerMessage.NOT_FOUND);
+            throw new NotFoundException(CustomerMessage.NOT_FOUND);
     }
 
     @Override
-    public String delete(String id) throws AppException {
+    public CustomerDTO delete(String id) throws NotFoundException {
         Customer customer = customerRepository.findById(id).orElse(null);
 
         if (customer != null) {
             customerRepository.delete(customer);
-            return CustomerMessage.SUCCESS_DELETED;
-
+            return customerEntityToDTO(customer);
         } else
-            throw new AppException(HttpStatus.NOT_FOUND, CustomerMessage.NOT_FOUND);
+            throw new NotFoundException(CustomerMessage.NOT_FOUND);
     }
 
     private Customer validateObject(Customer customer) {
@@ -84,5 +92,13 @@ public class CustomerService implements CustomerInterface {
             customer.setStatus("Normal");
 
         return customer;
+    }
+
+    private Customer customerDTOtoEntity(CustomerDTO customerDTO) {
+        return mapper.map(customerDTO, Customer.class);
+    }
+
+    private CustomerDTO customerEntityToDTO(Customer customer) {
+        return mapper.map(customer, CustomerDTO.class);
     }
 }

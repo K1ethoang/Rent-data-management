@@ -1,7 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Customer;
-import com.example.demo.message.CustomerMessage;
+import com.example.demo.message.GlobalMessage;
+import com.example.demo.model.DTO.CustomerDTO;
+import com.example.demo.response.ResponseHandler;
 import com.example.demo.service.implement.CustomerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -9,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController // @RestController dùng cho API còn @Controller dùng cho return View HTML
@@ -20,50 +20,33 @@ public class CustomerController {
     private final CustomerService customerService;
 
     // [GET] /customers
-    @GetMapping("") // Endpoint /customers
-    // Trả về model là một List<Customer>
-    public ResponseEntity<List<Customer>> getCustomerList() {
-        List<Customer> customers = customerService.getAll();
-
-        log.info(CustomerMessage.FOUND);
-        return ResponseEntity.status(HttpStatus.OK).body(customers);
+    @GetMapping("")
+    public ResponseEntity<Object> getCustomerList() {
+        return ResponseHandler.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.getAll());
     }
 
     // [GET] /customers/:id
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomer(@PathVariable("id") String id) {
-        Customer customer = customerService.getOneById(id);
-
-        log.info(CustomerMessage.FOUND);
-        return ResponseEntity.status(HttpStatus.OK).body(customer);
+    public ResponseEntity<Object> getCustomer(@PathVariable("id") String id) {
+        return ResponseHandler.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.getOneById(id));
     }
 
     // [POST] /customers/add
     @PostMapping("/add")
-    public ResponseEntity<Customer> save(@RequestBody Customer newCustomer) {
-        Customer customer = customerService.create(newCustomer);
-
-        log.info(CustomerMessage.SUCCESS_CREATED);
-        return ResponseEntity.status(HttpStatus.CREATED).body(customer);
+    public ResponseEntity<Object> save(@RequestBody CustomerDTO customerDTO) {
+        return ResponseHandler.responseBuilder(HttpStatus.CREATED, GlobalMessage.SUCCESS, customerService.create(customerDTO));
     }
 
     // [POST] /customers/update/:id
     @PostMapping("/update/{id}")
     public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
-        Customer customer = customerService.update(id, payload);
-
-        log.info(CustomerMessage.SUCCESS_UPDATED);
-        return ResponseEntity.status(HttpStatus.OK).body(CustomerMessage.SUCCESS_UPDATED);
+        return ResponseHandler.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.update(id, payload));
     }
-
 
     // [DELETE] /customers/delete/:id
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Object> delete(@PathVariable("id") String id) {
-        String message = customerService.delete(id);
-
-        log.info(CustomerMessage.SUCCESS_DELETED);
-        return ResponseEntity.status(HttpStatus.OK).body(message);
+        return ResponseHandler.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.delete(id));
     }
 
 }
