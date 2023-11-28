@@ -3,7 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.message.GlobalMessage;
 import com.example.demo.model.DTO.CustomerDTO;
 import com.example.demo.response.ApiResponse;
-import com.example.demo.service.implement.CustomerService;
+import com.example.demo.service.implement.CustomerServiceImp;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -17,36 +17,36 @@ import java.util.Map;
 @AllArgsConstructor
 @Log4j2
 public class CustomerController {
-    private final CustomerService customerService;
+    private final CustomerServiceImp customerServiceImp;
 
     // [GET] /customers
-    @GetMapping("")
+    @GetMapping({"", "/"})
     public ResponseEntity<Object> getCustomerList() {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.getAll());
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerServiceImp.getAll());
     }
 
     // [GET] /customers/:id
     @GetMapping("/{id}")
     public ResponseEntity<Object> getCustomer(@PathVariable("id") String id) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.getOneById(id));
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerServiceImp.getOneById(id));
     }
 
     // [POST] /customers/add
     @PostMapping("/add")
     public ResponseEntity<Object> save(@RequestBody CustomerDTO customerDTO) {
-        return ApiResponse.responseBuilder(HttpStatus.CREATED, GlobalMessage.SUCCESS, customerService.create(customerDTO));
+        return ApiResponse.responseBuilder(HttpStatus.CREATED, GlobalMessage.SUCCESS, customerServiceImp.create(customerDTO));
     }
 
     // [POST] /customers/update/:id
     @PostMapping("/update/{id}")
     public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.update(id, payload));
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerServiceImp.update(id, payload));
     }
 
     // [DELETE] /customers/delete/:id
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Object> delete(@PathVariable("id") String id) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.delete(id));
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerServiceImp.delete(id));
     }
 
 }

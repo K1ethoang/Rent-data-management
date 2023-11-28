@@ -5,7 +5,7 @@ import com.example.demo.model.DTO.CustomerDTO;
 import java.util.List;
 import java.util.Map;
 
-public interface CustomerInterface {
+public interface CustomerService {
     List<CustomerDTO> getAll();
 
     CustomerDTO getOneById(String id);

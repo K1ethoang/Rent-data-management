@@ -2,7 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Contract;
 import com.example.demo.message.ContractMessage;
-import com.example.demo.service.implement.ContractService;
+import com.example.demo.service.implement.ContractServiceImp;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -16,12 +16,12 @@ import java.util.List;
 @Log4j2
 @RequestMapping("/contracts")
 public class ContractController {
-    public final ContractService contractService;
+    public final ContractServiceImp contractServiceImp;
 
     // [GET] : /contracts/
     @GetMapping("")
     public ResponseEntity<List<Contract>> getContractList() {
-        List<Contract> contracts = contractService.getAll();
+        List<Contract> contracts = contractServiceImp.getAll();
 
         log.info(ContractMessage.FOUND);
         return ResponseEntity.status(HttpStatus.OK).body(contracts);
@@ -30,7 +30,7 @@ public class ContractController {
     // [GET] : /contracts/:id
     @GetMapping("/{id}")
     public ResponseEntity<Contract> getContract(@PathVariable("id") String id) {
-        Contract contract = contractService.getOneById(id);
+        Contract contract = contractServiceImp.getOneById(id);
 
         log.info(ContractMessage.FOUND);
         return ResponseEntity.status(HttpStatus.OK).body(contract);
@@ -39,7 +39,7 @@ public class ContractController {
     // [POST] : contracts/add
     @PostMapping("/add")
     public ResponseEntity<Contract> save(@RequestBody Contract newContract) {
-        Contract contract = contractService.create(newContract);
+        Contract contract = contractServiceImp.create(newContract);
 
         log.info(ContractMessage.SUCCESS_CREATED);
         return ResponseEntity.status(HttpStatus.CREATED).body(contract);
@@ -48,7 +48,7 @@ public class ContractController {
     // [DELETE] : contracts/delete/:id
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Object> save(@PathVariable String id) {
-        String message = contractService.delete(id);
+        String message = contractServiceImp.delete(id);
 
         log.info(ContractMessage.SUCCESS_DELETED);
         return ResponseEntity.status(HttpStatus.OK).body(message);

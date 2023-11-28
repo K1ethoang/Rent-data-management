@@ -7,7 +7,7 @@ import com.example.demo.exception.NotFoundException;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.model.DTO.CustomerDTO;
 import com.example.demo.repository.CustomerRepository;
-import com.example.demo.service.interfaces.CustomerInterface;
+import com.example.demo.service.interfaces.CustomerService;
 import com.example.demo.utils.MyUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,7 +24,7 @@ import java.util.Map;
 @Service
 @AllArgsConstructor
 @Log4j2
-public class CustomerService implements CustomerInterface {
+public class CustomerServiceImp implements CustomerService {
     private final CustomerRepository customerRepository;
     private final ModelMapper mapper;
 

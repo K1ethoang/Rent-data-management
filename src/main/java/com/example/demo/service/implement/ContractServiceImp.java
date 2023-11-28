@@ -4,7 +4,7 @@ import com.example.demo.entity.Contract;
 import com.example.demo.exception.AppException;
 import com.example.demo.message.ContractMessage;
 import com.example.demo.repository.ContractRepository;
-import com.example.demo.service.interfaces.ContractInterface;
+import com.example.demo.service.interfaces.ContractService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 @Service
 @AllArgsConstructor
-public class ContractService implements ContractInterface {
+public class ContractServiceImp implements ContractService {
     public final ContractRepository contractRepository;
 
     @Override

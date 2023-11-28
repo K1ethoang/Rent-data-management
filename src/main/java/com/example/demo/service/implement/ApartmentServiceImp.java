@@ -2,12 +2,17 @@ package com.example.demo.service.implement;
 
 import com.example.demo.entity.Apartment;
 import com.example.demo.exception.AppException;
+import com.example.demo.exception.NoContentException;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.message.ApartmentMessage;
+import com.example.demo.model.DTO.ApartmentDTO;
 import com.example.demo.repository.ApartmentRepository;
-import com.example.demo.service.interfaces.ApartmentInterface;
+import com.example.demo.service.interfaces.ApartmentService;
 import com.example.demo.utils.MyUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
@@ -19,40 +24,40 @@ import java.util.Map;
 @Service
 @AllArgsConstructor
 @Log4j2
-public class ApartmentService implements ApartmentInterface {
+public class ApartmentServiceImp implements ApartmentService {
     private final ApartmentRepository apartmentRepository;
+    private final ModelMapper mapper;
 
     @Override
-    public List<Apartment> getAll() throws AppException {
+    public List<ApartmentDTO> getAll() throws NotFoundException {
         List<Apartment> apartments = apartmentRepository.findAll();
 
-        if (apartments.isEmpty())
-            throw new AppException(HttpStatus.OK, ApartmentMessage.EMPTY_LIST);
+        if (apartments.isEmpty()) throw new NoContentException(ApartmentMessage.EMPTY_LIST);
 
-        return apartments;
+        return mapper.map(apartments, new TypeToken<List<ApartmentDTO>>() {
+        }.getType());
     }
 
     @Override
-    public Apartment getOne(String id) throws AppException {
+    public ApartmentDTO getOne(String id) throws NotFoundException {
         Apartment apartment = apartmentRepository.findById(id).orElse(null);
 
         if (apartment != null) {
-            return apartment;
-        } else
-            throw new AppException(HttpStatus.NOT_FOUND, ApartmentMessage.NOT_FOUND);
+            return apartmentEntityToDTO(apartment);
+        } else throw new NotFoundException(ApartmentMessage.NOT_FOUND);
     }
 
     @Override
-    public Apartment create(Apartment apartment) throws AppException {
-        return apartmentRepository.save(validateObject(apartment));
+    public ApartmentDTO create(ApartmentDTO apartmentDTO) {
+        return apartmentEntityToDTO(apartmentRepository.save(validateObject(apartmentDTOtoEntity(apartmentDTO))));
     }
 
     @Override
-    public String update(String id, Map<String, Object> payload) throws AppException {
+    public ApartmentDTO update(String id, Map<String, Object> payload) throws NotFoundException {
         Apartment apartmentFromDB = apartmentRepository.findById(id).orElse(null);
 
-        if (apartmentFromDB != null) {
 
+        if (apartmentFromDB != null) {
             payload.forEach((key, value) -> {
                 Field field = ReflectionUtils.findField(Apartment.class, key);
                 if (field != null) {
@@ -61,22 +66,18 @@ public class ApartmentService implements ApartmentInterface {
                 }
             });
 
-            apartmentRepository.save(validateObject(apartmentFromDB));
-            return ApartmentMessage.SUCCESS_UPDATED;
-        } else
-            throw new AppException(HttpStatus.NOT_FOUND, ApartmentMessage.NOT_FOUND);
+            return apartmentEntityToDTO(apartmentRepository.save(validateObject(apartmentFromDB)));
+        } else throw new NotFoundException(ApartmentMessage.NOT_FOUND);
     }
 
     @Override
-    public String delete(String id) throws AppException {
+    public ApartmentDTO delete(String id) throws NotFoundException {
         Apartment apartmentFromDB = apartmentRepository.findById(id).orElse(null);
 
         if (apartmentFromDB != null) {
             apartmentRepository.delete(apartmentFromDB);
-
-            return ApartmentMessage.SUCCESS_DELETED;
-        } else
-            throw new AppException(HttpStatus.NOT_FOUND, ApartmentMessage.NOT_FOUND);
+            return apartmentEntityToDTO(apartmentFromDB);
+        } else throw new NotFoundException(ApartmentMessage.NOT_FOUND);
     }
 
     private Apartment validateObject(Apartment apartment) {
@@ -95,5 +96,13 @@ public class ApartmentService implements ApartmentInterface {
         apartment.setRetailPrice(MyUtils.formatMoney(retailPrice));
 
         return apartment;
+    }
+
+    private Apartment apartmentDTOtoEntity(ApartmentDTO apartmentDTO) {
+        return mapper.map(apartmentDTO, Apartment.class);
+    }
+
+    private ApartmentDTO apartmentEntityToDTO(Apartment apartment) {
+        return mapper.map(apartment, ApartmentDTO.class);
     }
 }

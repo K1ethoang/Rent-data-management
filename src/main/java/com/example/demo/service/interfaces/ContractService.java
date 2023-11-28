@@ -5,7 +5,7 @@ import com.example.demo.entity.Contract;
 import java.util.List;
 import java.util.Map;
 
-public interface ContractInterface {
+public interface ContractService {
     List<Contract> getAll();
 
     Contract getOneById(String id);
