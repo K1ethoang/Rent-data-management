@@ -85,7 +85,7 @@ public class CustomerServiceImp implements CustomerService {
 
     private Customer validateObject(Customer customer) {
         int age = customer.getAge();
-        if (age <= 0 || !MyUtils.isNumeric(String.valueOf(age))) {
+        if (age <= 0 || MyUtils.isNumeric(String.valueOf(age))) {
             throw new AppException(HttpStatus.BAD_REQUEST, CustomerMessage.INVALID_DATA);
         }
 

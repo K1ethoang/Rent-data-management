@@ -1,19 +1,17 @@
 package com.example.demo.service.implement;
 
 import com.example.demo.entity.Apartment;
-import com.example.demo.exception.AppException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.message.ApartmentMessage;
 import com.example.demo.model.DTO.ApartmentDTO;
+import com.example.demo.model.validator.ApartmentValidator;
 import com.example.demo.repository.ApartmentRepository;
 import com.example.demo.service.interfaces.ApartmentService;
-import com.example.demo.utils.MyUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
@@ -29,7 +27,7 @@ public class ApartmentServiceImp implements ApartmentService {
     private final ModelMapper mapper;
 
     @Override
-    public List<ApartmentDTO> getAll() throws NotFoundException {
+    public List<ApartmentDTO> getAll() throws NoContentException {
         List<Apartment> apartments = apartmentRepository.findAll();
 
         if (apartments.isEmpty()) throw new NoContentException(ApartmentMessage.EMPTY_LIST);
@@ -49,25 +47,35 @@ public class ApartmentServiceImp implements ApartmentService {
 
     @Override
     public ApartmentDTO create(ApartmentDTO apartmentDTO) {
-        return apartmentEntityToDTO(apartmentRepository.save(validateObject(apartmentDTOtoEntity(apartmentDTO))));
+        ApartmentValidator.validator(apartmentDTO, true);
+        ApartmentValidator.format(apartmentDTO);
+        return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOtoEntity(apartmentDTO)));
     }
 
     @Override
     public ApartmentDTO update(String id, Map<String, Object> payload) throws NotFoundException {
+        // Find
         Apartment apartmentFromDB = apartmentRepository.findById(id).orElse(null);
+        if (apartmentFromDB == null) throw new NotFoundException(ApartmentMessage.NOT_FOUND);
 
+        // Map payload -> DTO to validate
+        ApartmentDTO apartmentFromPayload = mapper.map(payload, ApartmentDTO.class);
+        // Validate & Format
+        ApartmentValidator.validator(apartmentFromPayload, false);
+        ApartmentValidator.format(apartmentFromPayload);
 
-        if (apartmentFromDB != null) {
-            payload.forEach((key, value) -> {
-                Field field = ReflectionUtils.findField(Apartment.class, key);
-                if (field != null) {
-                    field.setAccessible(true);
-                    ReflectionUtils.setField(field, apartmentFromDB, value);
-                }
-            });
+        ApartmentDTO apartmentToUpdate = apartmentEntityToDTO(apartmentFromDB);
 
-            return apartmentEntityToDTO(apartmentRepository.save(validateObject(apartmentFromDB)));
-        } else throw new NotFoundException(ApartmentMessage.NOT_FOUND);
+        payload.forEach((key, value) -> {
+            Field field = ReflectionUtils.findField(ApartmentDTO.class, key);
+
+            if (field != null) {
+                field.setAccessible(true);
+                ReflectionUtils.setField(field, apartmentToUpdate, ReflectionUtils.getField(field, apartmentFromPayload));
+            }
+        });
+
+        return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOtoEntity(apartmentToUpdate)));
     }
 
     @Override
@@ -78,24 +86,6 @@ public class ApartmentServiceImp implements ApartmentService {
             apartmentRepository.delete(apartmentFromDB);
             return apartmentEntityToDTO(apartmentFromDB);
         } else throw new NotFoundException(ApartmentMessage.NOT_FOUND);
-    }
-
-    private Apartment validateObject(Apartment apartment) {
-        int numberOfRoom = apartment.getNumberOfRoom();
-
-        if (numberOfRoom < 0 || !MyUtils.isNumeric(String.valueOf(numberOfRoom))) {
-            throw new AppException(HttpStatus.BAD_REQUEST, ApartmentMessage.INVALID_DATA);
-        }
-
-        double retailPrice = MyUtils.stringToNumeric(apartment.getRetailPrice());
-
-        if (retailPrice < 0) {
-            throw new AppException(HttpStatus.BAD_REQUEST, ApartmentMessage.INVALID_DATA);
-        }
-
-        apartment.setRetailPrice(MyUtils.formatMoney(retailPrice));
-
-        return apartment;
     }
 
     private Apartment apartmentDTOtoEntity(ApartmentDTO apartmentDTO) {

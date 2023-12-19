@@ -7,9 +7,6 @@ import java.text.NumberFormat;
 @Log4j2
 public final class MyUtils {
     public static double stringToNumeric(String s) {
-        if (s.isEmpty())
-            s = "0";
-
         try {
             return Double.parseDouble(s);
         } catch (NumberFormatException e) {
@@ -18,20 +15,22 @@ public final class MyUtils {
         }
     }
 
-    public static boolean isNumeric(String s) {
-        int intValue;
+    public static boolean isNullOrEmpty(String s) {
+        return s == null || s.isEmpty();
+    }
 
+    public static boolean isNumeric(String s) {
         try {
-            intValue = Integer.parseInt(s);
-            return true;
+            Double.parseDouble(s);
+            return false;
         } catch (NumberFormatException e) {
             log.error(e.getMessage());
-            return false;
+            return true;
         }
     }
 
-    public static String formatMoney(double money) {
+    public static String formatMoney(String money) {
         NumberFormat formatter = NumberFormat.getNumberInstance();
-        return formatter.format(money);
+        return formatter.format(stringToNumeric(money));
     }
 }
