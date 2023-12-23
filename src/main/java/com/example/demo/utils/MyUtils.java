@@ -6,28 +6,31 @@ import java.text.NumberFormat;
 
 @Log4j2
 public final class MyUtils {
-    public static double stringToNumeric(String s) {
-        try {
-            return Double.parseDouble(s);
-        } catch (NumberFormatException e) {
-            log.error(e.getMessage());
-            return -1.0;
-        }
-    }
-
-    public static boolean isNullOrEmpty(String s) {
-        return s == null || s.isEmpty();
-    }
-
     public static boolean isNumeric(String s) {
         try {
             Double.parseDouble(s);
             return false;
         } catch (NumberFormatException e) {
-            log.error(e.getMessage());
             return true;
         }
     }
+
+    public static double stringToNumeric(String s) {
+        try {
+            return Double.parseDouble(s);
+        } catch (NumberFormatException e) {
+            return -1.0;
+        }
+    }
+
+    public static boolean isNull(String s) {
+        return s == null;
+    }
+
+    public static boolean isEmpty(String s) {
+        return s.isEmpty();
+    }
+
 
     public static String formatMoney(String money) {
         NumberFormat formatter = NumberFormat.getNumberInstance();

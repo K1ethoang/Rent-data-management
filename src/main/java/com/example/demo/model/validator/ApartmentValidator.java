@@ -6,67 +6,76 @@ import com.example.demo.message.ApartmentMessage;
 import com.example.demo.model.DTO.ApartmentDTO;
 import com.example.demo.utils.MyUtils;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.util.ReflectionUtils;
+
+import java.lang.reflect.Field;
+import java.util.List;
 
 @Log4j2
 public class ApartmentValidator {
 
     public static void notNullAddress(String address) throws NotNullException {
-        if (MyUtils.isNullOrEmpty(address)) throw new NotNullException(ApartmentMessage.NULL_ADDRESS);
+        if (MyUtils.isNull(address)) return;
+        if (MyUtils.isEmpty(address)) throw new NotNullException(ApartmentMessage.NOT_NULL_ADDRESS);
     }
 
     public static void notNullRetailPrice(String retailPrice) throws NotNullException {
-        if (MyUtils.isNullOrEmpty(retailPrice)) throw new NotNullException(ApartmentMessage.NULL_RETAIL_PRICE);
+        if (MyUtils.isNull(retailPrice)) return;
+        if (MyUtils.isEmpty(retailPrice)) throw new NotNullException(ApartmentMessage.NOT_NULL_RETAIL_PRICE);
     }
 
     public static void notNullNumberOfRoom(String numberOfRoom) throws NotNullException {
-        if (MyUtils.isNullOrEmpty(numberOfRoom)) throw new NotNullException(ApartmentMessage.NULL_NUMBER_OF_ROOM);
+        if (MyUtils.isNull(numberOfRoom)) return;
+        if (MyUtils.isEmpty(numberOfRoom)) throw new NotNullException(ApartmentMessage.NOT_NULL_NUMBER_OF_ROOM);
     }
 
     public static void invalidRetailPrice(String retailPrice) throws NotValidException {
-        if (MyUtils.isNullOrEmpty(retailPrice)) return;
+        if (MyUtils.isNull(retailPrice) || MyUtils.isEmpty(retailPrice)) return;
         if (MyUtils.stringToNumeric(retailPrice) < 0)
             throw new NotValidException(ApartmentMessage.INVALID_RETAIL_PRICE);
     }
 
     public static void invalidNumberOfRoom(String numberOfRoom) throws NotValidException {
-        if (MyUtils.isNullOrEmpty(numberOfRoom)) return;
+        if (MyUtils.isNull(numberOfRoom) || MyUtils.isEmpty(numberOfRoom)) return;
         if (MyUtils.stringToNumeric(numberOfRoom) < 0)
             throw new NotValidException(ApartmentMessage.INVALID_NUMBER_OF_ROOM);
     }
 
-    public static void validator(ApartmentDTO apartmentDTO, boolean hasCheckNull) {
-        log.info("START: validator");
-        if (hasCheckNull) {
-            log.info("CHECK NULL");
-            notNullAddress(apartmentDTO.getAddress().trim());
-            notNullRetailPrice(apartmentDTO.getRetailPrice().trim());
-            notNullNumberOfRoom(apartmentDTO.getNumberOfRoom().trim());
-        }
+    public static void validator(ApartmentDTO apartmentDTO) {
+        trimToSetAllField(apartmentDTO);
 
-        log.info("TRIM DATA");
-        trim(apartmentDTO);
+        notNullAddress(apartmentDTO.getAddress());
+        notNullRetailPrice(apartmentDTO.getRetailPrice());
+        notNullNumberOfRoom(apartmentDTO.getNumberOfRoom());
 
-        log.info("VALIDATE");
         invalidRetailPrice(apartmentDTO.getRetailPrice());
         invalidNumberOfRoom(apartmentDTO.getNumberOfRoom());
 
-        log.info("END: validator");
+        format(apartmentDTO);
     }
 
-    public static void trim(ApartmentDTO apartmentDTO) {
-        // trim
-        if (!MyUtils.isNullOrEmpty(apartmentDTO.getAddress()))
-            apartmentDTO.setAddress(apartmentDTO.getAddress().trim());
+    private static void trimToSetAllField(ApartmentDTO apartmentDTO) {
+        List<Field> fieldList = List.of(apartmentDTO.getClass().getDeclaredFields());
 
-        if (!MyUtils.isNullOrEmpty(apartmentDTO.getRetailPrice()))
-            apartmentDTO.setRetailPrice(apartmentDTO.getRetailPrice().trim());
+        for (Field field : fieldList) {
+            try {
+                field.setAccessible(true);
 
-        if (!MyUtils.isNullOrEmpty(apartmentDTO.getNumberOfRoom()))
-            apartmentDTO.setNumberOfRoom(apartmentDTO.getNumberOfRoom().trim());
+                Object value = field.get(apartmentDTO);
+
+                if (value == null) continue;
+
+                if (value instanceof String) {
+                    ReflectionUtils.setField(field, apartmentDTO, ((String) value).trim());
+                }
+
+            } catch (Exception e) {
+            }
+        }
     }
 
     public static void format(ApartmentDTO apartmentDTO) {
-        if (!MyUtils.isNullOrEmpty(apartmentDTO.getRetailPrice()))
+        if (!MyUtils.isNull(apartmentDTO.getRetailPrice()))
             apartmentDTO.setRetailPrice(MyUtils.formatMoney(apartmentDTO.getRetailPrice()));
     }
 }

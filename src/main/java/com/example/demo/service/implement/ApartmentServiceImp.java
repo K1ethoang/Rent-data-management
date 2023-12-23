@@ -47,8 +47,7 @@ public class ApartmentServiceImp implements ApartmentService {
 
     @Override
     public ApartmentDTO create(ApartmentDTO apartmentDTO) {
-        ApartmentValidator.validator(apartmentDTO, true);
-        ApartmentValidator.format(apartmentDTO);
+        ApartmentValidator.validator(apartmentDTO);
         return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOtoEntity(apartmentDTO)));
     }
 
@@ -60,9 +59,8 @@ public class ApartmentServiceImp implements ApartmentService {
 
         // Map payload -> DTO to validate
         ApartmentDTO apartmentFromPayload = mapper.map(payload, ApartmentDTO.class);
-        // Validate & Format
-        ApartmentValidator.validator(apartmentFromPayload, false);
-        ApartmentValidator.format(apartmentFromPayload);
+        // Validate
+        ApartmentValidator.validator(apartmentFromPayload);
 
         ApartmentDTO apartmentToUpdate = apartmentEntityToDTO(apartmentFromDB);
 
