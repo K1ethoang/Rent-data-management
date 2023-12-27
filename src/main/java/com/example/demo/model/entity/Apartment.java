@@ -1,6 +1,9 @@
-package com.example.demo.entity;
+package com.example.demo.model.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.Column;
@@ -13,23 +16,18 @@ import javax.persistence.Id;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-public class Customer {
+public class Apartment {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(updatable = false, insertable = false)
     private String id;
 
-    @Column(name = "first_name", length = 50)
-    private String firstName;
-
-    @Column(name = "last_name", length = 50)
-    private String lastName;
-
     private String address;
 
-    private int age;
+    @Column(name = "retail_price")
+    private String retailPrice;
 
-    private String status;
+    @Column(name = "number_of_room")
+    private int numberOfRoom;
 }

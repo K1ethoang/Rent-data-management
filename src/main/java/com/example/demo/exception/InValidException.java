@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 @NoArgsConstructor
 @Getter
 @Setter
-public class NotValidException extends RuntimeException {
+public class InValidException extends RuntimeException {
     private final HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     private String message;
 }

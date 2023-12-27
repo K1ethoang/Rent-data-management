@@ -1,7 +1,8 @@
 package com.example.demo.model.validator;
 
+import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NotNullException;
-import com.example.demo.exception.NotValidException;
+import com.example.demo.helpers.Helper;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.model.DTO.CustomerDTO;
 import com.example.demo.utils.MyUtils;
@@ -35,14 +36,14 @@ public class CustomerValidator {
         if (MyUtils.isEmpty(status)) throw new NotNullException(CustomerMessage.NOT_NULL_STATUS);
     }
 
-    public static void invalidAge(String age) throws NotValidException {
+    public static void invalidAge(String age) throws InValidException {
         if (MyUtils.isNull(age) || MyUtils.isEmpty(age)) return;
         if (!(MyUtils.stringToNumeric(age) >= 18))
-            throw new NotValidException(CustomerMessage.INVALID_AGE);
+            throw new InValidException(CustomerMessage.INVALID_AGE);
     }
 
     public static void validator(CustomerDTO customerDTO) {
-        MyUtils.trimToSetAllField(customerDTO);
+        Helper.trimToSetAllField(customerDTO);
 
         notNullFirstname(customerDTO.getFirstName());
         notNullLastname(customerDTO.getLastName());

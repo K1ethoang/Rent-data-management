@@ -1,7 +1,8 @@
 package com.example.demo.model.validator;
 
+import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NotNullException;
-import com.example.demo.exception.NotValidException;
+import com.example.demo.helpers.Helper;
 import com.example.demo.message.ApartmentMessage;
 import com.example.demo.model.DTO.ApartmentDTO;
 import com.example.demo.utils.MyUtils;
@@ -25,20 +26,20 @@ public class ApartmentValidator {
         if (MyUtils.isEmpty(numberOfRoom)) throw new NotNullException(ApartmentMessage.NOT_NULL_NUMBER_OF_ROOM);
     }
 
-    public static void invalidRetailPrice(String retailPrice) throws NotValidException {
+    public static void invalidRetailPrice(String retailPrice) throws InValidException {
         if (MyUtils.isNull(retailPrice) || MyUtils.isEmpty(retailPrice)) return;
         if (MyUtils.stringToNumeric(retailPrice) < 0)
-            throw new NotValidException(ApartmentMessage.INVALID_RETAIL_PRICE);
+            throw new InValidException(ApartmentMessage.INVALID_RETAIL_PRICE);
     }
 
-    public static void invalidNumberOfRoom(String numberOfRoom) throws NotValidException {
+    public static void invalidNumberOfRoom(String numberOfRoom) throws InValidException {
         if (MyUtils.isNull(numberOfRoom) || MyUtils.isEmpty(numberOfRoom)) return;
         if (MyUtils.stringToNumeric(numberOfRoom) < 0)
-            throw new NotValidException(ApartmentMessage.INVALID_NUMBER_OF_ROOM);
+            throw new InValidException(ApartmentMessage.INVALID_NUMBER_OF_ROOM);
     }
 
     public static void validator(ApartmentDTO apartmentDTO) {
-        MyUtils.trimToSetAllField(apartmentDTO);
+        Helper.trimToSetAllField(apartmentDTO);
 
         notNullAddress(apartmentDTO.getAddress());
         notNullRetailPrice(apartmentDTO.getRetailPrice());

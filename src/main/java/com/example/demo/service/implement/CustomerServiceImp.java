@@ -1,10 +1,11 @@
 package com.example.demo.service.implement;
 
-import com.example.demo.entity.Customer;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.helpers.Helper;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.model.DTO.CustomerDTO;
+import com.example.demo.model.entity.Customer;
 import com.example.demo.model.validator.CustomerValidator;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerService;
@@ -50,9 +51,11 @@ public class CustomerServiceImp implements CustomerService {
 
     @Override
     public CustomerDTO create(CustomerDTO customerDTO) {
+        Helper.setAllFieldNullToEmpty(customerDTO);
+
+        if (MyUtils.isEmpty(customerDTO.getStatus())) customerDTO.setStatus(DEFAULT_STATUS);
+
         CustomerValidator.validator(customerDTO);
-        if (MyUtils.isNull(customerDTO.getStatus()) || MyUtils.isEmpty(customerDTO.getStatus()))
-            customerDTO.setStatus(DEFAULT_STATUS);
         return customerEntityToDTO(customerRepository.save((customerDTOtoEntity(customerDTO))));
     }
 

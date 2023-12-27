@@ -1,10 +1,11 @@
 package com.example.demo.service.implement;
 
-import com.example.demo.entity.Apartment;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.helpers.Helper;
 import com.example.demo.message.ApartmentMessage;
 import com.example.demo.model.DTO.ApartmentDTO;
+import com.example.demo.model.entity.Apartment;
 import com.example.demo.model.validator.ApartmentValidator;
 import com.example.demo.repository.ApartmentRepository;
 import com.example.demo.service.interfaces.ApartmentService;
@@ -47,6 +48,8 @@ public class ApartmentServiceImp implements ApartmentService {
 
     @Override
     public ApartmentDTO create(ApartmentDTO apartmentDTO) {
+        Helper.setAllFieldNullToEmpty(apartmentDTO);
+
         ApartmentValidator.validator(apartmentDTO);
         return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOtoEntity(apartmentDTO)));
     }

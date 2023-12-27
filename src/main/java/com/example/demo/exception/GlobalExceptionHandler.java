@@ -26,8 +26,8 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
     }
 
-    @ExceptionHandler(NotValidException.class)
-    public ErrorResponse handlerNotValidException(NotValidException e) {
+    @ExceptionHandler(InValidException.class)
+    public ErrorResponse handlerNotValidException(InValidException e) {
         log.trace(e.getMessage());
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
     }
