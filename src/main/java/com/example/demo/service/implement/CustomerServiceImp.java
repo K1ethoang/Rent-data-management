@@ -56,7 +56,7 @@ public class CustomerServiceImp implements CustomerService {
         if (MyUtils.isEmpty(customerDTO.getStatus())) customerDTO.setStatus(DEFAULT_STATUS);
 
         CustomerValidator.validator(customerDTO);
-        return customerEntityToDTO(customerRepository.save((customerDTOtoEntity(customerDTO))));
+        return customerEntityToDTO(customerRepository.save((customerDTOToEntity(customerDTO))));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class CustomerServiceImp implements CustomerService {
             }
         });
 
-        return customerEntityToDTO(customerRepository.save(customerDTOtoEntity(customerToUpdate)));
+        return customerEntityToDTO(customerRepository.save(customerDTOToEntity(customerToUpdate)));
     }
 
     @Override
@@ -98,11 +98,12 @@ public class CustomerServiceImp implements CustomerService {
             throw new NotFoundException(CustomerMessage.NOT_FOUND);
     }
 
-    private Customer customerDTOtoEntity(CustomerDTO customerDTO) {
+    public Customer customerDTOToEntity(CustomerDTO customerDTO) {
         return mapper.map(customerDTO, Customer.class);
     }
 
-    private CustomerDTO customerEntityToDTO(Customer customer) {
+    @Override
+    public CustomerDTO customerEntityToDTO(Customer customer) {
         return mapper.map(customer, CustomerDTO.class);
     }
 }

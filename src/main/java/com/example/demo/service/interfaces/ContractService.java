@@ -1,18 +1,18 @@
 package com.example.demo.service.interfaces;
 
-import com.example.demo.entity.Contract;
+import com.example.demo.model.DTO.ContractDTO;
 
 import java.util.List;
 import java.util.Map;
 
 public interface ContractService {
-    List<Contract> getAll();
+    List<ContractDTO> getAll();
 
-    Contract getOneById(String id);
+    ContractDTO getOneById(String id);
 
-    Contract create(Contract contract);
+    ContractDTO create(ContractDTO contractDTO);
 
-    Contract update(String id, Map<String, Object> payload);
+    ContractDTO update(String id, Map<String, Object> payload);
 
-    String delete(String id);
+    ContractDTO delete(String id);
 }

@@ -38,11 +38,11 @@ public class ApartmentServiceImp implements ApartmentService {
     }
 
     @Override
-    public ApartmentDTO getOne(String id) throws NotFoundException {
-        Apartment apartment = apartmentRepository.findById(id).orElse(null);
+    public ApartmentDTO getOneById(String id) throws NotFoundException {
+        Apartment apartmentFromDB = apartmentRepository.findById(id).orElse(null);
 
-        if (apartment != null) {
-            return apartmentEntityToDTO(apartment);
+        if (apartmentFromDB != null) {
+            return apartmentEntityToDTO(apartmentFromDB);
         } else throw new NotFoundException(ApartmentMessage.NOT_FOUND);
     }
 
@@ -51,7 +51,7 @@ public class ApartmentServiceImp implements ApartmentService {
         Helper.setAllFieldNullToEmpty(apartmentDTO);
 
         ApartmentValidator.validator(apartmentDTO);
-        return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOtoEntity(apartmentDTO)));
+        return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOToEntity(apartmentDTO)));
     }
 
     @Override
@@ -79,7 +79,7 @@ public class ApartmentServiceImp implements ApartmentService {
 
         });
 
-        return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOtoEntity(apartmentToUpdate)));
+        return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOToEntity(apartmentToUpdate)));
     }
 
 
@@ -93,11 +93,14 @@ public class ApartmentServiceImp implements ApartmentService {
         } else throw new NotFoundException(ApartmentMessage.NOT_FOUND);
     }
 
-    private Apartment apartmentDTOtoEntity(ApartmentDTO apartmentDTO) {
+    @Override
+    public Apartment apartmentDTOToEntity(ApartmentDTO apartmentDTO) {
         return mapper.map(apartmentDTO, Apartment.class);
     }
 
-    private ApartmentDTO apartmentEntityToDTO(Apartment apartment) {
+
+    @Override
+    public ApartmentDTO apartmentEntityToDTO(Apartment apartment) {
         return mapper.map(apartment, ApartmentDTO.class);
     }
 }
