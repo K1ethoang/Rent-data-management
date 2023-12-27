@@ -6,10 +6,6 @@ import com.example.demo.message.ApartmentMessage;
 import com.example.demo.model.DTO.ApartmentDTO;
 import com.example.demo.utils.MyUtils;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.util.ReflectionUtils;
-
-import java.lang.reflect.Field;
-import java.util.List;
 
 @Log4j2
 public class ApartmentValidator {
@@ -42,7 +38,7 @@ public class ApartmentValidator {
     }
 
     public static void validator(ApartmentDTO apartmentDTO) {
-        trimToSetAllField(apartmentDTO);
+        MyUtils.trimToSetAllField(apartmentDTO);
 
         notNullAddress(apartmentDTO.getAddress());
         notNullRetailPrice(apartmentDTO.getRetailPrice());
@@ -52,26 +48,6 @@ public class ApartmentValidator {
         invalidNumberOfRoom(apartmentDTO.getNumberOfRoom());
 
         format(apartmentDTO);
-    }
-
-    private static void trimToSetAllField(ApartmentDTO apartmentDTO) {
-        List<Field> fieldList = List.of(apartmentDTO.getClass().getDeclaredFields());
-
-        for (Field field : fieldList) {
-            try {
-                field.setAccessible(true);
-
-                Object value = field.get(apartmentDTO);
-
-                if (value == null) continue;
-
-                if (value instanceof String) {
-                    ReflectionUtils.setField(field, apartmentDTO, ((String) value).trim());
-                }
-
-            } catch (Exception e) {
-            }
-        }
     }
 
     public static void format(ApartmentDTO apartmentDTO) {

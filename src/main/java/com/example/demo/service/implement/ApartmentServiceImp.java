@@ -65,16 +65,20 @@ public class ApartmentServiceImp implements ApartmentService {
         ApartmentDTO apartmentToUpdate = apartmentEntityToDTO(apartmentFromDB);
 
         payload.forEach((key, value) -> {
-            Field field = ReflectionUtils.findField(ApartmentDTO.class, key);
+            if (value != null) {
+                Field field = ReflectionUtils.findField(ApartmentDTO.class, key);
 
-            if (field != null) {
-                field.setAccessible(true);
-                ReflectionUtils.setField(field, apartmentToUpdate, ReflectionUtils.getField(field, apartmentFromPayload));
+                if (field != null) {
+                    field.setAccessible(true);
+                    ReflectionUtils.setField(field, apartmentToUpdate, ReflectionUtils.getField(field, apartmentFromPayload));
+                }
             }
+
         });
 
         return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOtoEntity(apartmentToUpdate)));
     }
+
 
     @Override
     public ApartmentDTO delete(String id) throws NotFoundException {

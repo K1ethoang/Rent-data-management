@@ -1,11 +1,11 @@
 package com.example.demo.service.implement;
 
 import com.example.demo.entity.Customer;
-import com.example.demo.exception.AppException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.model.DTO.CustomerDTO;
+import com.example.demo.model.validator.CustomerValidator;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerService;
 import com.example.demo.utils.MyUtils;
@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
@@ -27,6 +26,8 @@ import java.util.Map;
 public class CustomerServiceImp implements CustomerService {
     private final CustomerRepository customerRepository;
     private final ModelMapper mapper;
+    private final String DEFAULT_STATUS = "Ok";
+
 
     @Override
     public List<CustomerDTO> getAll() throws NoContentException {
@@ -48,28 +49,39 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public CustomerDTO create(CustomerDTO customerDTO) throws AppException {
-        return customerEntityToDTO(customerRepository.save(validateObject(customerDTOtoEntity(customerDTO))));
+    public CustomerDTO create(CustomerDTO customerDTO) {
+        CustomerValidator.validator(customerDTO);
+        if (MyUtils.isNull(customerDTO.getStatus()) || MyUtils.isEmpty(customerDTO.getStatus()))
+            customerDTO.setStatus(DEFAULT_STATUS);
+        return customerEntityToDTO(customerRepository.save((customerDTOtoEntity(customerDTO))));
     }
 
     @Override
     public CustomerDTO update(String id, Map<String, Object> payload) throws NotFoundException {
+        // Find
         Customer customerFromDB = customerRepository.findById(id).orElse(null);
+        if (customerFromDB == null) throw new NotFoundException(CustomerMessage.NOT_FOUND);
 
-        if (customerFromDB != null) {
+        // Map payload -> DTO to validate
+        CustomerDTO customerFromPayload = mapper.map(payload, CustomerDTO.class);
+        // Validate
+        CustomerValidator.validator(customerFromPayload);
 
-            payload.forEach((key, value) -> {
-                Field field = ReflectionUtils.findField(Customer.class, key);
+        CustomerDTO customerToUpdate = customerEntityToDTO(customerFromDB);
+
+        payload.forEach((key, value) -> {
+            if (value != null) {
+                Field field = ReflectionUtils.findField(CustomerDTO.class, key);
+
                 if (field != null) {
                     field.setAccessible(true);
-                    ReflectionUtils.setField(field, customerFromDB, value);
+                    log.info(key + " : " + value);
+                    ReflectionUtils.setField(field, customerToUpdate, ReflectionUtils.getField(field, customerFromPayload));
                 }
-            });
+            }
+        });
 
-
-            return customerEntityToDTO(customerRepository.save(validateObject(customerFromDB)));
-        } else
-            throw new NotFoundException(CustomerMessage.NOT_FOUND);
+        return customerEntityToDTO(customerRepository.save(customerDTOtoEntity(customerToUpdate)));
     }
 
     @Override
@@ -81,18 +93,6 @@ public class CustomerServiceImp implements CustomerService {
             return customerEntityToDTO(customer);
         } else
             throw new NotFoundException(CustomerMessage.NOT_FOUND);
-    }
-
-    private Customer validateObject(Customer customer) {
-        int age = customer.getAge();
-        if (age <= 0 || MyUtils.isNumeric(String.valueOf(age))) {
-            throw new AppException(HttpStatus.BAD_REQUEST, CustomerMessage.INVALID_DATA);
-        }
-
-        if (customer.getStatus().isEmpty())
-            customer.setStatus("Normal");
-
-        return customer;
     }
 
     private Customer customerDTOtoEntity(CustomerDTO customerDTO) {
