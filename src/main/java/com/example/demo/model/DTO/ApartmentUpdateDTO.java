@@ -5,9 +5,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CustomerDTO {
-    private String firstName;
-    private String lastName;
+public class ApartmentUpdateDTO {
     private String address;
-    private String age;
+    private String retailPrice;
+    private String numberOfRoom;
 }

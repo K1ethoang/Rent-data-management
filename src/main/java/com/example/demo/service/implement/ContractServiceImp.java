@@ -1,15 +1,11 @@
 package com.example.demo.service.implement;
 
+import com.example.demo.entity.Contract;
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.helpers.Helper;
 import com.example.demo.message.ContractMessage;
 import com.example.demo.model.DTO.ContractDTO;
-import com.example.demo.model.entity.Apartment;
-import com.example.demo.model.entity.Contract;
-import com.example.demo.model.entity.Customer;
-import com.example.demo.model.validator.ContractValidator;
 import com.example.demo.repository.ContractRepository;
 import com.example.demo.service.interfaces.ApartmentService;
 import com.example.demo.service.interfaces.ContractService;
@@ -53,26 +49,7 @@ public class ContractServiceImp implements ContractService {
 
     @Override
     public ContractDTO create(ContractDTO contractDTO) throws InValidException {
-        Helper.setAllFieldNullToEmpty(contractDTO);
-
-        ContractValidator.validator(contractDTO);
-        log.info(contractDTO.toString());
-
-        // Find customer and apartment via id
-        Customer customerFromDB = customerService.customerDTOToEntity(customerService.getOneById(contractDTO.getCustomerId()));
-        Apartment apartmentFromDB = apartmentService.apartmentDTOToEntity(apartmentService.getOneById(contractDTO.getApartmentId()));
-
-        if (customerFromDB == null) throw new InValidException(ContractMessage.NOT_EXIST_CUSTOMER_ID);
-        if (apartmentFromDB == null) throw new InValidException(ContractMessage.NOT_EXIST_APARTMENT_ID);
-
-        // Create a contract to save
-        Contract contractToCreate = contractDTOToEntity(contractDTO);
-        log.info(contractToCreate.toString());
-
-        contractToCreate.setCustomer(customerFromDB);
-        contractToCreate.setApartment(apartmentFromDB);
-
-        return contractEntityToDTO(contractToCreate);
+        return null;
     }
 
     @Override
@@ -97,4 +74,6 @@ public class ContractServiceImp implements ContractService {
     private ContractDTO contractEntityToDTO(Contract contract) {
         return mapper.map(contract, ContractDTO.class);
     }
+
+
 }

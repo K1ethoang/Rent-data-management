@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.message.GlobalMessage;
 import com.example.demo.model.DTO.ApartmentDTO;
+import com.example.demo.model.DTO.ApartmentUpdateDTO;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.ApartmentService;
 import lombok.AllArgsConstructor;
@@ -9,8 +10,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -28,7 +27,7 @@ public class ApartmentController {
     // [GET] /apartments/:id
     @GetMapping("/{id}")
     public ResponseEntity<Object> getApartment(@PathVariable("id") String id) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, apartmentService.getOneById(id));
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, apartmentService.getApartmentDTO(id));
     }
 
     // [POST] /apartments/add
@@ -39,8 +38,8 @@ public class ApartmentController {
 
     // [POST] /apartments/update/:id
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, apartmentService.update(id, payload));
+    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody ApartmentUpdateDTO apartmentUpdateDTO) {
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, apartmentService.update(id, apartmentUpdateDTO));
     }
 
     // [DELETE] /apartments/delete/:id

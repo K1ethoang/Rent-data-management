@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.message.GlobalMessage;
 import com.example.demo.model.DTO.CustomerDTO;
+import com.example.demo.model.DTO.CustomerUpdateDTO;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.CustomerService;
 import lombok.AllArgsConstructor;
@@ -9,8 +10,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController // @RestController dùng cho API còn @Controller dùng cho return View HTML
 @RequestMapping("/customers") // Endpoint gốc là /customers
@@ -28,7 +27,7 @@ public class CustomerController {
     // [GET] /customers/:id
     @GetMapping("/{id}")
     public ResponseEntity<Object> getCustomer(@PathVariable("id") String id) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.getOneById(id));
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.getCustomerDTO(id));
     }
 
     // [POST] /customers/add
@@ -39,8 +38,8 @@ public class CustomerController {
 
     // [POST] /customers/update/:id
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.update(id, payload));
+    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody CustomerUpdateDTO customerUpdate) {
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.update(id, customerUpdate));
     }
 
     // [DELETE] /customers/delete/:id

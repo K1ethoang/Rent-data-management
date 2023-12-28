@@ -1,106 +1,119 @@
 package com.example.demo.service.implement;
 
+import com.example.demo.entity.Apartment;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.helpers.Helper;
 import com.example.demo.message.ApartmentMessage;
 import com.example.demo.model.DTO.ApartmentDTO;
-import com.example.demo.model.entity.Apartment;
-import com.example.demo.model.validator.ApartmentValidator;
+import com.example.demo.model.DTO.ApartmentUpdateDTO;
+import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.ApartmentRepository;
 import com.example.demo.service.interfaces.ApartmentService;
+import com.example.demo.utils.MyUtils;
+import com.example.demo.utils.validator.ApartmentValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 @Log4j2
 public class ApartmentServiceImp implements ApartmentService {
     private final ApartmentRepository apartmentRepository;
-    private final ModelMapper mapper;
+//    private final ModelMapper mapper;
 
     @Override
     public List<ApartmentDTO> getAll() throws NoContentException {
-        List<Apartment> apartments = apartmentRepository.findAll();
+        List<Apartment> apartmentList = apartmentRepository.findAll();
 
-        if (apartments.isEmpty()) throw new NoContentException(ApartmentMessage.EMPTY_LIST);
+        if (apartmentList.isEmpty()) throw new NoContentException(ApartmentMessage.EMPTY_LIST);
 
-        return mapper.map(apartments, new TypeToken<List<ApartmentDTO>>() {
-        }.getType());
+        List<ApartmentDTO> apartmentDTOList = new ArrayList<>() {
+        };
+
+        for (Apartment apartment : apartmentList) {
+            apartmentDTOList.add(EntityToDto.ApartmentToDto(apartment));
+        }
+        return apartmentDTOList;
+    }
+
+    public Apartment getApartment(String id) throws NotFoundException {
+        Optional<Apartment> optional = apartmentRepository.findById(id);
+
+        if (optional.isEmpty()) throw new NotFoundException(ApartmentMessage.NOT_FOUND);
+
+        return optional.get();
     }
 
     @Override
-    public ApartmentDTO getOneById(String id) throws NotFoundException {
-        Apartment apartmentFromDB = apartmentRepository.findById(id).orElse(null);
+    public ApartmentDTO getApartmentDTO(String id) {
+        Apartment apartment = getApartment(id);
 
-        if (apartmentFromDB != null) {
-            return apartmentEntityToDTO(apartmentFromDB);
-        } else throw new NotFoundException(ApartmentMessage.NOT_FOUND);
+        return EntityToDto.ApartmentToDto(apartment);
     }
 
     @Override
     public ApartmentDTO create(ApartmentDTO apartmentDTO) {
-        Helper.setAllFieldNullToEmpty(apartmentDTO);
+        ApartmentValidator.validatorApartmentDTO(apartmentDTO);
 
-        ApartmentValidator.validator(apartmentDTO);
-        return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOToEntity(apartmentDTO)));
+        Apartment apartment = Apartment.builder()
+                .address(apartmentDTO.getAddress().trim())
+                .retailPrice(MyUtils.formatMoney(apartmentDTO.getRetailPrice().trim()))
+                .numberOfRoom(Integer.parseInt(apartmentDTO.getNumberOfRoom().trim()))
+                .build();
+
+        apartmentRepository.save(apartment);
+
+        return EntityToDto.ApartmentToDto(apartment);
     }
 
     @Override
-    public ApartmentDTO update(String id, Map<String, Object> payload) throws NotFoundException {
-        // Find
-        Apartment apartmentFromDB = apartmentRepository.findById(id).orElse(null);
-        if (apartmentFromDB == null) throw new NotFoundException(ApartmentMessage.NOT_FOUND);
+    public ApartmentDTO update(String id, ApartmentUpdateDTO apartmentUpdate) {
+        ApartmentValidator.validatorApartmentUpdateDTO(apartmentUpdate);
 
-        // Map payload -> DTO to validate
-        ApartmentDTO apartmentFromPayload = mapper.map(payload, ApartmentDTO.class);
-        // Validate
-        ApartmentValidator.validator(apartmentFromPayload);
+        // Check apartment has in DB
+        Apartment apartmentFromDB = getApartment(id);
 
-        ApartmentDTO apartmentToUpdate = apartmentEntityToDTO(apartmentFromDB);
+        if (apartmentUpdate.getAddress() != null) {
+            apartmentFromDB.setAddress(apartmentUpdate.getAddress().trim());
+        }
 
-        payload.forEach((key, value) -> {
-            if (value != null) {
-                Field field = ReflectionUtils.findField(ApartmentDTO.class, key);
+        if (apartmentUpdate.getRetailPrice() != null) {
+            apartmentFromDB.setRetailPrice(MyUtils.formatMoney(apartmentUpdate.getRetailPrice().trim()));
+        }
 
-                if (field != null) {
-                    field.setAccessible(true);
-                    ReflectionUtils.setField(field, apartmentToUpdate, ReflectionUtils.getField(field, apartmentFromPayload));
-                }
-            }
+        if (apartmentUpdate.getNumberOfRoom() != null) {
+            apartmentFromDB.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom().trim()));
+        }
 
-        });
+        apartmentRepository.save(apartmentFromDB);
 
-        return apartmentEntityToDTO(apartmentRepository.save(apartmentDTOToEntity(apartmentToUpdate)));
-    }
-
-
-    @Override
-    public ApartmentDTO delete(String id) throws NotFoundException {
-        Apartment apartmentFromDB = apartmentRepository.findById(id).orElse(null);
-
-        if (apartmentFromDB != null) {
-            apartmentRepository.delete(apartmentFromDB);
-            return apartmentEntityToDTO(apartmentFromDB);
-        } else throw new NotFoundException(ApartmentMessage.NOT_FOUND);
-    }
-
-    @Override
-    public Apartment apartmentDTOToEntity(ApartmentDTO apartmentDTO) {
-        return mapper.map(apartmentDTO, Apartment.class);
+        return EntityToDto.ApartmentToDto(apartmentFromDB);
     }
 
 
     @Override
-    public ApartmentDTO apartmentEntityToDTO(Apartment apartment) {
-        return mapper.map(apartment, ApartmentDTO.class);
+    public ApartmentDTO delete(String id) {
+        // Check apartment has in DB
+        Apartment apartmentToDelete = getApartment(id);
+
+        apartmentRepository.delete(apartmentToDelete);
+
+        return EntityToDto.ApartmentToDto(apartmentToDelete);
     }
+
+//    @Override
+//    public Apartment apartmentDTOToEntity(ApartmentDTO apartmentDTO) {
+//        return mapper.map(apartmentDTO, Apartment.class);
+//    }
+//
+//
+//    @Override
+//    public ApartmentDTO apartmentEntityToDTO(Apartment apartment) {
+//        return mapper.map(apartment, ApartmentDTO.class);
+//    }
 }

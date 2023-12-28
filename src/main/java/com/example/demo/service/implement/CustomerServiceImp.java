@@ -1,34 +1,30 @@
 package com.example.demo.service.implement;
 
+import com.example.demo.entity.Customer;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.helpers.Helper;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.model.DTO.CustomerDTO;
-import com.example.demo.model.entity.Customer;
-import com.example.demo.model.validator.CustomerValidator;
+import com.example.demo.model.DTO.CustomerUpdateDTO;
+import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerService;
-import com.example.demo.utils.MyUtils;
+import com.example.demo.utils.validator.CustomerValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ReflectionUtils;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 @Log4j2
 public class CustomerServiceImp implements CustomerService {
     private final CustomerRepository customerRepository;
-    private final ModelMapper mapper;
-    private final String DEFAULT_STATUS = "Ok";
-
+    //    private final ModelMapper mapper;
+    private final String DEFAULT_STATUS = "Normal";
 
     @Override
     public List<CustomerDTO> getAll() throws NoContentException {
@@ -36,74 +32,86 @@ public class CustomerServiceImp implements CustomerService {
 
         if (customerList.isEmpty()) throw new NoContentException(CustomerMessage.EMPTY_LIST);
 
-        return mapper.map(customerList, new TypeToken<List<CustomerDTO>>() {
-        }.getType());
+        List<CustomerDTO> customerDTOList = new ArrayList<>();
+
+        for (Customer customer : customerList) {
+            customerDTOList.add(EntityToDto.CustomerToDto(customer));
+        }
+
+        return customerDTOList;
+    }
+
+    public Customer getCustomer(String id) throws NotFoundException {
+        Optional<Customer> optional = customerRepository.findById(id);
+
+        if (optional.isEmpty()) throw new NotFoundException(CustomerMessage.NOT_FOUND);
+
+        return optional.get();
     }
 
     @Override
-    public CustomerDTO getOneById(String id) throws NotFoundException {
-        Customer customer = customerRepository.findById(id).orElse(null);
+    public CustomerDTO getCustomerDTO(String id) {
+        Customer customer = getCustomer(id);
 
-        if (customer != null) return customerEntityToDTO(customer);
-        else
-            throw new NotFoundException(CustomerMessage.NOT_FOUND);
+        return EntityToDto.CustomerToDto(customer);
     }
 
     @Override
     public CustomerDTO create(CustomerDTO customerDTO) {
-        Helper.setAllFieldNullToEmpty(customerDTO);
+        CustomerValidator.validatorCustomerDTO(customerDTO);
 
-        if (MyUtils.isEmpty(customerDTO.getStatus())) customerDTO.setStatus(DEFAULT_STATUS);
+        Customer customer = Customer.builder()
+                .firstName(customerDTO.getFirstName().trim())
+                .lastName(customerDTO.getLastName().trim())
+                .address(customerDTO.getAddress().trim())
+                .status(DEFAULT_STATUS)
+                .age(Integer.parseInt(customerDTO.getAge().trim()))
+                .build();
 
-        CustomerValidator.validator(customerDTO);
-        return customerEntityToDTO(customerRepository.save((customerDTOToEntity(customerDTO))));
+        customerRepository.save(customer);
+
+        return customerDTO;
     }
 
     @Override
-    public CustomerDTO update(String id, Map<String, Object> payload) throws NotFoundException {
-        // Find
-        Customer customerFromDB = customerRepository.findById(id).orElse(null);
-        if (customerFromDB == null) throw new NotFoundException(CustomerMessage.NOT_FOUND);
+    public CustomerDTO update(String id, CustomerUpdateDTO customerUpdateDTO) {
+        CustomerValidator.validatorCustomerUpdateDTO(customerUpdateDTO);
 
-        // Map payload -> DTO to validate
-        CustomerDTO customerFromPayload = mapper.map(payload, CustomerDTO.class);
-        // Validate
-        CustomerValidator.validator(customerFromPayload);
+        Customer customerFromDB = getCustomer(id);
 
-        CustomerDTO customerToUpdate = customerEntityToDTO(customerFromDB);
+        if (customerUpdateDTO.getFirstName() != null) {
+            customerFromDB.setFirstName(customerUpdateDTO.getFirstName().trim());
+        }
+        if (customerUpdateDTO.getLastName() != null) {
+            customerFromDB.setLastName(customerUpdateDTO.getLastName().trim());
+        }
+        if (customerUpdateDTO.getAddress() != null) {
+            customerFromDB.setAddress(customerUpdateDTO.getAddress().trim());
+        }
+        if (customerUpdateDTO.getAge() != null) {
+            customerFromDB.setAge(Integer.parseInt(customerUpdateDTO.getAge().trim()));
+        }
 
-        payload.forEach((key, value) -> {
-            if (value != null) {
-                Field field = ReflectionUtils.findField(CustomerDTO.class, key);
+        customerRepository.save(customerFromDB);
 
-                if (field != null) {
-                    field.setAccessible(true);
-                    log.info(key + " : " + value);
-                    ReflectionUtils.setField(field, customerToUpdate, ReflectionUtils.getField(field, customerFromPayload));
-                }
-            }
-        });
-
-        return customerEntityToDTO(customerRepository.save(customerDTOToEntity(customerToUpdate)));
+        return EntityToDto.CustomerToDto(customerFromDB);
     }
 
     @Override
     public CustomerDTO delete(String id) throws NotFoundException {
-        Customer customer = customerRepository.findById(id).orElse(null);
+        Customer customerToDelete = getCustomer(id);
 
-        if (customer != null) {
-            customerRepository.delete(customer);
-            return customerEntityToDTO(customer);
-        } else
-            throw new NotFoundException(CustomerMessage.NOT_FOUND);
+        customerRepository.delete(customerToDelete);
+
+        return EntityToDto.CustomerToDto(customerToDelete);
     }
 
-    public Customer customerDTOToEntity(CustomerDTO customerDTO) {
-        return mapper.map(customerDTO, Customer.class);
-    }
-
-    @Override
-    public CustomerDTO customerEntityToDTO(Customer customer) {
-        return mapper.map(customer, CustomerDTO.class);
-    }
+//    public Customer customerDTOToEntity(CustomerDTO customerDTO) {
+//        return mapper.map(customerDTO, Customer.class);
+//    }
+//
+//    @Override
+//    public CustomerDTO customerEntityToDTO(Customer customer) {
+//        return mapper.map(customer, CustomerDTO.class);
+//    }
 }
