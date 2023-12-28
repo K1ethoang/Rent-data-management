@@ -12,14 +12,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Log4j2
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    // Exception ứng dụng
-    @ExceptionHandler(AppException.class)
-    public ErrorResponse handlerAppException(AppException e) {
-        log.trace(e.getMessage());
-        return new ErrorResponse(e.getCode().value(), e.getMessage());
-    }
-
     @ExceptionHandler(NotFoundException.class)
     public ErrorResponse handlerNotFoundException(NotFoundException e) {
         log.trace(e.getMessage());
