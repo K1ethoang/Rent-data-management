@@ -35,12 +35,13 @@ public class CustomerServiceImp implements CustomerService {
         List<CustomerDTO> customerDTOList = new ArrayList<>();
 
         for (Customer customer : customerList) {
-            customerDTOList.add(EntityToDto.CustomerToDto(customer));
+            customerDTOList.add(EntityToDto.customerToDto(customer));
         }
 
         return customerDTOList;
     }
 
+    @Override
     public Customer getCustomer(String id) throws NotFoundException {
         Optional<Customer> optional = customerRepository.findById(id);
 
@@ -53,7 +54,7 @@ public class CustomerServiceImp implements CustomerService {
     public CustomerDTO getCustomerDTO(String id) {
         Customer customer = getCustomer(id);
 
-        return EntityToDto.CustomerToDto(customer);
+        return EntityToDto.customerToDto(customer);
     }
 
     @Override
@@ -94,7 +95,7 @@ public class CustomerServiceImp implements CustomerService {
 
         customerRepository.save(customerFromDB);
 
-        return EntityToDto.CustomerToDto(customerFromDB);
+        return EntityToDto.customerToDto(customerFromDB);
     }
 
     @Override
@@ -103,7 +104,7 @@ public class CustomerServiceImp implements CustomerService {
 
         customerRepository.delete(customerToDelete);
 
-        return EntityToDto.CustomerToDto(customerToDelete);
+        return EntityToDto.customerToDto(customerToDelete);
     }
 
 //    public Customer customerDTOToEntity(CustomerDTO customerDTO) {

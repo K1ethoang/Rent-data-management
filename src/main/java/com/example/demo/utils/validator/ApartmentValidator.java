@@ -26,12 +26,12 @@ public class ApartmentValidator {
     }
 
     private static void invalidRetailPrice(String retailPrice) throws InValidException {
-        if (MyUtils.stringToNumeric(retailPrice) < 0)
+        if (MyUtils.stringToDouble(retailPrice) < 0)
             throw new InValidException(ApartmentMessage.INVALID_RETAIL_PRICE);
     }
 
     private static void invalidNumberOfRoom(String numberOfRoom) throws InValidException {
-        if (MyUtils.stringToNumeric(numberOfRoom) <= 0)
+        if (MyUtils.stringToInteger(numberOfRoom) <= 0)
             throw new InValidException(ApartmentMessage.INVALID_NUMBER_OF_ROOM);
     }
 

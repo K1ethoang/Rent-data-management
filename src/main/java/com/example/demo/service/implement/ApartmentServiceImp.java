@@ -36,11 +36,12 @@ public class ApartmentServiceImp implements ApartmentService {
         };
 
         for (Apartment apartment : apartmentList) {
-            apartmentDTOList.add(EntityToDto.ApartmentToDto(apartment));
+            apartmentDTOList.add(EntityToDto.apartmentToDto(apartment));
         }
         return apartmentDTOList;
     }
 
+    @Override
     public Apartment getApartment(String id) throws NotFoundException {
         Optional<Apartment> optional = apartmentRepository.findById(id);
 
@@ -53,7 +54,7 @@ public class ApartmentServiceImp implements ApartmentService {
     public ApartmentDTO getApartmentDTO(String id) {
         Apartment apartment = getApartment(id);
 
-        return EntityToDto.ApartmentToDto(apartment);
+        return EntityToDto.apartmentToDto(apartment);
     }
 
     @Override
@@ -68,7 +69,7 @@ public class ApartmentServiceImp implements ApartmentService {
 
         apartmentRepository.save(apartment);
 
-        return EntityToDto.ApartmentToDto(apartment);
+        return EntityToDto.apartmentToDto(apartment);
     }
 
     @Override
@@ -92,7 +93,7 @@ public class ApartmentServiceImp implements ApartmentService {
 
         apartmentRepository.save(apartmentFromDB);
 
-        return EntityToDto.ApartmentToDto(apartmentFromDB);
+        return EntityToDto.apartmentToDto(apartmentFromDB);
     }
 
 
@@ -103,7 +104,7 @@ public class ApartmentServiceImp implements ApartmentService {
 
         apartmentRepository.delete(apartmentToDelete);
 
-        return EntityToDto.ApartmentToDto(apartmentToDelete);
+        return EntityToDto.apartmentToDto(apartmentToDelete);
     }
 
 //    @Override

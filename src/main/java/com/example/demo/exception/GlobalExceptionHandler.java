@@ -1,7 +1,6 @@
 package com.example.demo.exception;
 
 
-import com.example.demo.message.GlobalMessage;
 import com.example.demo.response.ErrorResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -14,25 +13,21 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ErrorResponse handlerNotFoundException(NotFoundException e) {
-        log.trace(e.getMessage());
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
     }
 
     @ExceptionHandler(InValidException.class)
     public ErrorResponse handlerNotValidException(InValidException e) {
-        log.trace(e.getMessage());
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
     }
 
     @ExceptionHandler(NotNullException.class)
     public ErrorResponse handlerNotNullException(NotNullException e) {
-        log.trace(e.getMessage());
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
     }
 
     @ExceptionHandler(NoContentException.class)
     public ErrorResponse handlerNoContentException(NoContentException e) {
-        log.trace(e.getMessage());
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
     }
 
@@ -40,8 +35,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handlerException(Exception e) {
-        log.error(e.getMessage());
-        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), GlobalMessage.ERROR);
+        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
     }
-
 }

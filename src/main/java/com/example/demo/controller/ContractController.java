@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.message.GlobalMessage;
 import com.example.demo.model.DTO.ContractDTO;
+import com.example.demo.model.DTO.ContractUpdateDTO;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.ContractService;
 import lombok.AllArgsConstructor;
@@ -9,8 +10,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -28,7 +27,7 @@ public class ContractController {
     // [GET] : /contracts/:id
     @GetMapping("/{id}")
     public ResponseEntity<Object> getContract(@PathVariable("id") String id) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, contractService.getOneById(id));
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, contractService.getContractDTO(id));
     }
 
     // [POST] : contracts/add
@@ -39,8 +38,8 @@ public class ContractController {
 
     // [UPDATE] : contracts/update/:id
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody Map<String, Object> payload) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, contractService.update(id, payload));
+    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody ContractUpdateDTO contractUpdate) {
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, contractService.update(id, contractUpdate));
     }
 
     // [DELETE] : contracts/delete/:id

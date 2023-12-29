@@ -34,7 +34,7 @@ public class CustomerValidator {
     }
 
     private static void invalidAge(String age) throws InValidException {
-        if (!(MyUtils.stringToNumeric(age.trim()) >= 18))
+        if (!(MyUtils.stringToInteger(age.trim()) >= 18))
             throw new InValidException(CustomerMessage.INVALID_AGE);
     }
 

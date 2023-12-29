@@ -1,7 +1,7 @@
-package com.example.demo.helpers;
-
-public class Helper {
-    // Help to trim all field of object and after setField
+//package com.example.demo.helpers;
+//
+//public class Helper {
+// Help to trim all field of object and after setField
 //    public static void trimToSetAllField(Object object) {
 //        List<Field> fieldList = List.of(object.getClass().getDeclaredFields());
 //
@@ -26,4 +26,4 @@ public class Helper {
 //                ReflectionUtils.setField(field, object, "");
 //        }
 //    }
-}
+//}

@@ -13,11 +13,19 @@ import java.util.Date;
 public final class MyUtils {
     private static final String DATE_FORMAT = "yyyy/MM/dd";
 
-    public static double stringToNumeric(String s) {
+    public static double stringToDouble(String s) {
         try {
             return Double.parseDouble(s);
         } catch (NumberFormatException e) {
             return -1.0;
+        }
+    }
+
+    public static Integer stringToInteger(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 
@@ -31,7 +39,7 @@ public final class MyUtils {
 
     public static String formatMoney(String money) {
         NumberFormat formatter = NumberFormat.getNumberInstance();
-        return formatter.format(stringToNumeric(money));
+        return formatter.format(stringToDouble(money));
     }
 
     public static LocalDate stringToDate(String date) {
