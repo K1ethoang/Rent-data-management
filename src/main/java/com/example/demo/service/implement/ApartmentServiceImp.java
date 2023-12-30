@@ -91,6 +91,8 @@ public class ApartmentServiceImp implements ApartmentService {
             apartmentFromDB.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom().trim()));
         }
 
+        ApartmentValidator.validatorApartmentDTO(EntityToDto.apartmentToDto(apartmentFromDB));
+
         apartmentRepository.save(apartmentFromDB);
 
         return EntityToDto.apartmentToDto(apartmentFromDB);

@@ -82,6 +82,7 @@ public class ContractServiceImp implements ContractService {
 
     @Override
     public ContractDTO update(String id, ContractUpdateDTO contractUpdate) {
+        // Validate dữ liệu input
         ContractValidator.validatorContactUpdateDTO(contractUpdate);
 
         Contract contractFromDB = getContract(id);
@@ -94,7 +95,6 @@ public class ContractServiceImp implements ContractService {
         if (contractUpdate.getApartmentId() != null) {
             Apartment apartmentFromDB = apartmentService.getApartment(contractUpdate.getApartmentId().trim());
             contractFromDB.setApartment(apartmentFromDB);
-
         }
 
         if (contractUpdate.getStartDate() != null) {
@@ -105,7 +105,8 @@ public class ContractServiceImp implements ContractService {
             contractFromDB.setEndDate(MyUtils.stringToDate(contractUpdate.getEndDate().trim()));
         }
 
-        // lỗi khi edit start date -> có thể set ngày lớn hơn end date
+        // Validate sau khi cập nhật các field
+        ContractValidator.validatorContractDTO(EntityToDto.contractToDto(contractFromDB));
 
         contractRepository.save(contractFromDB);
 

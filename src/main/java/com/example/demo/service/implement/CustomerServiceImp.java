@@ -76,7 +76,7 @@ public class CustomerServiceImp implements CustomerService {
 
     @Override
     public CustomerDTO update(String id, CustomerUpdateDTO customerUpdateDTO) {
-        CustomerValidator.validatorCustomerUpdateDTO(customerUpdateDTO);
+//        CustomerValidator.validatorCustomerUpdateDTO(customerUpdateDTO);
 
         Customer customerFromDB = getCustomer(id);
 
@@ -92,6 +92,8 @@ public class CustomerServiceImp implements CustomerService {
         if (customerUpdateDTO.getAge() != null) {
             customerFromDB.setAge(Integer.parseInt(customerUpdateDTO.getAge().trim()));
         }
+
+        CustomerValidator.validatorCustomerDTO(EntityToDto.customerToDto(customerFromDB));
 
         customerRepository.save(customerFromDB);
 
