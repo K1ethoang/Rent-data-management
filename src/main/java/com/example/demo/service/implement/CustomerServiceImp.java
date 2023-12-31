@@ -1,6 +1,7 @@
 package com.example.demo.service.implement;
 
 import com.example.demo.entity.Customer;
+import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.message.CustomerMessage;
@@ -58,8 +59,22 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public CustomerDTO create(CustomerDTO customerDTO) {
+    public CustomerDTO create(CustomerDTO customerDTO) throws InValidException {
         CustomerValidator.validatorCustomerDTO(customerDTO);
+
+        // Kiểm tra trùng dữ liệu
+        List<CustomerDTO> customerList = getAll();
+
+        boolean isDuplicatedValue = false;
+
+        for (CustomerDTO customer : customerList) {
+            if (customer.equals(customerDTO)) {
+                isDuplicatedValue = true;
+                break;
+            }
+        }
+
+        if (isDuplicatedValue) throw new InValidException(CustomerMessage.CUSTOMER_EXIST);
 
         Customer customer = Customer.builder()
                 .firstName(customerDTO.getFirstName().trim())
@@ -75,10 +90,14 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public CustomerDTO update(String id, CustomerUpdateDTO customerUpdateDTO) {
-//        CustomerValidator.validatorCustomerUpdateDTO(customerUpdateDTO);
+    public CustomerDTO update(String id, CustomerUpdateDTO customerUpdateDTO) throws InValidException {
+        CustomerValidator.validatorCustomerUpdateDTO(customerUpdateDTO);
 
         Customer customerFromDB = getCustomer(id);
+
+        // Lấy danh sách trước để tránh việc lưu dữ liệu vào caching của Hibernate
+        List<CustomerDTO> customerList = getAll();
+
 
         if (customerUpdateDTO.getFirstName() != null) {
             customerFromDB.setFirstName(customerUpdateDTO.getFirstName().trim());
@@ -93,7 +112,22 @@ public class CustomerServiceImp implements CustomerService {
             customerFromDB.setAge(Integer.parseInt(customerUpdateDTO.getAge().trim()));
         }
 
+        // Chưa tối ưu validator -> cần sửa
         CustomerValidator.validatorCustomerDTO(EntityToDto.customerToDto(customerFromDB));
+
+        // Kiểm tra trùng khách hàng
+        CustomerDTO customerToUpdate = EntityToDto.customerToDto(customerFromDB);
+
+        boolean isDuplicatedValue = false;
+
+        for (CustomerDTO customer : customerList) {
+            if (customer.equals(customerToUpdate)) {
+                isDuplicatedValue = true;
+                break;
+            }
+        }
+
+        if (isDuplicatedValue) throw new InValidException(CustomerMessage.CUSTOMER_EXIST);
 
         customerRepository.save(customerFromDB);
 

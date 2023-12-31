@@ -3,6 +3,7 @@ package com.example.demo.message;
 public class CustomerMessage {
     public static final String NOT_FOUND = "Customer not found";
     public static final String EMPTY_LIST = "Customer list are empty";
+    public static final String CUSTOMER_EXIST = "Customer already exists";
 
     // Not null
     public static final String NOT_NULL_FIRST_NAME = "Firstname is not null";

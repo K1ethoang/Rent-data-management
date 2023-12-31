@@ -1,6 +1,7 @@
 package com.example.demo.service.implement;
 
 import com.example.demo.entity.Apartment;
+import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.message.ApartmentMessage;
@@ -32,8 +33,7 @@ public class ApartmentServiceImp implements ApartmentService {
 
         if (apartmentList.isEmpty()) throw new NoContentException(ApartmentMessage.EMPTY_LIST);
 
-        List<ApartmentDTO> apartmentDTOList = new ArrayList<>() {
-        };
+        List<ApartmentDTO> apartmentDTOList = new ArrayList<>();
 
         for (Apartment apartment : apartmentList) {
             apartmentDTOList.add(EntityToDto.apartmentToDto(apartment));
@@ -58,13 +58,27 @@ public class ApartmentServiceImp implements ApartmentService {
     }
 
     @Override
-    public ApartmentDTO create(ApartmentDTO apartmentDTO) {
-        ApartmentValidator.validatorApartmentDTO(apartmentDTO);
+    public ApartmentDTO create(ApartmentDTO apartmentToCreate) throws InValidException {
+        ApartmentValidator.validatorApartmentDTO(apartmentToCreate);
+
+        // Kiểm tra trùng dữ liệu
+        List<ApartmentDTO> apartmentDTOList = getAll();
+
+        boolean isDuplicatedValue = false;
+
+        for (ApartmentDTO apartment : apartmentDTOList) {
+            if (apartment.equals(apartmentToCreate)) {
+                isDuplicatedValue = true;
+                break;
+            }
+        }
+
+        if (isDuplicatedValue) throw new InValidException(ApartmentMessage.APARTMENT_EXIST);
 
         Apartment apartment = Apartment.builder()
-                .address(apartmentDTO.getAddress().trim())
-                .retailPrice(MyUtils.formatMoney(apartmentDTO.getRetailPrice().trim()))
-                .numberOfRoom(Integer.parseInt(apartmentDTO.getNumberOfRoom().trim()))
+                .address(apartmentToCreate.getAddress().trim())
+                .retailPrice(MyUtils.formatMoney(apartmentToCreate.getRetailPrice().trim()))
+                .numberOfRoom(Integer.parseInt(apartmentToCreate.getNumberOfRoom().trim()))
                 .build();
 
         apartmentRepository.save(apartment);
@@ -76,8 +90,9 @@ public class ApartmentServiceImp implements ApartmentService {
     public ApartmentDTO update(String id, ApartmentUpdateDTO apartmentUpdate) {
         ApartmentValidator.validatorApartmentUpdateDTO(apartmentUpdate);
 
-        // Check apartment has in DB
         Apartment apartmentFromDB = getApartment(id);
+
+        List<ApartmentDTO> apartmentDTOList = getAll();
 
         if (apartmentUpdate.getAddress() != null) {
             apartmentFromDB.setAddress(apartmentUpdate.getAddress().trim());
@@ -92,6 +107,19 @@ public class ApartmentServiceImp implements ApartmentService {
         }
 
         ApartmentValidator.validatorApartmentDTO(EntityToDto.apartmentToDto(apartmentFromDB));
+
+        ApartmentDTO apartmentToUpdate = EntityToDto.apartmentToDto(apartmentFromDB);
+
+        boolean isDuplicatedValue = false;
+
+        for (ApartmentDTO apartment : apartmentDTOList) {
+            if (apartment.equals(apartmentToUpdate)) {
+                isDuplicatedValue = true;
+                break;
+            }
+        }
+
+        if (isDuplicatedValue) throw new InValidException(ApartmentMessage.APARTMENT_EXIST);
 
         apartmentRepository.save(apartmentFromDB);
 

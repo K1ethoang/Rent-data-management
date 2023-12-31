@@ -13,7 +13,7 @@ public interface ApartmentService {
 
     ApartmentDTO getApartmentDTO(String id);
 
-    ApartmentDTO create(ApartmentDTO apartmentDTO);
+    ApartmentDTO create(ApartmentDTO apartmentToCreate);
 
     ApartmentDTO update(String id, ApartmentUpdateDTO apartmentUpdateDTO);
 
