@@ -10,16 +10,9 @@ import com.example.demo.model.DTO.ApartmentUpdateDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.ApartmentRepository;
 import com.example.demo.service.interfaces.ApartmentService;
-import com.example.demo.utils.MyUtils;
 import com.example.demo.utils.validator.ApartmentValidator;
-import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.stat.EntityStatistics;
-import org.hibernate.stat.Statistics;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -133,11 +126,11 @@ public class ApartmentServiceImp implements ApartmentService {
         for (Apartment apartment : apartmentList) {
             ApartmentDTO apartmentDTO = EntityToDto.apartmentToDto(apartment);
 
-            log.info(apartmentDTO);
-
-            if (!apartmentDTO.getAddress().equalsIgnoreCase(apartmentToCheck.getAddress())) continue;
+            if (!apartmentDTO.getAddress().equalsIgnoreCase(apartmentToCheck.getAddress()))
+                continue;
             if (!apartmentDTO.getRetailPrice().equals(apartmentToCheck.getRetailPrice())) continue;
-            if (!apartmentDTO.getNumberOfRoom().equals(apartmentToCheck.getNumberOfRoom())) continue;
+            if (!apartmentDTO.getNumberOfRoom().equals(apartmentToCheck.getNumberOfRoom()))
+                continue;
 
             isDuplicated = true;
             break;
