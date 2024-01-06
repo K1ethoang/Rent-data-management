@@ -24,22 +24,16 @@ import java.util.Optional;
 @Log4j2
 public class CustomerServiceImp implements CustomerService {
     private final CustomerRepository customerRepository;
-    //    private final ModelMapper mapper;
-    private final String DEFAULT_STATUS = "Normal";
 
     @Override
     public List<CustomerDTO> getAll() throws NoContentException {
-        List<Customer> customerList = customerRepository.findAll();
+        List<CustomerDTO> customerList = new ArrayList<>();
+
+        customerRepository.findAll().forEach(customer -> customerList.add(EntityToDto.customerToDto(customer)));
 
         if (customerList.isEmpty()) throw new NoContentException(CustomerMessage.EMPTY_LIST);
 
-        List<CustomerDTO> customerDTOList = new ArrayList<>();
-
-        for (Customer customer : customerList) {
-            customerDTOList.add(EntityToDto.customerToDto(customer));
-        }
-
-        return customerDTOList;
+        return customerList;
     }
 
     @Override
@@ -62,26 +56,17 @@ public class CustomerServiceImp implements CustomerService {
     public CustomerDTO create(CustomerDTO customerDTO) throws InValidException {
         CustomerValidator.validatorCustomerDTO(customerDTO);
 
-        // Kiểm tra trùng dữ liệu
-        List<CustomerDTO> customerList = getAll();
+        checkDuplicated(customerDTO);
 
-        boolean isDuplicatedValue = false;
-
-        for (CustomerDTO customer : customerList) {
-            if (customer.equals(customerDTO)) {
-                isDuplicatedValue = true;
-                break;
-            }
-        }
-
-        if (isDuplicatedValue) throw new InValidException(CustomerMessage.CUSTOMER_EXIST);
+        //    private final ModelMapper mapper;
+        final String DEFAULT_STATUS = "Normal";
 
         Customer customer = Customer.builder()
-                .firstName(customerDTO.getFirstName().trim())
-                .lastName(customerDTO.getLastName().trim())
-                .address(customerDTO.getAddress().trim())
+                .firstName(customerDTO.getFirstName())
+                .lastName(customerDTO.getLastName())
+                .address(customerDTO.getAddress())
                 .status(DEFAULT_STATUS)
-                .age(Integer.parseInt(customerDTO.getAge().trim()))
+                .age(Integer.parseInt(customerDTO.getAge()))
                 .build();
 
         customerRepository.save(customer);
@@ -90,48 +75,41 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public CustomerDTO update(String id, CustomerUpdateDTO customerUpdateDTO) throws InValidException {
-        CustomerValidator.validatorCustomerUpdateDTO(customerUpdateDTO);
+    public CustomerDTO update(String id, CustomerUpdateDTO customerToUpdate) {
+        CustomerValidator.validatorCustomerUpdateDTO(customerToUpdate);
 
-        Customer customerFromDB = getCustomer(id);
+        Customer storedCustomer = getCustomer(id);
 
-        // Lấy danh sách trước để tránh việc lưu dữ liệu vào caching của Hibernate
-        List<CustomerDTO> customerList = getAll();
+        Customer tempCustomer = Customer.builder()
+                .address(storedCustomer.getAddress())
+                .firstName(storedCustomer.getFirstName())
+                .lastName(storedCustomer.getLastName())
+                .age(storedCustomer.getAge())
+                .build();
 
-
-        if (customerUpdateDTO.getFirstName() != null) {
-            customerFromDB.setFirstName(customerUpdateDTO.getFirstName().trim());
+        if (customerToUpdate.getFirstName() != null) {
+            tempCustomer.setFirstName(customerToUpdate.getFirstName());
         }
-        if (customerUpdateDTO.getLastName() != null) {
-            customerFromDB.setLastName(customerUpdateDTO.getLastName().trim());
+        if (customerToUpdate.getLastName() != null) {
+            tempCustomer.setLastName(customerToUpdate.getLastName());
         }
-        if (customerUpdateDTO.getAddress() != null) {
-            customerFromDB.setAddress(customerUpdateDTO.getAddress().trim());
+        if (customerToUpdate.getAddress() != null) {
+            tempCustomer.setAddress(customerToUpdate.getAddress());
         }
-        if (customerUpdateDTO.getAge() != null) {
-            customerFromDB.setAge(Integer.parseInt(customerUpdateDTO.getAge().trim()));
-        }
-
-        // Chưa tối ưu validator -> cần sửa
-        CustomerValidator.validatorCustomerDTO(EntityToDto.customerToDto(customerFromDB));
-
-        // Kiểm tra trùng khách hàng
-        CustomerDTO customerToUpdate = EntityToDto.customerToDto(customerFromDB);
-
-        boolean isDuplicatedValue = false;
-
-        for (CustomerDTO customer : customerList) {
-            if (customer.equals(customerToUpdate)) {
-                isDuplicatedValue = true;
-                break;
-            }
+        if (customerToUpdate.getAge() != null) {
+            tempCustomer.setAge(Integer.parseInt(customerToUpdate.getAge()));
         }
 
-        if (isDuplicatedValue) throw new InValidException(CustomerMessage.CUSTOMER_EXIST);
+        checkDuplicated(EntityToDto.customerToDto(tempCustomer));
 
-        customerRepository.save(customerFromDB);
+        storedCustomer.setAddress(tempCustomer.getAddress());
+        storedCustomer.setFirstName(tempCustomer.getFirstName());
+        storedCustomer.setLastName(tempCustomer.getLastName());
+        storedCustomer.setAge(tempCustomer.getAge());
 
-        return EntityToDto.customerToDto(customerFromDB);
+        customerRepository.save(storedCustomer);
+
+        return EntityToDto.customerToDto(storedCustomer);
     }
 
     @Override
@@ -142,6 +120,30 @@ public class CustomerServiceImp implements CustomerService {
 
         return EntityToDto.customerToDto(customerToDelete);
     }
+
+    public void checkDuplicated(CustomerDTO customerToCheck) throws InValidException {
+        List<Customer> customerList = customerRepository.findAll();
+
+        boolean isDuplicate = false;
+
+        for (Customer customer : customerList) {
+            CustomerDTO customerFromList = EntityToDto.customerToDto(customer);
+
+            if (!customerFromList.getFirstName().equalsIgnoreCase(customerToCheck.getFirstName()))
+                continue;
+            if (!customerFromList.getLastName().equalsIgnoreCase(customerToCheck.getLastName()))
+                continue;
+            if (!customerFromList.getAddress().equalsIgnoreCase(customerToCheck.getAddress()))
+                continue;
+            if (!customerFromList.getAge().equals(customerToCheck.getAge())) continue;
+
+            isDuplicate = true;
+            break;
+        }
+
+        if (isDuplicate) throw new InValidException(CustomerMessage.CUSTOMER_EXIST);
+    }
+
 
 //    public Customer customerDTOToEntity(CustomerDTO customerDTO) {
 //        return mapper.map(customerDTO, Customer.class);

@@ -22,15 +22,18 @@ public class CustomerValidator {
     }
 
     private static void notNullAddress(String address) throws NotNullException {
-        if (address == null || address.trim().isEmpty()) throw new NotNullException(CustomerMessage.NOT_NULL_ADDRESS);
+        if (address == null || address.trim().isEmpty())
+            throw new NotNullException(CustomerMessage.NOT_NULL_ADDRESS);
     }
 
     private static void notNullAge(String age) throws NotNullException {
-        if (age == null || age.trim().isEmpty()) throw new NotNullException(CustomerMessage.NOT_NULL_AGE);
+        if (age == null || age.trim().isEmpty())
+            throw new NotNullException(CustomerMessage.NOT_NULL_AGE);
     }
 
     private static void notNullStatus(String status) throws NotNullException {
-        if (status == null || status.trim().isEmpty()) throw new NotNullException(CustomerMessage.NOT_NULL_STATUS);
+        if (status == null || status.trim().isEmpty())
+            throw new NotNullException(CustomerMessage.NOT_NULL_STATUS);
     }
 
     private static void invalidAge(String age) throws InValidException {
@@ -44,24 +47,33 @@ public class CustomerValidator {
         notNullAddress(customerDTO.getAddress());
         notNullAge(customerDTO.getAge());
         invalidAge(customerDTO.getAge());
+
+        customerDTO.setAddress(customerDTO.getAddress().trim());
+        customerDTO.setFirstName(customerDTO.getFirstName().trim());
+        customerDTO.setLastName(customerDTO.getLastName().trim());
+        customerDTO.setAge(customerDTO.getAge().trim());
     }
 
     public static void validatorCustomerUpdateDTO(CustomerUpdateDTO customerUpdateDTO) {
         if (customerUpdateDTO.getFirstName() != null) {
             notNullFirstname(customerUpdateDTO.getFirstName());
+            customerUpdateDTO.setFirstName(customerUpdateDTO.getFirstName().trim());
         }
 
         if (customerUpdateDTO.getLastName() != null) {
             notNullLastname(customerUpdateDTO.getLastName());
+            customerUpdateDTO.setLastName(customerUpdateDTO.getLastName().trim());
         }
 
         if (customerUpdateDTO.getAddress() != null) {
             notNullAddress(customerUpdateDTO.getAddress());
+            customerUpdateDTO.setAddress(customerUpdateDTO.getAddress().trim());
         }
 
         if (customerUpdateDTO.getAge() != null) {
             notNullAge(customerUpdateDTO.getAge());
             invalidAge(customerUpdateDTO.getAge());
+            customerUpdateDTO.setAge(customerUpdateDTO.getAge().trim());
         }
     }
 }
