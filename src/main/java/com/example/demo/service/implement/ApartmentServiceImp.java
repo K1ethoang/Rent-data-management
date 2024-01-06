@@ -12,8 +12,14 @@ import com.example.demo.repository.ApartmentRepository;
 import com.example.demo.service.interfaces.ApartmentService;
 import com.example.demo.utils.MyUtils;
 import com.example.demo.utils.validator.ApartmentValidator;
+import jdk.jfr.Timestamp;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.stat.EntityStatistics;
+import org.hibernate.stat.Statistics;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,15 +35,12 @@ public class ApartmentServiceImp implements ApartmentService {
 
     @Override
     public List<ApartmentDTO> getAll() throws NoContentException {
-        List<Apartment> apartmentList = apartmentRepository.findAll();
-
-        if (apartmentList.isEmpty()) throw new NoContentException(ApartmentMessage.EMPTY_LIST);
-
         List<ApartmentDTO> apartmentDTOList = new ArrayList<>();
 
-        for (Apartment apartment : apartmentList) {
-            apartmentDTOList.add(EntityToDto.apartmentToDto(apartment));
-        }
+        apartmentRepository.findAll().forEach(apartment -> apartmentDTOList.add(EntityToDto.apartmentToDto(apartment)));
+
+        if (apartmentDTOList.isEmpty()) throw new NoContentException(ApartmentMessage.EMPTY_LIST);
+
         return apartmentDTOList;
     }
 
@@ -58,32 +61,20 @@ public class ApartmentServiceImp implements ApartmentService {
     }
 
     @Override
-    public ApartmentDTO create(ApartmentDTO apartmentToCreate) throws InValidException {
+    public ApartmentDTO create(ApartmentDTO apartmentToCreate) {
         ApartmentValidator.validatorApartmentDTO(apartmentToCreate);
 
-        // Kiểm tra trùng dữ liệu
-        List<ApartmentDTO> apartmentDTOList = getAll();
-
-        boolean isDuplicatedValue = false;
-
-        for (ApartmentDTO apartment : apartmentDTOList) {
-            if (apartment.equals(apartmentToCreate)) {
-                isDuplicatedValue = true;
-                break;
-            }
-        }
-
-        if (isDuplicatedValue) throw new InValidException(ApartmentMessage.APARTMENT_EXIST);
+        checkDuplicated(apartmentToCreate);
 
         Apartment apartment = Apartment.builder()
-                .address(apartmentToCreate.getAddress().trim())
-                .retailPrice(MyUtils.formatMoney(apartmentToCreate.getRetailPrice().trim()))
-                .numberOfRoom(Integer.parseInt(apartmentToCreate.getNumberOfRoom().trim()))
+                .address(apartmentToCreate.getAddress())
+                .retailPrice(apartmentToCreate.getRetailPrice())
+                .numberOfRoom(Integer.parseInt(apartmentToCreate.getNumberOfRoom()))
                 .build();
 
-        apartmentRepository.save(apartment);
+        Apartment storedApartmentDetails = apartmentRepository.save(apartment);
 
-        return EntityToDto.apartmentToDto(apartment);
+        return EntityToDto.apartmentToDto(storedApartmentDetails);
     }
 
     @Override
@@ -92,40 +83,22 @@ public class ApartmentServiceImp implements ApartmentService {
 
         Apartment apartmentFromDB = getApartment(id);
 
-        List<ApartmentDTO> apartmentDTOList = getAll();
-
         if (apartmentUpdate.getAddress() != null) {
-            apartmentFromDB.setAddress(apartmentUpdate.getAddress().trim());
+            apartmentFromDB.setAddress(apartmentUpdate.getAddress());
         }
-
         if (apartmentUpdate.getRetailPrice() != null) {
-            apartmentFromDB.setRetailPrice(MyUtils.formatMoney(apartmentUpdate.getRetailPrice().trim()));
+            apartmentFromDB.setRetailPrice(apartmentUpdate.getRetailPrice());
         }
-
         if (apartmentUpdate.getNumberOfRoom() != null) {
-            apartmentFromDB.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom().trim()));
+            apartmentFromDB.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom()));
         }
 
-        ApartmentValidator.validatorApartmentDTO(EntityToDto.apartmentToDto(apartmentFromDB));
-
-        ApartmentDTO apartmentToUpdate = EntityToDto.apartmentToDto(apartmentFromDB);
-
-        boolean isDuplicatedValue = false;
-
-        for (ApartmentDTO apartment : apartmentDTOList) {
-            if (apartment.equals(apartmentToUpdate)) {
-                isDuplicatedValue = true;
-                break;
-            }
-        }
-
-        if (isDuplicatedValue) throw new InValidException(ApartmentMessage.APARTMENT_EXIST);
+        checkDuplicated(EntityToDto.apartmentToDto(apartmentFromDB));
 
         apartmentRepository.save(apartmentFromDB);
 
         return EntityToDto.apartmentToDto(apartmentFromDB);
     }
-
 
     @Override
     public ApartmentDTO delete(String id) {
@@ -137,11 +110,32 @@ public class ApartmentServiceImp implements ApartmentService {
         return EntityToDto.apartmentToDto(apartmentToDelete);
     }
 
+    // Kiểm tra trùng dữ liệu
+    public void checkDuplicated(ApartmentDTO apartmentToCheck) {
+        List<Apartment> apartmentList = apartmentRepository.findAll();
+
+        boolean isDuplicated = false;
+
+        for (Apartment apartment : apartmentList) {
+            ApartmentDTO apartmentDTO = EntityToDto.apartmentToDto(apartment);
+
+            log.info(apartmentDTO);
+
+            if (!apartmentDTO.getAddress().equalsIgnoreCase(apartmentToCheck.getAddress())) continue;
+            if (!apartmentDTO.getRetailPrice().equals(apartmentToCheck.getRetailPrice())) continue;
+            if (!apartmentDTO.getNumberOfRoom().equals(apartmentToCheck.getNumberOfRoom())) continue;
+
+            isDuplicated = true;
+            break;
+        }
+
+        if (isDuplicated) throw new InValidException(ApartmentMessage.APARTMENT_EXIST);
+    }
+
 //    @Override
 //    public Apartment apartmentDTOToEntity(ApartmentDTO apartmentDTO) {
 //        return mapper.map(apartmentDTO, Apartment.class);
 //    }
-//
 //
 //    @Override
 //    public ApartmentDTO apartmentEntityToDTO(Apartment apartment) {

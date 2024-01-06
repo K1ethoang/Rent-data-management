@@ -20,7 +20,7 @@ public class EntityToDto {
     public static ApartmentDTO apartmentToDto(Apartment apartment) {
         return ApartmentDTO.builder()
                 .address(apartment.getAddress())
-                .retailPrice(apartment.getRetailPrice().replace(".", ""))
+                .retailPrice(apartment.getRetailPrice())
                 .numberOfRoom(String.valueOf(apartment.getNumberOfRoom()))
                 .build();
     }

@@ -39,7 +39,7 @@ public class ContractValidator {
         if (!MyUtils.isValidDate(endDate)) throw new InValidException(ContractMessage.INVALID_END_DATE);
     }
 
-    private static void invalidStartDateAndEndDate(String startDate, String endDate) throws InValidException {
+    public static void invalidStartDateAndEndDate(String startDate, String endDate) throws InValidException {
         LocalDate startD = MyUtils.stringToDate(startDate);
         LocalDate endD = MyUtils.stringToDate(endDate);
 

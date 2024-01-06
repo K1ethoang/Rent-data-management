@@ -105,6 +105,8 @@ public class ContractServiceImp implements ContractService {
             contractFromDB.setEndDate(MyUtils.stringToDate(contractUpdate.getEndDate().trim()));
         }
 
+//        if(contractFromDB.getStartDate().isAfter(contractFromDB.getEndDate())) throw...;
+
         // Validate sau khi cập nhật các field
         ContractValidator.validatorContractDTO(EntityToDto.contractToDto(contractFromDB));
 
