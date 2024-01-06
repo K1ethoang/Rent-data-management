@@ -83,17 +83,31 @@ public class ApartmentServiceImp implements ApartmentService {
 
         Apartment apartmentFromDB = getApartment(id);
 
+        Apartment tempApartment = Apartment.builder()
+                .address(apartmentFromDB.getAddress())
+                .retailPrice(apartmentFromDB.getRetailPrice())
+                .numberOfRoom(apartmentFromDB.getNumberOfRoom())
+                .build();
+
         if (apartmentUpdate.getAddress() != null) {
-            apartmentFromDB.setAddress(apartmentUpdate.getAddress());
+//            apartmentFromDB.setAddress(apartmentUpdate.getAddress());
+            tempApartment.setAddress(apartmentUpdate.getAddress());
         }
         if (apartmentUpdate.getRetailPrice() != null) {
-            apartmentFromDB.setRetailPrice(apartmentUpdate.getRetailPrice());
+//            apartmentFromDB.setRetailPrice(apartmentUpdate.getRetailPrice());
+            tempApartment.setRetailPrice(apartmentUpdate.getRetailPrice());
         }
         if (apartmentUpdate.getNumberOfRoom() != null) {
-            apartmentFromDB.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom()));
+//            apartmentFromDB.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom()));
+            tempApartment.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom()));
         }
 
-        checkDuplicated(EntityToDto.apartmentToDto(apartmentFromDB));
+//        checkDuplicated(EntityToDto.apartmentToDto(apartmentFromDB));
+        checkDuplicated(EntityToDto.apartmentToDto(tempApartment));
+
+        apartmentFromDB.setRetailPrice(tempApartment.getRetailPrice());
+        apartmentFromDB.setAddress(tempApartment.getAddress());
+        apartmentFromDB.setNumberOfRoom(tempApartment.getNumberOfRoom());
 
         apartmentRepository.save(apartmentFromDB);
 
