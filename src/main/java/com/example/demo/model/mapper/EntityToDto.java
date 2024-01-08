@@ -27,11 +27,10 @@ public class EntityToDto {
 
     public static ContractDTO contractToDto(Contract contract) {
         return ContractDTO.builder()
-                .startDate(contract.getStartDate().toString().replace('-', '/'))
-                .endDate(contract.getEndDate().toString().replace('-', '/'))
-                .apartmentId(contract.getCustomer().getId())
-                .customerId(contract.getApartment().getId())
+                .startDate(contract.getStartDate().toString())
+                .endDate(contract.getEndDate().toString())
+                .apartmentId(contract.getApartment().getId())
+                .customerId(contract.getCustomer().getId())
                 .build();
-
     }
 }
