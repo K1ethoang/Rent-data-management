@@ -3,6 +3,7 @@ package com.example.demo.service.implement;
 import com.example.demo.entity.Apartment;
 import com.example.demo.entity.Contract;
 import com.example.demo.entity.Customer;
+import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.message.ContractMessage;
@@ -34,16 +35,13 @@ public class ContractServiceImp implements ContractService {
 
     @Override
     public List<ContractDTO> getAll() throws NoContentException {
-        List<Contract> contractList = contractRepository.findAll();
+        List<ContractDTO> contractList = new ArrayList<>();
+
+        contractRepository.findAll().forEach(contract -> contractList.add(EntityToDto.contractToDto(contract)));
+
         if (contractList.isEmpty()) throw new NoContentException(ContractMessage.EMPTY_LIST);
 
-        List<ContractDTO> resultList = new ArrayList<>();
-
-        for (Contract contract : contractList) {
-            resultList.add(EntityToDto.contractToDto(contract));
-        }
-
-        return resultList;
+        return contractList;
     }
 
     private Contract getContract(String id) throws NotFoundException {
@@ -65,12 +63,14 @@ public class ContractServiceImp implements ContractService {
     public ContractDTO create(ContractDTO contractDTO) {
         ContractValidator.validatorContractDTO(contractDTO);
 
-        Customer customerFromDB = customerService.getCustomer(contractDTO.getCustomerId().trim());
-        Apartment apartmentFromDB = apartmentService.getApartment(contractDTO.getApartmentId().trim());
+        checkDuplicated(contractDTO);
+
+        Customer customerFromDB = customerService.getCustomer(contractDTO.getCustomerId());
+        Apartment apartmentFromDB = apartmentService.getApartment(contractDTO.getApartmentId());
 
         Contract contractToCreate = Contract.builder()
-                .startDate(MyUtils.stringToDate(contractDTO.getStartDate().trim()))
-                .endDate(MyUtils.stringToDate(contractDTO.getEndDate().trim()))
+                .startDate(MyUtils.stringToDate(contractDTO.getStartDate()))
+                .endDate(MyUtils.stringToDate(contractDTO.getEndDate()))
                 .customer(customerFromDB)
                 .apartment(apartmentFromDB)
                 .build();
@@ -82,37 +82,46 @@ public class ContractServiceImp implements ContractService {
 
     @Override
     public ContractDTO update(String id, ContractUpdateDTO contractUpdate) {
-        // Validate dữ liệu input
         ContractValidator.validatorContactUpdateDTO(contractUpdate);
 
-        Contract contractFromDB = getContract(id);
+        Contract storedContract = getContract(id);
+
+        Contract tempContract = Contract.builder()
+                .startDate(storedContract.getStartDate())
+                .endDate(storedContract.getEndDate())
+                .customer(storedContract.getCustomer())
+                .apartment(storedContract.getApartment())
+                .build();
 
         if (contractUpdate.getCustomerId() != null) {
-            Customer customerFromDB = customerService.getCustomer(contractUpdate.getCustomerId().trim());
-            contractFromDB.setCustomer(customerFromDB);
+            Customer storedCustomer = customerService.getCustomer(contractUpdate.getCustomerId());
+            tempContract.setCustomer(storedCustomer);
         }
-
         if (contractUpdate.getApartmentId() != null) {
-            Apartment apartmentFromDB = apartmentService.getApartment(contractUpdate.getApartmentId().trim());
-            contractFromDB.setApartment(apartmentFromDB);
+            Apartment storedApartment =
+                    apartmentService.getApartment(contractUpdate.getApartmentId());
+            tempContract.setApartment(storedApartment);
         }
-
         if (contractUpdate.getStartDate() != null) {
-            contractFromDB.setStartDate(MyUtils.stringToDate(contractUpdate.getStartDate().trim()));
+            tempContract.setStartDate(MyUtils.stringToDate(contractUpdate.getStartDate()));
         }
-
         if (contractUpdate.getEndDate() != null) {
-            contractFromDB.setEndDate(MyUtils.stringToDate(contractUpdate.getEndDate().trim()));
+            tempContract.setEndDate(MyUtils.stringToDate(contractUpdate.getEndDate()));
         }
 
-//        if(contractFromDB.getStartDate().isAfter(contractFromDB.getEndDate())) throw...;
+        ContractValidator.invalidStartDateAndEndDate(tempContract.getStartDate(),
+                tempContract.getEndDate());
 
-        // Validate sau khi cập nhật các field
-        ContractValidator.validatorContractDTO(EntityToDto.contractToDto(contractFromDB));
+        checkDuplicated(EntityToDto.contractToDto(tempContract));
 
-        contractRepository.save(contractFromDB);
+        storedContract.setStartDate(tempContract.getStartDate());
+        storedContract.setEndDate(tempContract.getEndDate());
+        storedContract.setCustomer(tempContract.getCustomer());
+        storedContract.setApartment(tempContract.getApartment());
 
-        return EntityToDto.contractToDto(contractFromDB);
+        contractRepository.save(storedContract);
+
+        return EntityToDto.contractToDto(storedContract);
     }
 
     @Override
@@ -122,6 +131,27 @@ public class ContractServiceImp implements ContractService {
         contractRepository.delete(contract);
 
         return EntityToDto.contractToDto(contract);
+    }
+
+    public void checkDuplicated(ContractDTO contractToCheck) throws InValidException {
+        List<Contract> contractList = contractRepository.findAll();
+
+        boolean isDuplicate = false;
+
+        for (Contract contract : contractList) {
+            ContractDTO contractFromList = EntityToDto.contractToDto(contract);
+
+            if (!contractFromList.getStartDate().equals(contractToCheck.getStartDate())) continue;
+            if (!contractFromList.getEndDate().equals(contractToCheck.getEndDate())) continue;
+            if (!contractFromList.getCustomerId().equals(contractToCheck.getCustomerId())) continue;
+            if (!contractFromList.getApartmentId().equals(contractToCheck.getApartmentId()))
+                continue;
+
+            isDuplicate = true;
+            break;
+        }
+
+        if (isDuplicate) throw new InValidException(ContractMessage.CONTRACT_EXIST);
     }
 
 //    private Contract contractDTOToEntity(ContractDTO contractDTO) {
