@@ -15,4 +15,12 @@ public class ApiResponse {
 
         return new ResponseEntity<>(response, httpStatus);
     }
+
+    public static ResponseEntity<Object> responseBuilder(HttpStatus httpStatus, String message) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("statusCode", httpStatus.value());
+        response.put("message", message);
+
+        return new ResponseEntity<>(response, httpStatus);
+    }
 }

@@ -40,4 +40,8 @@ public final class MyUtils {
             return null;
         }
     }
+
+    public static String cleanPath(String path) {
+        return path.split("\\.")[0];
+    }
 }
