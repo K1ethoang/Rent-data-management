@@ -10,6 +10,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.websocket.server.PathParam;
 
 @RestController // @RestController dùng cho API còn @Controller dùng cho return View HTML
 @RequestMapping("/customers") // Endpoint gốc là /customers
@@ -48,4 +51,10 @@ public class CustomerController {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.delete(id));
     }
 
+    // [POST] customers/upload
+    @PostMapping("/upload")
+    public ResponseEntity<Object> uploadCsvCustomer(@PathParam("file") MultipartFile file) {
+        customerService.loadCustomers(file);
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS);
+    }
 }

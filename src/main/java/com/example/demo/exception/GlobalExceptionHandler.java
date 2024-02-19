@@ -31,6 +31,11 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
     }
 
+    @ExceptionHandler(DuplicatedException.class)
+    public ErrorResponse handlerNoContentException(DuplicatedException e) {
+        return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
+    }
+
     // Exception hệ thống
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

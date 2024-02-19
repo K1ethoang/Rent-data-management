@@ -1,31 +1,28 @@
 package com.example.demo.service.implement;
 
 import com.example.demo.entity.Customer;
+import com.example.demo.exception.DuplicatedException;
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.helpers.CsvHelper;
 import com.example.demo.message.CustomerMessage;
-import com.example.demo.message.UploadFileMessage;
+import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.CustomerDTO;
 import com.example.demo.model.DTO.CustomerUpdateDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerService;
-import com.example.demo.utils.MyUtils;
 import com.example.demo.utils.validator.CustomerValidator;
+import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -33,8 +30,28 @@ import java.util.Optional;
 @Log4j2
 public class CustomerServiceImp implements CustomerService {
     private final CustomerRepository customerRepository;
-    private final String FILE_NAME = "Customer";
-    private final String TYPE_CSV = "text/csv";
+    private final String DEFAULT_STATUS = "Normal";
+
+    public static void checkDuplicated(CustomerDTO customerToCheck, List<Customer> customerList) throws DuplicatedException {
+        boolean isDuplicate = false;
+
+        for (Customer customer : customerList) {
+            CustomerDTO customerFromList = EntityToDto.customerToDto(customer);
+
+            if (!customerFromList.getFirstName().equalsIgnoreCase(customerToCheck.getFirstName()))
+                continue;
+            if (!customerFromList.getLastName().equalsIgnoreCase(customerToCheck.getLastName()))
+                continue;
+            if (!customerFromList.getAddress().equalsIgnoreCase(customerToCheck.getAddress()))
+                continue;
+            if (!customerFromList.getAge().equals(customerToCheck.getAge())) continue;
+
+            isDuplicate = true;
+            break;
+        }
+
+        if (isDuplicate) throw new DuplicatedException(CustomerMessage.CUSTOMER_EXIST);
+    }
 
     @Override
     public List<CustomerDTO> getAll() throws NoContentException {
@@ -67,11 +84,9 @@ public class CustomerServiceImp implements CustomerService {
     public CustomerDTO create(CustomerDTO customerDTO) throws InValidException {
         CustomerValidator.validatorCustomerDTO(customerDTO);
 
-        checkDuplicated(customerDTO);
+        checkDuplicated(customerDTO, customerRepository.findAll());
 
         //    private final ModelMapper mapper;
-        final String DEFAULT_STATUS = "Normal";
-
         Customer customer = Customer.builder()
                 .firstName(customerDTO.getFirstName())
                 .lastName(customerDTO.getLastName())
@@ -86,64 +101,27 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public void loadCustomers(MultipartFile file) throws NoContentException, InValidException {
-        if (file.isEmpty()) throw new NoContentException(UploadFileMessage.FILE_NOT_FOUND);
-
-        String fileName = MyUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-
-        if (!fileName.equalsIgnoreCase(FILE_NAME))
-            throw new InValidException(UploadFileMessage.INVALID_FILE_NAME);
-
-        if (!Objects.equals(file.getContentType(), TYPE_CSV))
-            throw new InValidException((UploadFileMessage.MUST_TYPE_CSV));
-
-        String line = "";
+    public void loadCustomers(MultipartFile file) throws InValidException {
+        FileValidator.validatorMultipartFile(file);
 
         try {
-            Reader reader = new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8);
-            BufferedReader br = new BufferedReader(reader);
+            List<CustomerDTO> customerListToAdd = CsvHelper.csvToCustomers(file.getInputStream(),
+                    customerRepository.findAll());
 
-            // Read header row
-            line = br.readLine();
-            String[] data = line.split(",");
-            int countLine = 1;
-
-            int lengthOfFields = CustomerDTO.class.getDeclaredFields().length;
-
-            if (data.length != lengthOfFields) {
-                throw new InValidException(UploadFileMessage.INVALID_FIELD + " at row: " + countLine);
-            }
-
-            String message = "Duplicate row: ";
-
-            while ((line = br.readLine()) != null) {
-                data = line.split(",");
-                countLine++;
-
-                if (data.length != lengthOfFields) {
-                    throw new InValidException(UploadFileMessage.INVALID_FIELD + " at row: " + countLine);
-                }
-
-                CustomerDTO customerDTO = CustomerDTO.builder()
-                        .firstName(data[0])
-                        .lastName(data[1])
-                        .address(data[2])
-                        .age(data[3])
+            for (CustomerDTO customerDTO : customerListToAdd) {
+                Customer customerToAdd = Customer.builder()
+                        .firstName(customerDTO.getFirstName())
+                        .lastName(customerDTO.getLastName())
+                        .address(customerDTO.getAddress())
+                        .status(DEFAULT_STATUS)
+                        .age(Integer.parseInt(customerDTO.getAge()))
                         .build();
 
-                try {
-                    create(customerDTO);
-                } catch (InValidException e) {
-                    message = message.concat(countLine + "; ");
-                }
+                customerRepository.save(customerToAdd);
             }
 
-            br.close();
-
-            throw new InValidException(message);
-
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new InValidException(FileMessage.WRONG_WHEN_READ_FILE);
         }
     }
 
@@ -173,7 +151,7 @@ public class CustomerServiceImp implements CustomerService {
             tempCustomer.setAge(Integer.parseInt(customerToUpdate.getAge()));
         }
 
-        checkDuplicated(EntityToDto.customerToDto(tempCustomer));
+        checkDuplicated(EntityToDto.customerToDto(tempCustomer), customerRepository.findAll());
 
         storedCustomer.setAddress(tempCustomer.getAddress());
         storedCustomer.setFirstName(tempCustomer.getFirstName());
@@ -193,30 +171,6 @@ public class CustomerServiceImp implements CustomerService {
 
         return EntityToDto.customerToDto(customerToDelete);
     }
-
-    public void checkDuplicated(CustomerDTO customerToCheck) throws InValidException {
-        List<Customer> customerList = customerRepository.findAll();
-
-        boolean isDuplicate = false;
-
-        for (Customer customer : customerList) {
-            CustomerDTO customerFromList = EntityToDto.customerToDto(customer);
-
-            if (!customerFromList.getFirstName().equalsIgnoreCase(customerToCheck.getFirstName()))
-                continue;
-            if (!customerFromList.getLastName().equalsIgnoreCase(customerToCheck.getLastName()))
-                continue;
-            if (!customerFromList.getAddress().equalsIgnoreCase(customerToCheck.getAddress()))
-                continue;
-            if (!customerFromList.getAge().equals(customerToCheck.getAge())) continue;
-
-            isDuplicate = true;
-            break;
-        }
-
-        if (isDuplicate) throw new InValidException(CustomerMessage.CUSTOMER_EXIST);
-    }
-
 
 //    public Customer customerDTOToEntity(CustomerDTO customerDTO) {
 //        return mapper.map(customerDTO, Customer.class);
