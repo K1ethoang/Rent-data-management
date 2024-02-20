@@ -6,6 +6,7 @@ import com.example.demo.model.DTO.CustomerUpdateDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CustomerService {
     List<CustomerDTO> getAll();
@@ -17,11 +18,15 @@ public interface CustomerService {
     CustomerDTO create(CustomerDTO customerDTO);
 
     // Read file from upload
-    void loadCustomers(MultipartFile file);
+    List<Object> loadCustomers(MultipartFile[] files);
+
+    Map<String, Object> loadCustomer(MultipartFile file);
 
     CustomerDTO update(String id, CustomerUpdateDTO customerUpdate);
 
     CustomerDTO delete(String id);
+
+    void checkDuplicated(CustomerDTO customerToCheck);
 
 //    Customer customerDTOToEntity(CustomerDTO customerDTO);
 //

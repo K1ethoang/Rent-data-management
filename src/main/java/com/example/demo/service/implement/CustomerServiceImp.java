@@ -20,38 +20,15 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 @Log4j2
 public class CustomerServiceImp implements CustomerService {
+    public static final String DEFAULT_STATUS = "Normal";
     private final CustomerRepository customerRepository;
-    private final String DEFAULT_STATUS = "Normal";
 
-    public static void checkDuplicated(CustomerDTO customerToCheck, List<Customer> customerList) throws DuplicatedException {
-        boolean isDuplicate = false;
-
-        for (Customer customer : customerList) {
-            CustomerDTO customerFromList = EntityToDto.customerToDto(customer);
-
-            if (!customerFromList.getFirstName().equalsIgnoreCase(customerToCheck.getFirstName()))
-                continue;
-            if (!customerFromList.getLastName().equalsIgnoreCase(customerToCheck.getLastName()))
-                continue;
-            if (!customerFromList.getAddress().equalsIgnoreCase(customerToCheck.getAddress()))
-                continue;
-            if (!customerFromList.getAge().equals(customerToCheck.getAge())) continue;
-
-            isDuplicate = true;
-            break;
-        }
-
-        if (isDuplicate) throw new DuplicatedException(CustomerMessage.CUSTOMER_EXIST);
-    }
 
     @Override
     public List<CustomerDTO> getAll() throws NoContentException {
@@ -84,7 +61,7 @@ public class CustomerServiceImp implements CustomerService {
     public CustomerDTO create(CustomerDTO customerDTO) throws InValidException {
         CustomerValidator.validatorCustomerDTO(customerDTO);
 
-        checkDuplicated(customerDTO, customerRepository.findAll());
+        checkDuplicated(customerDTO);
 
         //    private final ModelMapper mapper;
         Customer customer = Customer.builder()
@@ -101,28 +78,14 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public void loadCustomers(MultipartFile file) throws InValidException {
-        FileValidator.validatorMultipartFile(file);
+    public List<Object> loadCustomers(MultipartFile[] files) throws InValidException {
+        List<Object> response = new ArrayList<>();
 
-        try {
-            List<CustomerDTO> customerListToAdd = CsvHelper.csvToCustomers(file.getInputStream(),
-                    customerRepository.findAll());
-
-            for (CustomerDTO customerDTO : customerListToAdd) {
-                Customer customerToAdd = Customer.builder()
-                        .firstName(customerDTO.getFirstName())
-                        .lastName(customerDTO.getLastName())
-                        .address(customerDTO.getAddress())
-                        .status(DEFAULT_STATUS)
-                        .age(Integer.parseInt(customerDTO.getAge()))
-                        .build();
-
-                customerRepository.save(customerToAdd);
-            }
-
-        } catch (IOException e) {
-            throw new InValidException(FileMessage.WRONG_WHEN_READ_FILE);
+        for (MultipartFile file : files) {
+            response.add(loadCustomer(file));
         }
+
+        return response;
     }
 
     @Override
@@ -151,7 +114,7 @@ public class CustomerServiceImp implements CustomerService {
             tempCustomer.setAge(Integer.parseInt(customerToUpdate.getAge()));
         }
 
-        checkDuplicated(EntityToDto.customerToDto(tempCustomer), customerRepository.findAll());
+        checkDuplicated(EntityToDto.customerToDto(tempCustomer));
 
         storedCustomer.setAddress(tempCustomer.getAddress());
         storedCustomer.setFirstName(tempCustomer.getFirstName());
@@ -170,6 +133,72 @@ public class CustomerServiceImp implements CustomerService {
         customerRepository.delete(customerToDelete);
 
         return EntityToDto.customerToDto(customerToDelete);
+    }
+
+    @Override
+    public void checkDuplicated(CustomerDTO customerToCheck) throws DuplicatedException {
+        List<Customer> customerList = customerRepository.findAll();
+
+        boolean isDuplicate = false;
+
+        for (Customer customer : customerList) {
+            CustomerDTO customerFromList = EntityToDto.customerToDto(customer);
+
+            if (!customerFromList.getFirstName().equalsIgnoreCase(customerToCheck.getFirstName()))
+                continue;
+            if (!customerFromList.getLastName().equalsIgnoreCase(customerToCheck.getLastName()))
+                continue;
+            if (!customerFromList.getAddress().equalsIgnoreCase(customerToCheck.getAddress()))
+                continue;
+            if (!customerFromList.getAge().equals(customerToCheck.getAge())) continue;
+
+            isDuplicate = true;
+            break;
+        }
+
+        if (isDuplicate) throw new DuplicatedException(CustomerMessage.CUSTOMER_EXIST);
+    }
+
+    @Override
+    public Map<String, Object> loadCustomer(MultipartFile file) throws InValidException {
+        FileValidator.validatorMultipartFile(file);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("File", file.getOriginalFilename());
+
+        List<CustomerDTO> customerList = CsvHelper.csvToCustomers(file);
+
+        int numberOfCustomerAdded = 0;
+
+        String failedRows = "";
+
+        for (int i = 0; i < customerList.size(); i++) {
+            try {
+                checkDuplicated(customerList.get(i));
+            } catch (DuplicatedException e) {
+                failedRows = failedRows.concat((i + 1) + " , ");
+                continue;
+            }
+
+            Customer customerToAdd = Customer.builder()
+                    .firstName(customerList.get(i).getFirstName())
+                    .lastName(customerList.get(i).getLastName())
+                    .address(customerList.get(i).getAddress())
+                    .status(CustomerServiceImp.DEFAULT_STATUS)
+                    .age(Integer.parseInt(customerList.get(i).getAge()))
+                    .build();
+
+            customerRepository.save(customerToAdd);
+            numberOfCustomerAdded++;
+        }
+
+        response.put(FileMessage.NUMBER_SUCCESS_ROW, numberOfCustomerAdded);
+
+        failedRows = failedRows.concat(",");
+        failedRows = failedRows.replace(" , ,", "");
+        response.put(FileMessage.FAILED_ROWS, failedRows);
+
+        return response;
     }
 
 //    public Customer customerDTOToEntity(CustomerDTO customerDTO) {

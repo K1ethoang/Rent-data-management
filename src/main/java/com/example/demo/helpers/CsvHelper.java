@@ -1,9 +1,8 @@
 package com.example.demo.helpers;
 
-import com.example.demo.entity.Customer;
-import com.example.demo.exception.DuplicatedException;
+import com.example.demo.exception.InValidException;
+import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.CustomerDTO;
-import com.example.demo.service.implement.CustomerServiceImp;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -12,50 +11,56 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Log4j2
 public class CsvHelper {
-    private static final String TYPE = "text/csv";
     // Header row
-    private static final String[] CUSTOMER_HEADER = {"First Name", "Last Name", "Address", "Age"};
+    public static final String[] CUSTOMER_HEADER = {"First Name", "Last Name", "Address", "Age"};
+    public static final String TYPE = "text/csv";
 
     public static boolean hasCsvFormat(MultipartFile file) {
         return (TYPE.equals(file.getContentType()));
     }
 
-    public static List<CustomerDTO> csvToCustomers(InputStream is, List<Customer> customerList) {
-        try (BufferedReader fileReader =
-                     new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-            CSVParser csvParser = new CSVParser(fileReader,
-                    CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+    public static List<CustomerDTO> csvToCustomers(MultipartFile file) throws InValidException {
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(),
+                StandardCharsets.UTF_8))) {
 
-            List<CustomerDTO> customerListToAdd = new ArrayList<>();
+            CSVParser csvParser = new CSVParser(fileReader, CSVFormat.DEFAULT
+                    .withFirstRecordAsHeader()
+                    .withIgnoreHeaderCase()
+                    .withTrim());
+
+            if (csvParser.getHeaderMap().size() != CUSTOMER_HEADER.length)
+                throw new InValidException(FileMessage.HEADER_MISSING + " (File name: " + file.getOriginalFilename() +
+                        ", Actual: " + csvParser.getHeaderMap().keySet() + ", Expected: " + Arrays.toString(CUSTOMER_HEADER) + ")");
+
+            List<CustomerDTO> customerList = new ArrayList<>();
 
             List<CSVRecord> csvRecords = csvParser.getRecords();
 
             for (CSVRecord record : csvRecords) {
-                CustomerDTO customerDTO = CustomerDTO.builder()
-                        .firstName(record.get(CUSTOMER_HEADER[0]))
-                        .lastName(record.get(CUSTOMER_HEADER[1]))
-                        .address(record.get(CUSTOMER_HEADER[2]))
-                        .age(record.get(CUSTOMER_HEADER[3]))
-                        .build();
-
                 try {
-                    CustomerServiceImp.checkDuplicated(customerDTO, customerList);
-                } catch (DuplicatedException e) {
-                    log.info(customerDTO);
-                    continue;
-                }
+                    CustomerDTO customerDTO = CustomerDTO.builder()
+                            .firstName(record.get(CUSTOMER_HEADER[0]))
+                            .lastName(record.get(CUSTOMER_HEADER[1]))
+                            .address(record.get(CUSTOMER_HEADER[2]))
+                            .age(record.get(CUSTOMER_HEADER[3]))
+                            .build();
 
-                customerListToAdd.add(customerDTO);
+                    customerList.add(customerDTO);
+                } catch (RuntimeException e) {
+                    throw new InValidException(FileMessage.HEADER_MISSING + " (File name: " + file.getOriginalFilename() +
+                            ", Actual: " + csvParser.getHeaderMap().keySet() + ", Expected: " + Arrays.toString(CUSTOMER_HEADER) + ")");
+                }
             }
-            return customerListToAdd;
+
+            return customerList;
         } catch (IOException e) {
             throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
         }
