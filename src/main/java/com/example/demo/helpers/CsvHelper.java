@@ -38,7 +38,19 @@ public class CsvHelper {
                     .withIgnoreHeaderCase()
                     .withTrim());
 
-            if (csvParser.getHeaderMap().size() != CUSTOMER_HEADER.length)
+            boolean isInvalidHeader = false;
+
+            if (csvParser.getHeaderMap().size() != CUSTOMER_HEADER.length) isInvalidHeader = true;
+            else {
+                for (String key : CUSTOMER_HEADER) {
+                    if (!csvParser.getHeaderMap().containsKey(key)) {
+                        isInvalidHeader = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isInvalidHeader)
                 throw new InValidException(FileMessage.HEADER_MISSING + " (File name: " + file.getOriginalFilename() +
                         ", Actual: " + csvParser.getHeaderMap().keySet() + ", Expected: " + Arrays.toString(CUSTOMER_HEADER) + ")");
 
@@ -77,9 +89,21 @@ public class CsvHelper {
                     .withIgnoreHeaderCase()
                     .withTrim());
 
-            if (csvParser.getHeaderMap().size() != APARTMENT_HEADER.length)
+            boolean isInvalidHeader = false;
+
+            if (csvParser.getHeaderMap().size() != APARTMENT_HEADER.length) isInvalidHeader = true;
+            else {
+                for (String key : APARTMENT_HEADER) {
+                    if (!csvParser.getHeaderMap().containsKey(key)) {
+                        isInvalidHeader = true;
+                        break;
+                    }
+                }
+            }
+
+            if (isInvalidHeader)
                 throw new InValidException(FileMessage.HEADER_MISSING + " (File name: " + file.getOriginalFilename() +
-                        ", Actual: " + csvParser.getHeaderMap().keySet() + ", Expected: " + Arrays.toString(APARTMENT_HEADER) + ")");
+                        ", Actual: " + csvParser.getHeaderMap().keySet() + ", Expected: " + Arrays.toString(CUSTOMER_HEADER) + ")");
 
             List<ApartmentDTO> apartmentList = new ArrayList<>();
 
