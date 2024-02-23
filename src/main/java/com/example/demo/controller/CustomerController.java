@@ -49,8 +49,8 @@ public class CustomerController {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.delete(id));
     }
 
-    // [POST] customers/upload
-    @PostMapping("/upload")
+    // [POST] /customers/import
+    @PostMapping("/import")
     public ResponseEntity<Object> uploadCsvCustomer(@RequestParam("file") MultipartFile[] files) {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
                 customerService.loadCustomers(files));

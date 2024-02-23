@@ -174,6 +174,13 @@ public class CustomerServiceImp implements CustomerService {
 
         for (int i = 0; i < customerList.size(); i++) {
             try {
+                CustomerValidator.validatorCustomerDTO(customerList.get(i));
+            } catch (Exception e) {
+                failedRows = failedRows.concat((i + 1) + " , ");
+                continue;
+            }
+
+            try {
                 checkDuplicated(customerList.get(i));
             } catch (DuplicatedException e) {
                 failedRows = failedRows.concat((i + 1) + " , ");
@@ -194,8 +201,8 @@ public class CustomerServiceImp implements CustomerService {
 
         response.put(FileMessage.NUMBER_SUCCESS_ROW, numberOfCustomerAdded);
 
-        failedRows = failedRows.concat(",");
-        failedRows = failedRows.replace(" , ,", "");
+        if (!failedRows.isEmpty())
+            failedRows = failedRows.substring(0, failedRows.length() - 3);
         response.put(FileMessage.FAILED_ROWS, failedRows);
 
         return response;
