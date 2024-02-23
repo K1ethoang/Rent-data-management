@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @AllArgsConstructor
@@ -46,5 +47,12 @@ public class ContractController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Object> delete(@PathVariable String id) {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, contractService.delete(id));
+    }
+
+    // [DELETE] : contracts/delete/:id
+    @PostMapping("/import")
+    public ResponseEntity<Object> importCsvContract(@RequestParam("file") MultipartFile file) {
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                contractService.loadContract(file));
     }
 }

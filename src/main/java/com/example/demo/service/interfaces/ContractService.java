@@ -2,8 +2,10 @@ package com.example.demo.service.interfaces;
 
 import com.example.demo.model.DTO.ContractDTO;
 import com.example.demo.model.DTO.ContractUpdateDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ContractService {
     List<ContractDTO> getAll();
@@ -15,4 +17,8 @@ public interface ContractService {
     ContractDTO update(String id, ContractUpdateDTO contractUpdate);
 
     ContractDTO delete(String id);
+
+    Map<String, Object> loadContract(MultipartFile file);
+
+    List<Object> loadContracts(MultipartFile[] files);
 }
