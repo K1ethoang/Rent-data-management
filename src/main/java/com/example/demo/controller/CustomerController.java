@@ -51,7 +51,7 @@ public class CustomerController {
 
     // [POST] /customers/import
     @PostMapping("/import")
-    public ResponseEntity<Object> uploadCsvCustomer(@RequestParam("file") MultipartFile[] files) {
+    public ResponseEntity<Object> importCsvCustomer(@RequestParam("file") MultipartFile[] files) {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
                 customerService.loadCustomers(files));
     }

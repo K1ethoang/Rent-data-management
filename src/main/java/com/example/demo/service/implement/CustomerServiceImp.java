@@ -163,9 +163,11 @@ public class CustomerServiceImp implements CustomerService {
     public Map<String, Object> loadCustomer(MultipartFile file) throws InValidException {
         FileValidator.validatorMultipartFile(file);
 
+        if (!CsvHelper.hasCsvFormat(file)) throw new InValidException(FileMessage.MUST_TYPE_CSV);
+
         Map<String, Object> response = new HashMap<>();
         response.put("File", file.getOriginalFilename());
-
+        
         List<CustomerDTO> customerList = CsvHelper.csvToCustomers(file);
 
         int numberOfCustomerAdded = 0;
