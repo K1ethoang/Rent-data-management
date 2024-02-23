@@ -10,6 +10,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @AllArgsConstructor
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @Log4j2
 public class ApartmentController {
     private final ApartmentService apartmentService;
+
 
     // [GET] /apartments/
     @GetMapping({"", "/"})
@@ -47,4 +49,12 @@ public class ApartmentController {
     public ResponseEntity<Object> delete(@PathVariable String id) {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, apartmentService.delete(id));
     }
+
+    // [POST] /apartments/upload
+    @PostMapping("/upload")
+    public ResponseEntity<Object> upload(@RequestParam("file") MultipartFile file) {
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                apartmentService.loadCustomer(file));
+    }
+
 }

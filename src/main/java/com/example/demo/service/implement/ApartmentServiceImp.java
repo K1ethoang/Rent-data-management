@@ -1,23 +1,25 @@
 package com.example.demo.service.implement;
 
 import com.example.demo.entity.Apartment;
-import com.example.demo.exception.InValidException;
+import com.example.demo.exception.DuplicatedException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
+import com.example.demo.helpers.CsvHelper;
 import com.example.demo.message.ApartmentMessage;
+import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.ApartmentDTO;
 import com.example.demo.model.DTO.ApartmentUpdateDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.ApartmentRepository;
 import com.example.demo.service.interfaces.ApartmentService;
 import com.example.demo.utils.validator.ApartmentValidator;
+import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -117,8 +119,61 @@ public class ApartmentServiceImp implements ApartmentService {
         return EntityToDto.apartmentToDto(apartmentToDelete);
     }
 
+    @Override
+    public List<Object> loadCustomers(MultipartFile[] files) {
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> loadCustomer(MultipartFile file) {
+        FileValidator.validatorMultipartFile(file);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("File", file.getOriginalFilename());
+
+        List<ApartmentDTO> apartmentList = CsvHelper.csvToApartments(file);
+
+        int numberOfApartmentAdded = 0;
+
+        String failedRows = "";
+
+        for (int i = 0; i < apartmentList.size(); i++) {
+            try {
+                ApartmentValidator.validatorApartmentDTO(apartmentList.get(i));
+            } catch (Exception e) {
+                failedRows = failedRows.concat((i + 1) + " , ");
+                continue;
+            }
+
+            try {
+                checkDuplicated(apartmentList.get(i));
+            } catch (DuplicatedException e) {
+                failedRows = failedRows.concat((i + 1) + " , ");
+                continue;
+            }
+
+            Apartment apartmentToAdd = Apartment.builder()
+                    .address(apartmentList.get(i).getAddress())
+                    .numberOfRoom(Integer.parseInt(apartmentList.get(i).getNumberOfRoom()))
+                    .retailPrice(apartmentList.get(i).getRetailPrice())
+                    .build();
+
+
+            apartmentRepository.save(apartmentToAdd);
+            numberOfApartmentAdded++;
+        }
+
+        response.put(FileMessage.NUMBER_SUCCESS_ROW, numberOfApartmentAdded);
+
+        if (!failedRows.isEmpty())
+            failedRows = failedRows.substring(0, failedRows.length() - 3);
+        response.put(FileMessage.FAILED_ROWS, failedRows);
+
+        return response;
+    }
+
     // Kiểm tra trùng dữ liệu
-    public void checkDuplicated(ApartmentDTO apartmentToCheck) {
+    public void checkDuplicated(ApartmentDTO apartmentToCheck) throws DuplicatedException {
         List<Apartment> apartmentList = apartmentRepository.findAll();
 
         boolean isDuplicated = false;
@@ -136,7 +191,7 @@ public class ApartmentServiceImp implements ApartmentService {
             break;
         }
 
-        if (isDuplicated) throw new InValidException(ApartmentMessage.APARTMENT_EXIST);
+        if (isDuplicated) throw new DuplicatedException(ApartmentMessage.APARTMENT_EXIST);
     }
 
 //    @Override
