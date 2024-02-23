@@ -120,12 +120,18 @@ public class ApartmentServiceImp implements ApartmentService {
     }
 
     @Override
-    public List<Object> loadCustomers(MultipartFile[] files) {
-        return null;
+    public List<Object> loadApartments(MultipartFile[] files) {
+        List<Object> response = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            response.add(loadApartment(file));
+        }
+
+        return response;
     }
 
     @Override
-    public Map<String, Object> loadCustomer(MultipartFile file) {
+    public Map<String, Object> loadApartment(MultipartFile file) {
         FileValidator.validatorMultipartFile(file);
 
         Map<String, Object> response = new HashMap<>();

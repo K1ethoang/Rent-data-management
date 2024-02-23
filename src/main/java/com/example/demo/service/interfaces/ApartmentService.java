@@ -21,9 +21,9 @@ public interface ApartmentService {
 
     ApartmentDTO delete(String id);
 
-    List<Object> loadCustomers(MultipartFile[] files);
+    List<Object> loadApartments(MultipartFile[] files);
 
-    Map<String, Object> loadCustomer(MultipartFile file);
+    Map<String, Object> loadApartment(MultipartFile file);
 //    Apartment apartmentDTOToEntity(ApartmentDTO apartmentDTO);
 //
 //    ApartmentDTO apartmentEntityToDTO(Apartment apartment);

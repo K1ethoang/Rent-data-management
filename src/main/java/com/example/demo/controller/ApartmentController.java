@@ -50,11 +50,11 @@ public class ApartmentController {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, apartmentService.delete(id));
     }
 
-    // [POST] /apartments/upload
-    @PostMapping("/upload")
-    public ResponseEntity<Object> upload(@RequestParam("file") MultipartFile file) {
+    // [POST] /apartments/import
+    @PostMapping("/import")
+    public ResponseEntity<Object> upload(@RequestParam("file") MultipartFile[] files) {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
-                apartmentService.loadCustomer(file));
+                apartmentService.loadApartments(files));
     }
 
 }
