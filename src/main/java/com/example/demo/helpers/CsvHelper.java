@@ -5,15 +5,15 @@ import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.ApartmentDTO;
 import com.example.demo.model.DTO.ContractDTO;
 import com.example.demo.model.DTO.CustomerDTO;
+import com.example.demo.utils.MyUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -174,4 +174,50 @@ public class CsvHelper {
             throw new RuntimeException("fail to parse CSV file: " + e.getMessage());
         }
     }
+
+    public static File exportCustomers(List<CustomerDTO> customerList) throws Exception {
+        final String NAME_FILE = "customer_" + MyUtils.getDateNow() +
+                ".csv";
+
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter(NAME_FILE), CSVFormat.EXCEL)) {
+            printer.printRecord(Arrays.stream(CUSTOMER_HEADER).toArray());
+
+            for (CustomerDTO customerDTO : customerList) {
+                List<Object> row = new ArrayList<>();
+
+                row.add(customerDTO.getFirstName());
+                row.add(customerDTO.getLastName());
+                row.add(customerDTO.getAddress());
+                row.add(customerDTO.getAge());
+
+                printer.printRecord(row);
+            }
+
+            return new File(NAME_FILE);
+        } catch (IOException e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public static File getTemplateCustomer() throws Exception {
+        final String NAME_FILE = "customer.csv";
+
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter(NAME_FILE), CSVFormat.EXCEL)) {
+            printer.printRecord(Arrays.stream(CUSTOMER_HEADER).toArray());
+
+            List<Object> row = new ArrayList<>();
+
+            row.add("Kiet");
+            row.add("Hoang");
+            row.add("TP. HCM");
+            row.add(21);
+
+            printer.printRecord(row);
+
+            return new File(NAME_FILE);
+        } catch (IOException e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
 }

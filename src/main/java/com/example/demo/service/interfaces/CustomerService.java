@@ -5,6 +5,7 @@ import com.example.demo.model.DTO.CustomerDTO;
 import com.example.demo.model.DTO.CustomerUpdateDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -26,9 +27,5 @@ public interface CustomerService {
 
     CustomerDTO delete(String id);
 
-    void checkDuplicated(CustomerDTO customerToCheck);
-
-//    Customer customerDTOToEntity(CustomerDTO customerDTO);
-//
-//    CustomerDTO customerEntityToDTO(Customer customer);
+    File exportCsv();
 }

@@ -7,4 +7,5 @@ public class FileMessage {
     public static final String HEADER_MISSING = "Field of header is wrong";
     public static final String NUMBER_SUCCESS_ROW = "Number of successful rows";
     public static final String FAILED_ROWS = "The rows failed";
+    public static final String MUST_TYPE_EXCEL = "File type must be .xlsx or .xls";
 }

@@ -41,6 +41,14 @@ public final class MyUtils {
         }
     }
 
+    public static String getDateNow() {
+        LocalDate today = LocalDate.now();
+
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
+        return today.format(dateTimeFormatter);
+    }
+
     public static String cleanPath(String path) {
         return path.split("\\.")[0];
     }

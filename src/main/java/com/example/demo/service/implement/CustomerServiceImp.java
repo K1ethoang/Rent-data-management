@@ -20,6 +20,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.*;
 
 @Service
@@ -135,7 +136,6 @@ public class CustomerServiceImp implements CustomerService {
         return EntityToDto.customerToDto(customerToDelete);
     }
 
-    @Override
     public void checkDuplicated(CustomerDTO customerToCheck) throws DuplicatedException {
         List<Customer> customerList = customerRepository.findAll();
 
@@ -163,12 +163,13 @@ public class CustomerServiceImp implements CustomerService {
     public Map<String, Object> loadCustomer(MultipartFile file) throws InValidException {
         FileValidator.validatorMultipartFile(file);
 
-        if (!CsvHelper.hasCsvFormat(file)) throw new InValidException(FileMessage.MUST_TYPE_CSV);
-
         Map<String, Object> response = new HashMap<>();
         response.put("File", file.getOriginalFilename());
-        
-        List<CustomerDTO> customerList = CsvHelper.csvToCustomers(file);
+
+        List<CustomerDTO> customerList = null;
+
+        if (CsvHelper.hasCsvFormat(file)) customerList = CsvHelper.csvToCustomers(file);
+//        else customerList = ExcelHelper.excelToCustomers(file);
 
         int numberOfCustomerAdded = 0;
 
@@ -210,12 +211,15 @@ public class CustomerServiceImp implements CustomerService {
         return response;
     }
 
-//    public Customer customerDTOToEntity(CustomerDTO customerDTO) {
-//        return mapper.map(customerDTO, Customer.class);
-//    }
-//
-//    @Override
-//    public CustomerDTO customerEntityToDTO(Customer customer) {
-//        return mapper.map(customer, CustomerDTO.class);
-//    }
+    @Override
+    public File exportCsv() {
+        try {
+            List<CustomerDTO> customerList = new ArrayList<>();
+            customerRepository.findAll().forEach(customer -> customerList.add(EntityToDto.customerToDto(customer)));
+
+            return CsvHelper.exportCustomers(customerList);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
