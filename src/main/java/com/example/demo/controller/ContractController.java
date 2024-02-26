@@ -80,6 +80,9 @@ public class ContractController {
             return new ResponseEntity<>(inputStreamResource, responseHeaders, HttpStatus.OK);
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
+        } finally {
+            if (file != null)
+                file.delete();
         }
     }
 }
