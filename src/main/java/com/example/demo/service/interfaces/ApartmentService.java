@@ -5,6 +5,7 @@ import com.example.demo.model.DTO.ApartmentDTO;
 import com.example.demo.model.DTO.ApartmentUpdateDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +25,6 @@ public interface ApartmentService {
     List<Object> loadApartments(MultipartFile[] files);
 
     Map<String, Object> loadApartment(MultipartFile file);
-//    Apartment apartmentDTOToEntity(ApartmentDTO apartmentDTO);
-//
-//    ApartmentDTO apartmentEntityToDTO(Apartment apartment);
+
+    File exportCsv(boolean getTemplate);
 }

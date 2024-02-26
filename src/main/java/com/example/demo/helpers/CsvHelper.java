@@ -175,49 +175,79 @@ public class CsvHelper {
         }
     }
 
-    public static File exportCustomers(List<CustomerDTO> customerList) throws Exception {
+    public static File exportCustomers(List<CustomerDTO> customerList, boolean getTemplate) throws Exception {
         final String NAME_FILE = "customer_" + MyUtils.getDateNow() +
                 ".csv";
 
-        try (CSVPrinter printer = new CSVPrinter(new FileWriter(NAME_FILE), CSVFormat.EXCEL)) {
-            printer.printRecord(Arrays.stream(CUSTOMER_HEADER).toArray());
+        final String NAME_FILE_TEMPLATE = "customer_template.csv";
 
-            for (CustomerDTO customerDTO : customerList) {
-                List<Object> row = new ArrayList<>();
-
-                row.add(customerDTO.getFirstName());
-                row.add(customerDTO.getLastName());
-                row.add(customerDTO.getAddress());
-                row.add(customerDTO.getAge());
-
-                printer.printRecord(row);
-            }
-
-            return new File(NAME_FILE);
-        } catch (IOException e) {
-            throw new Exception(e.getMessage());
-        }
-    }
-
-    public static File getTemplateCustomer() throws Exception {
-        final String NAME_FILE = "customer.csv";
-
-        try (CSVPrinter printer = new CSVPrinter(new FileWriter(NAME_FILE), CSVFormat.EXCEL)) {
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter(getTemplate ? NAME_FILE_TEMPLATE
+                : NAME_FILE),
+                CSVFormat.EXCEL)) {
             printer.printRecord(Arrays.stream(CUSTOMER_HEADER).toArray());
 
             List<Object> row = new ArrayList<>();
 
-            row.add("Kiet");
-            row.add("Hoang");
-            row.add("TP. HCM");
-            row.add(21);
+            if (getTemplate) {
+                row.add("A");
+                row.add("Hoang");
+                row.add("Dong Nai");
+                row.add(21);
 
-            printer.printRecord(row);
+                printer.printRecord(row);
+            } else {
+                for (CustomerDTO customerDTO : customerList) {
+                    row.add(customerDTO.getFirstName());
+                    row.add(customerDTO.getLastName());
+                    row.add(customerDTO.getAddress());
+                    row.add(customerDTO.getAge());
 
-            return new File(NAME_FILE);
+                    printer.printRecord(row);
+                    row.clear();
+                }
+            }
+
+            return new File(getTemplate ? NAME_FILE_TEMPLATE
+                    : NAME_FILE);
         } catch (IOException e) {
             throw new Exception(e.getMessage());
         }
     }
 
+    public static File exportApartments(List<ApartmentDTO> apartmentList, boolean getTemplate) throws Exception {
+        final String NAME_FILE = "apartment_" + MyUtils.getDateNow() +
+                ".csv";
+
+        final String NAME_FILE_TEMPLATE = "apartment_template.csv";
+
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter(getTemplate ? NAME_FILE_TEMPLATE
+                : NAME_FILE),
+                CSVFormat.EXCEL)) {
+            printer.printRecord(Arrays.stream(APARTMENT_HEADER).toArray());
+
+            List<Object> row = new ArrayList<>();
+
+            if (getTemplate) {
+                row.add("130 Tran Quoc Toan, An Binh, Bien Hoa, Dong Nai");
+                row.add(4);
+                row.add(5600000);
+
+                printer.printRecord(row);
+            } else {
+                for (ApartmentDTO apartmentDTO : apartmentList) {
+                    row.add(apartmentDTO.getAddress());
+                    row.add(apartmentDTO.getNumberOfRoom());
+                    row.add(apartmentDTO.getRetailPrice());
+
+                    printer.printRecord(row);
+                    row.clear();
+                }
+            }
+
+            return new File(getTemplate ? NAME_FILE_TEMPLATE
+                    : NAME_FILE);
+        } catch (IOException e) {
+            throw new Exception(e.getMessage());
+        }
+    }
 }

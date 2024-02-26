@@ -19,6 +19,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.*;
 
 @Service
@@ -137,7 +138,9 @@ public class ApartmentServiceImp implements ApartmentService {
         Map<String, Object> response = new HashMap<>();
         response.put("File", file.getOriginalFilename());
 
-        List<ApartmentDTO> apartmentList = CsvHelper.csvToApartments(file);
+        List<ApartmentDTO> apartmentList = null;
+
+        if (CsvHelper.hasCsvFormat(file)) apartmentList = CsvHelper.csvToApartments(file);
 
         int numberOfApartmentAdded = 0;
 
@@ -200,13 +203,16 @@ public class ApartmentServiceImp implements ApartmentService {
         if (isDuplicated) throw new DuplicatedException(ApartmentMessage.APARTMENT_EXIST);
     }
 
-//    @Override
-//    public Apartment apartmentDTOToEntity(ApartmentDTO apartmentDTO) {
-//        return mapper.map(apartmentDTO, Apartment.class);
-//    }
-//
-//    @Override
-//    public ApartmentDTO apartmentEntityToDTO(Apartment apartment) {
-//        return mapper.map(apartment, ApartmentDTO.class);
-//    }
+    @Override
+    public File exportCsv(boolean getTemplate) {
+        try {
+            List<ApartmentDTO> apartmentList = new ArrayList<>();
+            apartmentRepository.findAll().forEach(apartment -> apartmentList.add(EntityToDto.apartmentToDto(apartment)));
+
+            return CsvHelper.exportApartments(apartmentList, getTemplate);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
 }

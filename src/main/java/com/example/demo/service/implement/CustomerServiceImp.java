@@ -219,7 +219,7 @@ public class CustomerServiceImp implements CustomerService {
 
             return CsvHelper.exportCustomers(customerList, getTemplate);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 }
