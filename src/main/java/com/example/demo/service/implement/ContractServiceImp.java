@@ -25,6 +25,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.*;
 
 @Service
@@ -214,7 +215,7 @@ public class ContractServiceImp implements ContractService {
         return response;
     }
 
-    public void checkDuplicated(ContractDTO contractToCheck) throws InValidException {
+    public void checkDuplicated(ContractDTO contractToCheck) throws DuplicatedException {
         List<Contract> contractList = contractRepository.findAll();
 
         boolean isDuplicate = false;
@@ -232,16 +233,18 @@ public class ContractServiceImp implements ContractService {
             break;
         }
 
-        if (isDuplicate) throw new InValidException(ContractMessage.CONTRACT_EXIST);
+        if (isDuplicate) throw new DuplicatedException(ContractMessage.CONTRACT_EXIST);
     }
 
-//    private Contract contractDTOToEntity(ContractDTO contractDTO) {
-//        return mapper.map(contractDTO, Contract.class);
-//    }
-//
-//    private ContractDTO contractEntityToDTO(Contract contract) {
-//        return mapper.map(contract, ContractDTO.class);
-//    }
+    @Override
+    public File exportCsv(Boolean getTemplate) {
+        try {
+            List<ContractDTO> contractList = new ArrayList<>();
+            contractRepository.findAll().forEach(contract -> contractList.add(EntityToDto.contractToDto(contract)));
 
-
+            return CsvHelper.exportContracts(contractList, getTemplate);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
 }

@@ -62,8 +62,7 @@ public class ApartmentController {
 
     // [GET] /apartments/export
     @GetMapping("/export")
-    public ResponseEntity<InputStreamResource> exportCsv(@RequestParam(value = "getTemplate", required =
-            false) boolean getTemplate) {
+    public ResponseEntity<InputStreamResource> exportCsv(@RequestParam(value = "getTemplate", defaultValue = "false") boolean getTemplate) {
         HttpHeaders responseHeader = new HttpHeaders();
 
         File file = null;

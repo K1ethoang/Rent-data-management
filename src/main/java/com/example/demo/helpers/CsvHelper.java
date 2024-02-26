@@ -189,10 +189,10 @@ public class CsvHelper {
             List<Object> row = new ArrayList<>();
 
             if (getTemplate) {
-                row.add("A");
-                row.add("Hoang");
-                row.add("Dong Nai");
-                row.add(21);
+                row.add("<First name>");
+                row.add("<Last name>");
+                row.add("<Address>");
+                row.add("<Age>");
 
                 printer.printRecord(row);
             } else {
@@ -223,14 +223,16 @@ public class CsvHelper {
         try (CSVPrinter printer = new CSVPrinter(new FileWriter(getTemplate ? NAME_FILE_TEMPLATE
                 : NAME_FILE),
                 CSVFormat.EXCEL)) {
+
+
             printer.printRecord(Arrays.stream(APARTMENT_HEADER).toArray());
 
             List<Object> row = new ArrayList<>();
 
             if (getTemplate) {
-                row.add("130 Tran Quoc Toan, An Binh, Bien Hoa, Dong Nai");
-                row.add(4);
-                row.add(5600000);
+                row.add("<Address>");
+                row.add("<Numbers of room>");
+                row.add("<Price>");
 
                 printer.printRecord(row);
             } else {
@@ -238,6 +240,45 @@ public class CsvHelper {
                     row.add(apartmentDTO.getAddress());
                     row.add(apartmentDTO.getNumberOfRoom());
                     row.add(apartmentDTO.getRetailPrice());
+
+                    printer.printRecord(row);
+                    row.clear();
+                }
+            }
+
+            return new File(getTemplate ? NAME_FILE_TEMPLATE
+                    : NAME_FILE);
+        } catch (IOException e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public static File exportContracts(List<ContractDTO> contractList, boolean getTemplate) throws Exception {
+        final String NAME_FILE = "contract_" + MyUtils.getDateNow() +
+                ".csv";
+
+        final String NAME_FILE_TEMPLATE = "contract_template.csv";
+
+        try (CSVPrinter printer = new CSVPrinter(new FileWriter(getTemplate ? NAME_FILE_TEMPLATE
+                : NAME_FILE),
+                CSVFormat.EXCEL)) {
+            printer.printRecord(Arrays.stream(CONTRACT_HEADER).toArray());
+
+            List<Object> row = new ArrayList<>();
+
+            if (getTemplate) {
+                row.add("<Customer ID>");
+                row.add("<Apartment ID>");
+                row.add("<YYYY-MM-DD>");
+                row.add("<YYYY-MM-DD>");
+
+                printer.printRecord(row);
+            } else {
+                for (ContractDTO contract : contractList) {
+                    row.add(contract.getCustomerId());
+                    row.add(contract.getApartmentId());
+                    row.add(contract.getStartDate());
+                    row.add(contract.getEndDate());
 
                     printer.printRecord(row);
                     row.clear();

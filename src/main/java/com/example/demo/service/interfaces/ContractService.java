@@ -4,6 +4,7 @@ import com.example.demo.model.DTO.ContractDTO;
 import com.example.demo.model.DTO.ContractUpdateDTO;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -21,4 +22,6 @@ public interface ContractService {
     Map<String, Object> loadContract(MultipartFile file);
 
     List<Object> loadContracts(MultipartFile[] files);
+
+    File exportCsv(Boolean getTemplate);
 }

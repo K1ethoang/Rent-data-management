@@ -7,10 +7,13 @@ import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.ContractService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.apache.commons.io.FileUtils;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.*;
 
 @RestController
 @AllArgsConstructor
@@ -49,10 +52,34 @@ public class ContractController {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, contractService.delete(id));
     }
 
-    // [DELETE] : contracts/delete/:id
+    // [POST] : contracts/import
     @PostMapping("/import")
-    public ResponseEntity<Object> importCsvContract(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Object> importCsvContract(@RequestParam("file") MultipartFile[] files) {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
-                contractService.loadContract(file));
+                contractService.loadContracts(files));
+    }
+
+    // [GET] : contracts/export
+    @GetMapping("/export")
+    public ResponseEntity<InputStreamResource> exportCsv(@RequestParam(value = "getTemplate",
+            defaultValue = "false") Boolean getTemplate) {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        File file = null;
+
+        try {
+            file = contractService.exportCsv(getTemplate);
+            byte[] data = FileUtils.readFileToByteArray(file);
+
+
+            responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            responseHeaders.setContentDisposition(ContentDisposition.attachment().filename(file.getName()).build());
+
+            InputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(data));
+            InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
+
+            return new ResponseEntity<>(inputStreamResource, responseHeaders, HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 }

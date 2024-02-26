@@ -67,7 +67,7 @@ public class CustomerController {
     // [GET] /customers/export
     @GetMapping("/export")
     public ResponseEntity<Object> exportCsv(@RequestParam(value = "getTemplate",
-            required = false) boolean getTemplate) {
+            defaultValue = "false") boolean getTemplate) {
         HttpHeaders responseHeader = new HttpHeaders();
 
         File file = null;
