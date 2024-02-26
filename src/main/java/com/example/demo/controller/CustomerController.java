@@ -64,15 +64,15 @@ public class CustomerController {
                 customerService.loadCustomers(files));
     }
 
-    // [POST] /customers/export
+    // [GET] /customers/export
     @GetMapping("/export")
-    public ResponseEntity<Object> exportCsv(@RequestParam(value = "template",
+    public ResponseEntity<Object> exportCsv(@RequestParam(value = "getTemplate",
             required = false) boolean getTemplate) {
         HttpHeaders responseHeader = new HttpHeaders();
 
         File file = null;
         try {
-            file = customerService.exportCsv();
+            file = customerService.exportCsv(getTemplate);
             byte[] data = FileUtils.readFileToByteArray(file);
 
             responseHeader.setContentType(MediaType.APPLICATION_OCTET_STREAM);

@@ -27,5 +27,5 @@ public interface CustomerService {
 
     CustomerDTO delete(String id);
 
-    File exportCsv();
+    File exportCsv(boolean getTemplate);
 }

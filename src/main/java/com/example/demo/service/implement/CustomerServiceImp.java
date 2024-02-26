@@ -212,12 +212,12 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public File exportCsv() {
+    public File exportCsv(boolean getTemplate) {
         try {
             List<CustomerDTO> customerList = new ArrayList<>();
             customerRepository.findAll().forEach(customer -> customerList.add(EntityToDto.customerToDto(customer)));
 
-            return CsvHelper.exportCustomers(customerList);
+            return CsvHelper.exportCustomers(customerList, getTemplate);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
