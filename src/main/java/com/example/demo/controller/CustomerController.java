@@ -3,13 +3,14 @@ package com.example.demo.controller;
 import com.example.demo.message.GlobalMessage;
 import com.example.demo.model.DTO.CustomerDTO;
 import com.example.demo.model.DTO.CustomerUpdateDTO;
-import com.example.demo.repository.CustomerRepository;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.CustomerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,13 +25,17 @@ import java.io.*;
 @AllArgsConstructor
 @Log4j2
 public class CustomerController {
-    private final CustomerRepository customerRepository;
     private final CustomerService customerService;
+    private final String DEFAULT_PAGE_NUMBER = "0";
+    private final String DEFAULT_PAGE_SIZE = "10";
 
     // [GET] /customers
     @GetMapping({"", "/"})
-    public ResponseEntity<Object> getCustomerList() {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.getAll());
+    public ResponseEntity<Object> getCustomerList(@RequestParam(defaultValue = DEFAULT_PAGE_NUMBER) int page,
+                                                  @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int pageSize) {
+        Pageable pageable = PageRequest.of(page, pageSize);
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                customerService.getAll(pageable));
     }
 
     // [GET] /customers/:id

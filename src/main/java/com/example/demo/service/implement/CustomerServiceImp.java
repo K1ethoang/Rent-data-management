@@ -17,6 +17,7 @@ import com.example.demo.utils.validator.CustomerValidator;
 import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,10 +33,10 @@ public class CustomerServiceImp implements CustomerService {
 
 
     @Override
-    public List<CustomerDTO> getAll() throws NoContentException {
+    public List<CustomerDTO> getAll(Pageable pageable) throws NoContentException {
         List<CustomerDTO> customerList = new ArrayList<>();
 
-        customerRepository.findAll().forEach(customer -> customerList.add(EntityToDto.customerToDto(customer)));
+        customerRepository.findAll(pageable).forEach(customer -> customerList.add(EntityToDto.customerToDto(customer)));
 
         if (customerList.isEmpty()) throw new NoContentException(CustomerMessage.EMPTY_LIST);
 
