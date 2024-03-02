@@ -17,7 +17,7 @@ import java.io.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("apartments")
+@RequestMapping("/apartments")
 @Log4j2
 public class ApartmentController {
     private final ApartmentService apartmentService;
