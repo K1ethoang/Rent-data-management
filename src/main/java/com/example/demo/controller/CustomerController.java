@@ -3,14 +3,17 @@ package com.example.demo.controller;
 import com.example.demo.message.GlobalMessage;
 import com.example.demo.model.DTO.customer.CustomerDTO;
 import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
+import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.CustomerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,14 +31,17 @@ public class CustomerController {
     private final CustomerService customerService;
     private final String DEFAULT_PAGE_NUMBER = "0";
     private final String DEFAULT_PAGE_SIZE = "10";
+    private final String DEFAULT_SORT_BY = "age";
 
     // [GET] /customers
     @GetMapping("")
     public ResponseEntity<Object> getCustomerList(@RequestParam(defaultValue = DEFAULT_PAGE_NUMBER) int page,
-                                                  @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int pageSize) {
-        Pageable pageable = PageRequest.of(page, pageSize);
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
-                customerService.getAll(pageable));
+                                                  @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int pageSize,
+                                                  @RequestParam(defaultValue = DEFAULT_SORT_BY) String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
+
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, customerService.getAll(pageable));
     }
 
     // [GET] /customers/:id
@@ -67,6 +73,18 @@ public class CustomerController {
     public ResponseEntity<Object> importCsvCustomer(@RequestParam("file") MultipartFile[] files) {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
                 customerService.loadCustomers(files));
+    }
+
+    // [GET] /customers/search
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchCustomers(@RequestParam("q") String query,
+                                                  @RequestParam(defaultValue = DEFAULT_PAGE_NUMBER) int page,
+                                                  @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int pageSize,
+                                                  @RequestParam(defaultValue = DEFAULT_SORT_BY) String sortBy) {
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
+
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                customerService.search(query, pageable));
     }
 
     // [GET] /customers/export

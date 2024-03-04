@@ -10,6 +10,7 @@ import com.example.demo.message.CustomerMessage;
 import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.customer.CustomerDTO;
 import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
+import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerService;
@@ -17,6 +18,7 @@ import com.example.demo.utils.validator.CustomerValidator;
 import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,14 +35,18 @@ public class CustomerServiceImp implements CustomerService {
 
 
     @Override
-    public List<CustomerDTO> getAll(Pageable pageable) throws NoContentException {
-        List<CustomerDTO> customerList = new ArrayList<>();
+    public Map<String, Object>  getAll(Pageable pageable) throws NoContentException {
+        Map<String, Object> result = new HashMap<>();
 
-        customerRepository.findAll(pageable).forEach(customer -> customerList.add(EntityToDto.customerToDto(customer)));
+        Page<CustomerDTO> page =
+                customerRepository.findAll(pageable).map(EntityToDto::customerToDto);
 
-        if (customerList.isEmpty()) throw new NoContentException(CustomerMessage.EMPTY_LIST);
+        APIPageableDTO pageableResult = new APIPageableDTO(page);
 
-        return customerList;
+        result.put("page", pageableResult);
+        result.put("customers", page.getContent());
+
+        return result;
     }
 
     @Override
@@ -222,5 +228,21 @@ public class CustomerServiceImp implements CustomerService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public Map<String, Object> search(String query, Pageable pageable)
+    {
+        Map<String, Object> result = new HashMap<>();
+
+        Page<CustomerDTO> page =
+                customerRepository.search(query,pageable).map(EntityToDto::customerToDto);
+
+        APIPageableDTO pageableResult = new APIPageableDTO(page);
+
+        result.put("page", pageableResult);
+        result.put("customers", page.getContent());
+
+        return result;
     }
 }
