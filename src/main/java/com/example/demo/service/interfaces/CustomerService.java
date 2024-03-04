@@ -1,8 +1,8 @@
 package com.example.demo.service.interfaces;
 
 import com.example.demo.entity.Customer;
-import com.example.demo.model.DTO.CustomerDTO;
-import com.example.demo.model.DTO.CustomerUpdateDTO;
+import com.example.demo.model.DTO.customer.CustomerDTO;
+import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 

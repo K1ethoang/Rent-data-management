@@ -3,9 +3,9 @@ package com.example.demo.model.mapper;
 import com.example.demo.entity.Apartment;
 import com.example.demo.entity.Contract;
 import com.example.demo.entity.Customer;
-import com.example.demo.model.DTO.ApartmentDTO;
-import com.example.demo.model.DTO.ContractDTO;
-import com.example.demo.model.DTO.CustomerDTO;
+import com.example.demo.model.DTO.apartment.ApartmentDTO;
+import com.example.demo.model.DTO.contract.ContractDTO;
+import com.example.demo.model.DTO.customer.CustomerDTO;
 
 public class EntityToDto {
     public static CustomerDTO customerToDto(Customer customer) {

@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.message.GlobalMessage;
-import com.example.demo.model.DTO.ContractDTO;
-import com.example.demo.model.DTO.ContractUpdateDTO;
+import com.example.demo.model.DTO.contract.ContractDTO;
+import com.example.demo.model.DTO.contract.ContractUpdateDTO;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.ContractService;
 import lombok.AllArgsConstructor;

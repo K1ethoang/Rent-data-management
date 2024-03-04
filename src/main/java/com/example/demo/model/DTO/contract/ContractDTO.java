@@ -1,9 +1,11 @@
-package com.example.demo.model.DTO;
+package com.example.demo.model.DTO.contract;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class ContractUpdateDTO {
+@Builder
+public class ContractDTO {
     private String startDate;
     private String endDate;
     private String customerId;

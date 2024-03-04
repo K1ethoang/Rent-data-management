@@ -1,7 +1,7 @@
 package com.example.demo.service.interfaces;
 
-import com.example.demo.model.DTO.ContractDTO;
-import com.example.demo.model.DTO.ContractUpdateDTO;
+import com.example.demo.model.DTO.contract.ContractDTO;
+import com.example.demo.model.DTO.contract.ContractUpdateDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;

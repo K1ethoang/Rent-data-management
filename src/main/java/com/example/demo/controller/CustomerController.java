@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.message.GlobalMessage;
-import com.example.demo.model.DTO.CustomerDTO;
-import com.example.demo.model.DTO.CustomerUpdateDTO;
+import com.example.demo.model.DTO.customer.CustomerDTO;
+import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.CustomerService;
 import lombok.AllArgsConstructor;
