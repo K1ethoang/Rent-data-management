@@ -24,7 +24,7 @@ public class ApartmentController {
 
 
     // [GET] /apartments/
-    @GetMapping({"", "/"})
+    @GetMapping("")
     public ResponseEntity<Object> getApartmentList() {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, apartmentService.getAll());
     }

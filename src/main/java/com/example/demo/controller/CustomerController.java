@@ -30,7 +30,7 @@ public class CustomerController {
     private final String DEFAULT_PAGE_SIZE = "10";
 
     // [GET] /customers
-    @GetMapping({"", "/"})
+    @GetMapping("")
     public ResponseEntity<Object> getCustomerList(@RequestParam(defaultValue = DEFAULT_PAGE_NUMBER) int page,
                                                   @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int pageSize) {
         Pageable pageable = PageRequest.of(page, pageSize);

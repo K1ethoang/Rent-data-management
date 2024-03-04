@@ -23,7 +23,7 @@ public class ContractController {
     public final ContractService contractService;
 
     // [GET] : /contracts/
-    @GetMapping({"", "/"})
+    @GetMapping("")
     public ResponseEntity<Object> getContractList() {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, contractService.getAll());
     }
