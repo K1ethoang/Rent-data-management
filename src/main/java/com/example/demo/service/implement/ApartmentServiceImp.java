@@ -38,8 +38,8 @@ public class ApartmentServiceImp implements ApartmentService {
     public Map<String, Object> getAll(Pageable pageable) throws NoContentException {
         Map<String, Object> result = new HashMap<>();
 
-        Page<ApartmentDTO> pageResult =
-                apartmentRepository.findAll(pageable).map(EntityToDto::apartmentToDto);
+        Page<Apartment> pageResult =
+                apartmentRepository.findAll(pageable);
 
         APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
 
@@ -231,8 +231,8 @@ public class ApartmentServiceImp implements ApartmentService {
 
         Map<String, Object> result = new HashMap<>();
 
-        Page<ApartmentDTO> pageResult =
-                apartmentRepository.search(query.trim(), pageable).map(EntityToDto::apartmentToDto);
+        Page<Apartment> pageResult =
+                apartmentRepository.search(query.trim(), pageable);
 
         APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
 

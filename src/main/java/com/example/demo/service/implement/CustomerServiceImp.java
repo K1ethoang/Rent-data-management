@@ -40,8 +40,8 @@ public class CustomerServiceImp implements CustomerService {
     public Map<String, Object>  getAll(Pageable pageable) throws NoContentException {
         Map<String, Object> result = new HashMap<>();
 
-        Page<CustomerDTO> page =
-                customerRepository.findAll(pageable).map(EntityToDto::customerToDto);
+        Page<Customer> page =
+                customerRepository.findAll(pageable);
 
         APIPageableDTO pageableResult = new APIPageableDTO(page);
 
@@ -240,8 +240,8 @@ public class CustomerServiceImp implements CustomerService {
 
         Map<String, Object> result = new HashMap<>();
 
-        Page<CustomerDTO> page =
-                customerRepository.search(query.trim(),pageable).map(EntityToDto::customerToDto);
+        Page<Customer> page =
+                customerRepository.search(query.trim(),pageable);
 
         APIPageableDTO pageableResult = new APIPageableDTO(page);
 
