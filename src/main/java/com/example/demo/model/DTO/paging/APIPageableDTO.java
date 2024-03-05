@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import java.io.Serializable;
 
 @Data
-public class APIPageableDTO {
+public class APIPageableDTO implements Serializable {
     int pageNumber;
     int pageSize;
     int offset;

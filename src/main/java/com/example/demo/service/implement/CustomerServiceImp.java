@@ -8,12 +8,14 @@ import com.example.demo.exception.NotFoundException;
 import com.example.demo.helpers.CsvHelper;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.message.FileMessage;
+import com.example.demo.message.GlobalMessage;
 import com.example.demo.model.DTO.customer.CustomerDTO;
 import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
 import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerService;
+import com.example.demo.utils.MyUtils;
 import com.example.demo.utils.validator.CustomerValidator;
 import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
@@ -231,12 +233,15 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public Map<String, Object> search(String query, Pageable pageable)
+    public Map<String, Object> search(String query, Pageable pageable) throws InValidException
     {
+        if(query==null || query.trim().isEmpty())
+            throw new InValidException(GlobalMessage.NOT_NULL_QUERY);
+
         Map<String, Object> result = new HashMap<>();
 
         Page<CustomerDTO> page =
-                customerRepository.search(query,pageable).map(EntityToDto::customerToDto);
+                customerRepository.search(query.trim(),pageable).map(EntityToDto::customerToDto);
 
         APIPageableDTO pageableResult = new APIPageableDTO(page);
 
