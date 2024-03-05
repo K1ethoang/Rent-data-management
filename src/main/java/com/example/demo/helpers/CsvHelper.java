@@ -2,9 +2,9 @@ package com.example.demo.helpers;
 
 import com.example.demo.exception.InValidException;
 import com.example.demo.message.FileMessage;
-import com.example.demo.model.DTO.ApartmentDTO;
-import com.example.demo.model.DTO.ContractDTO;
-import com.example.demo.model.DTO.CustomerDTO;
+import com.example.demo.model.DTO.apartment.ApartmentDTO;
+import com.example.demo.model.DTO.contract.ContractDTO;
+import com.example.demo.model.DTO.customer.CustomerDTO;
 import com.example.demo.utils.MyUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;

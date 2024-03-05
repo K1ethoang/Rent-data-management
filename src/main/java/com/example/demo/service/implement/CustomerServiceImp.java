@@ -8,15 +8,19 @@ import com.example.demo.exception.NotFoundException;
 import com.example.demo.helpers.CsvHelper;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.message.FileMessage;
-import com.example.demo.model.DTO.CustomerDTO;
-import com.example.demo.model.DTO.CustomerUpdateDTO;
+import com.example.demo.message.GlobalMessage;
+import com.example.demo.model.DTO.customer.CustomerDTO;
+import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
+import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerService;
+import com.example.demo.utils.MyUtils;
 import com.example.demo.utils.validator.CustomerValidator;
 import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,14 +37,18 @@ public class CustomerServiceImp implements CustomerService {
 
 
     @Override
-    public List<CustomerDTO> getAll(Pageable pageable) throws NoContentException {
-        List<CustomerDTO> customerList = new ArrayList<>();
+    public Map<String, Object>  getAll(Pageable pageable) throws NoContentException {
+        Map<String, Object> result = new HashMap<>();
 
-        customerRepository.findAll(pageable).forEach(customer -> customerList.add(EntityToDto.customerToDto(customer)));
+        Page<Customer> page =
+                customerRepository.findAll(pageable);
 
-        if (customerList.isEmpty()) throw new NoContentException(CustomerMessage.EMPTY_LIST);
+        APIPageableDTO pageableResult = new APIPageableDTO(page);
 
-        return customerList;
+        result.put("page", pageableResult);
+        result.put("customers", page.getContent());
+
+        return result;
     }
 
     @Override
@@ -222,5 +230,24 @@ public class CustomerServiceImp implements CustomerService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public Map<String, Object> search(String query, Pageable pageable) throws InValidException
+    {
+        if(query==null || query.trim().isEmpty())
+            throw new InValidException(GlobalMessage.NOT_NULL_QUERY);
+
+        Map<String, Object> result = new HashMap<>();
+
+        Page<Customer> page =
+                customerRepository.search(query.trim(),pageable);
+
+        APIPageableDTO pageableResult = new APIPageableDTO(page);
+
+        result.put("page", pageableResult);
+        result.put("customers", page.getContent());
+
+        return result;
     }
 }

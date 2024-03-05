@@ -1,14 +1,17 @@
 package com.example.demo.controller;
 
 import com.example.demo.message.GlobalMessage;
-import com.example.demo.model.DTO.ApartmentDTO;
-import com.example.demo.model.DTO.ApartmentUpdateDTO;
+import com.example.demo.model.DTO.apartment.ApartmentDTO;
+import com.example.demo.model.DTO.apartment.ApartmentUpdateDTO;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.ApartmentService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,12 +24,24 @@ import java.io.*;
 @Log4j2
 public class ApartmentController {
     private final ApartmentService apartmentService;
+    private final String DEFAULT_PAGE_NUMBER = "0";
+    private final String DEFAULT_PAGE_SIZE = "10";
+    private final String DEFAULT_SORT_BY = "retailPrice";
 
 
     // [GET] /apartments/
-    @GetMapping({"", "/"})
-    public ResponseEntity<Object> getApartmentList() {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, apartmentService.getAll());
+    @GetMapping("")
+    public ResponseEntity<Object> getApartmentList(@RequestParam(defaultValue =
+            DEFAULT_PAGE_NUMBER) int page,
+                                                   @RequestParam(defaultValue =
+                                                           DEFAULT_PAGE_SIZE) int pageSize,
+                                                   @RequestParam(defaultValue =
+                                                           DEFAULT_SORT_BY) String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
+
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                apartmentService.getAll(pageable));
     }
 
     // [GET] /apartments/:id
@@ -60,6 +75,21 @@ public class ApartmentController {
                 apartmentService.loadApartments(files));
     }
 
+    // [GET] /apartments/search
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchApartments(@RequestParam(defaultValue =
+            DEFAULT_PAGE_NUMBER) int page,
+                                                   @RequestParam(defaultValue =
+                                                           DEFAULT_PAGE_SIZE) int pageSize,
+                                                   @RequestParam(defaultValue =
+                                                           DEFAULT_SORT_BY) String sortBy,
+                                                   @RequestParam("q") String query) {
+
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
+
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                apartmentService.search(query,pageable));
+    }
     // [GET] /apartments/export
     @GetMapping("/export")
     public ResponseEntity<InputStreamResource> exportCsv(@RequestParam(value = "getTemplate", defaultValue = "false") boolean getTemplate) {
@@ -84,7 +114,6 @@ public class ApartmentController {
             if (file != null)
                 file.delete();
         }
-
     }
 
 }

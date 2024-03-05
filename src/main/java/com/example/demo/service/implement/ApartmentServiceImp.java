@@ -2,13 +2,16 @@ package com.example.demo.service.implement;
 
 import com.example.demo.entity.Apartment;
 import com.example.demo.exception.DuplicatedException;
+import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.helpers.CsvHelper;
 import com.example.demo.message.ApartmentMessage;
 import com.example.demo.message.FileMessage;
-import com.example.demo.model.DTO.ApartmentDTO;
-import com.example.demo.model.DTO.ApartmentUpdateDTO;
+import com.example.demo.message.GlobalMessage;
+import com.example.demo.model.DTO.apartment.ApartmentDTO;
+import com.example.demo.model.DTO.apartment.ApartmentUpdateDTO;
+import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.ApartmentRepository;
 import com.example.demo.service.interfaces.ApartmentService;
@@ -16,6 +19,9 @@ import com.example.demo.utils.validator.ApartmentValidator;
 import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,17 +33,20 @@ import java.util.*;
 @Log4j2
 public class ApartmentServiceImp implements ApartmentService {
     private final ApartmentRepository apartmentRepository;
-//    private final ModelMapper mapper;
 
     @Override
-    public List<ApartmentDTO> getAll() throws NoContentException {
-        List<ApartmentDTO> apartmentDTOList = new ArrayList<>();
+    public Map<String, Object> getAll(Pageable pageable) throws NoContentException {
+        Map<String, Object> result = new HashMap<>();
 
-        apartmentRepository.findAll().forEach(apartment -> apartmentDTOList.add(EntityToDto.apartmentToDto(apartment)));
+        Page<Apartment> pageResult =
+                apartmentRepository.findAll(pageable);
 
-        if (apartmentDTOList.isEmpty()) throw new NoContentException(ApartmentMessage.EMPTY_LIST);
+        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
 
-        return apartmentDTOList;
+        result.put("page", apiPageableDTO);
+        result.put("apartments", pageResult.getContent());
+
+        return result;
     }
 
     @Override
@@ -215,4 +224,21 @@ public class ApartmentServiceImp implements ApartmentService {
         }
     }
 
+    @Override
+    public Map<String, Object> search(String query, Pageable pageable) throws InValidException{
+        if(query == null || query.trim().isEmpty())
+            throw new InValidException(GlobalMessage.NOT_NULL_QUERY);
+
+        Map<String, Object> result = new HashMap<>();
+
+        Page<Apartment> pageResult =
+                apartmentRepository.search(query.trim(), pageable);
+
+        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
+
+        result.put("page", apiPageableDTO);
+        result.put("apartments", pageResult.getContent());
+
+        return result;
+    }
 }

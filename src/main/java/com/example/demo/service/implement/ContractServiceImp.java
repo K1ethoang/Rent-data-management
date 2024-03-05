@@ -10,8 +10,10 @@ import com.example.demo.exception.NotFoundException;
 import com.example.demo.helpers.CsvHelper;
 import com.example.demo.message.ContractMessage;
 import com.example.demo.message.FileMessage;
-import com.example.demo.model.DTO.ContractDTO;
-import com.example.demo.model.DTO.ContractUpdateDTO;
+import com.example.demo.message.GlobalMessage;
+import com.example.demo.model.DTO.contract.ContractDTO;
+import com.example.demo.model.DTO.contract.ContractUpdateDTO;
+import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.ContractRepository;
 import com.example.demo.service.interfaces.ApartmentService;
@@ -22,6 +24,8 @@ import com.example.demo.utils.validator.ContractValidator;
 import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,17 +39,19 @@ public class ContractServiceImp implements ContractService {
     private final ContractRepository contractRepository;
     private final CustomerService customerService;
     private final ApartmentService apartmentService;
-//    private final ModelMapper mapper;
 
     @Override
-    public List<ContractDTO> getAll() throws NoContentException {
-        List<ContractDTO> contractList = new ArrayList<>();
+    public Map<String, Object> getAll(Pageable pageable) throws NoContentException {
+        Map<String, Object> result = new HashMap<>();
 
-        contractRepository.findAll().forEach(contract -> contractList.add(EntityToDto.contractToDto(contract)));
+        Page<Contract> pageResult = contractRepository.findAll(pageable);
 
-        if (contractList.isEmpty()) throw new NoContentException(ContractMessage.EMPTY_LIST);
+        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
 
-        return contractList;
+        result.put("page", apiPageableDTO);
+        result.put("contracts", pageResult.getContent());
+
+        return result;
     }
 
     private Contract getContract(String id) throws NotFoundException {
@@ -246,5 +252,23 @@ public class ContractServiceImp implements ContractService {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public Map<String, Object> search(String query, Pageable pageable){
+        if(query == null || query.trim().isEmpty())
+            throw new InValidException(GlobalMessage.NOT_NULL_QUERY);
+
+        Map<String, Object> result = new HashMap<>();
+
+        Page<Contract> pageResult =
+                contractRepository.search(query.trim(), pageable);
+
+        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
+
+        result.put("page", apiPageableDTO);
+        result.put("contracts", pageResult.getContent());
+
+        return result;
     }
 }

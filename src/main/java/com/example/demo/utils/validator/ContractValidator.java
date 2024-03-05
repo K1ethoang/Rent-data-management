@@ -3,8 +3,8 @@ package com.example.demo.utils.validator;
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NotNullException;
 import com.example.demo.message.ContractMessage;
-import com.example.demo.model.DTO.ContractDTO;
-import com.example.demo.model.DTO.ContractUpdateDTO;
+import com.example.demo.model.DTO.contract.ContractDTO;
+import com.example.demo.model.DTO.contract.ContractUpdateDTO;
 import com.example.demo.utils.MyUtils;
 import lombok.extern.log4j.Log4j2;
 
