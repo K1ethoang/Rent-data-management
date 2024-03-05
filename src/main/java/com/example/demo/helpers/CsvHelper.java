@@ -1,5 +1,8 @@
 package com.example.demo.helpers;
 
+import com.example.demo.entity.Apartment;
+import com.example.demo.entity.Contract;
+import com.example.demo.entity.Customer;
 import com.example.demo.exception.InValidException;
 import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.apartment.ApartmentDTO;
@@ -175,7 +178,7 @@ public class CsvHelper {
         }
     }
 
-    public static File exportCustomers(List<CustomerDTO> customerList, boolean getTemplate) throws Exception {
+    public static File exportCustomers(List<Customer> customerList, boolean getTemplate) throws Exception {
         final String NAME_FILE = "customer_" + MyUtils.getDateNow() +
                 ".csv";
 
@@ -184,23 +187,30 @@ public class CsvHelper {
         try (CSVPrinter printer = new CSVPrinter(new FileWriter(getTemplate ? NAME_FILE_TEMPLATE
                 : NAME_FILE),
                 CSVFormat.EXCEL)) {
-            printer.printRecord(Arrays.stream(CUSTOMER_HEADER).toArray());
 
             List<Object> row = new ArrayList<>();
 
             if (getTemplate) {
-                row.add("<First name>");
-                row.add("<Last name>");
-                row.add("<Address>");
-                row.add("<Age>");
+                printer.printRecord(Arrays.stream(CUSTOMER_HEADER).toArray());
+
+                row.add("Kiet");
+                row.add("Hoang");
+                row.add("239 Dien Bien Phu, Di An, Binh Duong");
+                row.add("21");
 
                 printer.printRecord(row);
             } else {
-                for (CustomerDTO customerDTO : customerList) {
-                    row.add(customerDTO.getFirstName());
-                    row.add(customerDTO.getLastName());
-                    row.add(customerDTO.getAddress());
-                    row.add(customerDTO.getAge());
+                String[] newHeader = Arrays.copyOf(CUSTOMER_HEADER, CUSTOMER_HEADER.length + 1);
+                newHeader[0] = "ID";
+
+                printer.printRecord(Arrays.stream(newHeader).toArray());
+
+                for (Customer customer : customerList) {
+                    row.add(customer.getId());
+                    row.add(customer.getFirstName());
+                    row.add(customer.getLastName());
+                    row.add(customer.getAddress());
+                    row.add(customer.getAge());
 
                     printer.printRecord(row);
                     row.clear();
@@ -214,7 +224,7 @@ public class CsvHelper {
         }
     }
 
-    public static File exportApartments(List<ApartmentDTO> apartmentList, boolean getTemplate) throws Exception {
+    public static File exportApartments(List<Apartment> apartmentList, boolean getTemplate) throws Exception {
         final String NAME_FILE = "apartment_" + MyUtils.getDateNow() +
                 ".csv";
 
@@ -224,36 +234,40 @@ public class CsvHelper {
                 : NAME_FILE),
                 CSVFormat.EXCEL)) {
 
-
-            printer.printRecord(Arrays.stream(APARTMENT_HEADER).toArray());
-
             List<Object> row = new ArrayList<>();
 
             if (getTemplate) {
-                row.add("<Address>");
-                row.add("<Numbers of room>");
-                row.add("<Price>");
+                printer.printRecord(Arrays.stream(APARTMENT_HEADER).toArray());
+
+                row.add("130 Pham Ngu Lao, An Binh, Bien Hoa, Dong Nai");
+                row.add("4");
+                row.add("3500000");
 
                 printer.printRecord(row);
             } else {
-                for (ApartmentDTO apartmentDTO : apartmentList) {
-                    row.add(apartmentDTO.getAddress());
-                    row.add(apartmentDTO.getNumberOfRoom());
-                    row.add(apartmentDTO.getRetailPrice());
+                String[] newHeader = Arrays.copyOf(APARTMENT_HEADER, APARTMENT_HEADER.length + 1);
+                newHeader[0] = "ID";
+
+                printer.printRecord(Arrays.stream(newHeader).toArray());
+
+                for (Apartment apartment : apartmentList) {
+                    row.add(apartment.getId());
+                    row.add(apartment.getAddress());
+                    row.add(apartment.getNumberOfRoom());
+                    row.add(apartment.getRetailPrice());
 
                     printer.printRecord(row);
                     row.clear();
                 }
             }
 
-            return new File(getTemplate ? NAME_FILE_TEMPLATE
-                    : NAME_FILE);
+            return new File(getTemplate ? NAME_FILE_TEMPLATE : NAME_FILE);
         } catch (IOException e) {
             throw new Exception(e.getMessage());
         }
     }
 
-    public static File exportContracts(List<ContractDTO> contractList, boolean getTemplate) throws Exception {
+    public static File exportContracts(List<Contract> contractList, boolean getTemplate) throws Exception {
         final String NAME_FILE = "contract_" + MyUtils.getDateNow() +
                 ".csv";
 
@@ -262,11 +276,12 @@ public class CsvHelper {
         try (CSVPrinter printer = new CSVPrinter(new FileWriter(getTemplate ? NAME_FILE_TEMPLATE
                 : NAME_FILE),
                 CSVFormat.EXCEL)) {
-            printer.printRecord(Arrays.stream(CONTRACT_HEADER).toArray());
 
             List<Object> row = new ArrayList<>();
 
             if (getTemplate) {
+                printer.printRecord(Arrays.stream(CONTRACT_HEADER).toArray());
+
                 row.add("<Customer ID>");
                 row.add("<Apartment ID>");
                 row.add("<YYYY-MM-DD>");
@@ -274,9 +289,14 @@ public class CsvHelper {
 
                 printer.printRecord(row);
             } else {
-                for (ContractDTO contract : contractList) {
-                    row.add(contract.getCustomerId());
-                    row.add(contract.getApartmentId());
+                List<String> newHeader = new ArrayList<>(Arrays.asList(CONTRACT_HEADER));
+                newHeader.add(0,"ID");
+
+                printer.printRecord(newHeader);
+                for (Contract contract : contractList) {
+                    row.add(contract.getId());
+                    row.add(contract.getCustomer().getId());
+                    row.add(contract.getApartment().getId());
                     row.add(contract.getStartDate());
                     row.add(contract.getEndDate());
 
