@@ -245,10 +245,7 @@ public class ContractServiceImp implements ContractService {
     @Override
     public File exportCsv(Boolean getTemplate) {
         try {
-            List<ContractDTO> contractList = new ArrayList<>();
-            contractRepository.findAll().forEach(contract -> contractList.add(EntityToDto.contractToDto(contract)));
-
-            return CsvHelper.exportContracts(contractList, getTemplate);
+            return CsvHelper.exportContracts(contractRepository.findAll(), getTemplate);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }

@@ -215,10 +215,7 @@ public class ApartmentServiceImp implements ApartmentService {
     @Override
     public File exportCsv(boolean getTemplate) {
         try {
-            List<ApartmentDTO> apartmentList = new ArrayList<>();
-            apartmentRepository.findAll().forEach(apartment -> apartmentList.add(EntityToDto.apartmentToDto(apartment)));
-
-            return CsvHelper.exportApartments(apartmentList, getTemplate);
+            return CsvHelper.exportApartments(apartmentRepository.findAll(), getTemplate);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
