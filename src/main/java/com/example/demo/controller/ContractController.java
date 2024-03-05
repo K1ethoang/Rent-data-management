@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,11 +24,20 @@ import java.io.*;
 @RequestMapping("/contracts")
 public class ContractController {
     public final ContractService contractService;
+    private final String DEFAULT_PAGE_NUMBER = "0";
+    private final String DEFAULT_PAGE_SIZE = "10";
+    private final String DEFAULT_SORT_BY = "endDate";
 
     // [GET] : /contracts/
     @GetMapping("")
-    public ResponseEntity<Object> getContractList() {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, contractService.getAll());
+    public ResponseEntity<Object> getContractList(@RequestParam(defaultValue = DEFAULT_PAGE_NUMBER) int page,
+                                                  @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int pageSize,
+                                                  @RequestParam(defaultValue = DEFAULT_SORT_BY) String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
+
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                contractService.getAll(pageable));
     }
 
     // [GET] : /contracts/:id
@@ -57,6 +69,20 @@ public class ContractController {
     public ResponseEntity<Object> importCsvContract(@RequestParam("file") MultipartFile[] files) {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
                 contractService.loadContracts(files));
+    }
+
+    // [GET] : /contracts/search
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchContracts(@RequestParam(defaultValue =
+            DEFAULT_PAGE_NUMBER) int page,
+                                                  @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int pageSize,
+                                                  @RequestParam(defaultValue = DEFAULT_SORT_BY) String sortBy,
+                                                  @RequestParam("q") String query) {
+
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
+
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                contractService.search(query,pageable));
     }
 
     // [GET] : contracts/export
