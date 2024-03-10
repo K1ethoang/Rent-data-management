@@ -1,8 +1,6 @@
 name: Google Java Format
 
-on:
-  push:
-    branches: [ main ]
+on: [ push, pull_request ]
 
 jobs:
 
@@ -14,4 +12,4 @@ jobs:
         with:
           args: "--skip-sorting-imports --replace"
           # Recommended if you use MacOS:
-          # github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
