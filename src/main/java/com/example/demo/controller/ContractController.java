@@ -21,6 +21,7 @@ import java.io.*;
 @RestController
 @AllArgsConstructor
 @Log4j2
+@CrossOrigin
 @RequestMapping("/contracts")
 public class ContractController {
     public final ContractService contractService;
@@ -82,7 +83,7 @@ public class ContractController {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
 
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
-                contractService.search(query,pageable));
+                contractService.search(query, pageable));
     }
 
     // [GET] : contracts/export

@@ -20,8 +20,9 @@ import java.io.*;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/apartments")
 @Log4j2
+@CrossOrigin
+@RequestMapping("/apartments")
 public class ApartmentController {
     private final ApartmentService apartmentService;
     private final String DEFAULT_PAGE_NUMBER = "0";
@@ -88,8 +89,9 @@ public class ApartmentController {
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
 
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
-                apartmentService.search(query,pageable));
+                apartmentService.search(query, pageable));
     }
+
     // [GET] /apartments/export
     @GetMapping("/export")
     public ResponseEntity<InputStreamResource> exportCsv(@RequestParam(value = "getTemplate", defaultValue = "false") boolean getTemplate) {

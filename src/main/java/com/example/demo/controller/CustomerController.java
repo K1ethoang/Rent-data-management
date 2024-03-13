@@ -3,14 +3,12 @@ package com.example.demo.controller;
 import com.example.demo.message.GlobalMessage;
 import com.example.demo.model.DTO.customer.CustomerDTO;
 import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
-import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.CustomerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -24,9 +22,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 
 @RestController // @RestController dùng cho API còn @Controller dùng cho return View HTML
-@RequestMapping("/customers") // Endpoint gốc là /customers
 @AllArgsConstructor
 @Log4j2
+@CrossOrigin
+@RequestMapping("/customers") // Endpoint gốc là /customers
 public class CustomerController {
     private final CustomerService customerService;
     private final String DEFAULT_PAGE_NUMBER = "0";
