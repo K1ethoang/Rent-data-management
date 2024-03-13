@@ -15,7 +15,6 @@ import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerService;
-import com.example.demo.utils.MyUtils;
 import com.example.demo.utils.validator.CustomerValidator;
 import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
@@ -31,13 +30,13 @@ import java.util.*;
 @Service
 @AllArgsConstructor
 @Log4j2
-public class CustomerServiceImp implements CustomerService {
+public class CustomerServiceImpl implements CustomerService {
     public static final String DEFAULT_STATUS = "Normal";
     private final CustomerRepository customerRepository;
 
 
     @Override
-    public Map<String, Object>  getAll(Pageable pageable) throws NoContentException {
+    public Map<String, Object> getAll(Pageable pageable) throws NoContentException {
         Map<String, Object> result = new HashMap<>();
 
         Page<Customer> page =
@@ -203,7 +202,7 @@ public class CustomerServiceImp implements CustomerService {
                     .firstName(customerList.get(i).getFirstName())
                     .lastName(customerList.get(i).getLastName())
                     .address(customerList.get(i).getAddress())
-                    .status(CustomerServiceImp.DEFAULT_STATUS)
+                    .status(CustomerServiceImpl.DEFAULT_STATUS)
                     .age(Integer.parseInt(customerList.get(i).getAge()))
                     .build();
 
@@ -230,15 +229,14 @@ public class CustomerServiceImp implements CustomerService {
     }
 
     @Override
-    public Map<String, Object> search(String query, Pageable pageable) throws InValidException
-    {
-        if(query==null || query.trim().isEmpty())
+    public Map<String, Object> search(String query, Pageable pageable) throws InValidException {
+        if (query == null || query.trim().isEmpty())
             throw new InValidException(GlobalMessage.NOT_NULL_QUERY);
 
         Map<String, Object> result = new HashMap<>();
 
         Page<Customer> page =
-                customerRepository.search(query.trim(),pageable);
+                customerRepository.search(query.trim(), pageable);
 
         APIPageableDTO pageableResult = new APIPageableDTO(page);
 

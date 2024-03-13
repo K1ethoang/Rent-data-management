@@ -35,7 +35,7 @@ import java.util.*;
 @Service
 @AllArgsConstructor
 @Log4j2
-public class ContractServiceImp implements ContractService {
+public class ContractServiceImpl implements ContractService {
     private final ContractRepository contractRepository;
     private final CustomerService customerService;
     private final ApartmentService apartmentService;
@@ -252,8 +252,8 @@ public class ContractServiceImp implements ContractService {
     }
 
     @Override
-    public Map<String, Object> search(String query, Pageable pageable){
-        if(query == null || query.trim().isEmpty())
+    public Map<String, Object> search(String query, Pageable pageable) {
+        if (query == null || query.trim().isEmpty())
             throw new InValidException(GlobalMessage.NOT_NULL_QUERY);
 
         Map<String, Object> result = new HashMap<>();

@@ -19,7 +19,6 @@ import com.example.demo.utils.validator.ApartmentValidator;
 import com.example.demo.utils.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,7 @@ import java.util.*;
 @Service
 @AllArgsConstructor
 @Log4j2
-public class ApartmentServiceImp implements ApartmentService {
+public class ApartmentServiceImpl implements ApartmentService {
     private final ApartmentRepository apartmentRepository;
 
     @Override
@@ -222,8 +221,8 @@ public class ApartmentServiceImp implements ApartmentService {
     }
 
     @Override
-    public Map<String, Object> search(String query, Pageable pageable) throws InValidException{
-        if(query == null || query.trim().isEmpty())
+    public Map<String, Object> search(String query, Pageable pageable) throws InValidException {
+        if (query == null || query.trim().isEmpty())
             throw new InValidException(GlobalMessage.NOT_NULL_QUERY);
 
         Map<String, Object> result = new HashMap<>();
