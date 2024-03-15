@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
                 .email(userDto.getEmail())
                 .username(userDto.getUsername())
                 .password(userDto.getPassword())
-                .state(EState.PENDING)
+                .state(EState.ACTIVE)
                 .createDate(LocalDate.now())
                 .build();
 
@@ -41,8 +41,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserDto> getUserByEmailOrUsername(UserDto userDto) {
-        return null;
+    public Optional<User> getUserByEmailOrUsername(UserDto userDto) {
+        return userRepository.findByEmailOrUsername(userDto.getEmail(),
+                userDto.getUsername());
+
     }
 
     public void checkDuplicated(UserDto userDto) throws InValidException {

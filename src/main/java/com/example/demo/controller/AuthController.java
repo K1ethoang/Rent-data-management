@@ -26,6 +26,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Object> login(LoginDTO loginDTO) {
+        authService.login(loginDTO);
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, null);
     }
 

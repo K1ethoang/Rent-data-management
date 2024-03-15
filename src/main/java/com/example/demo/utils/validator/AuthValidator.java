@@ -42,9 +42,6 @@ public class AuthValidator {
     public static void validatorLoginDTO(LoginDTO loginDTO) {
         notNullEmailOrUsername(loginDTO.getEmailOrUsername());
         notNullPassword(loginDTO.getPassword());
-
-        loginDTO.setEmailOrUsername(loginDTO.getEmailOrUsername().trim());
-        loginDTO.setPassword(loginDTO.getPassword().trim());
     }
 
     public static void validatorRegisterDTO(RegisterDTO registerDTO) {
