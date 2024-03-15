@@ -1,6 +1,6 @@
 package com.example.demo.entity;
 
-public enum State {
+public enum EState {
     PENDING,
     ACTIVE,
     DISABLED,

@@ -1,11 +1,15 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NaturalId;
 
-import javax.persistence.*;
-import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.time.LocalDate;
 
 @Builder
 @AllArgsConstructor
@@ -23,17 +27,18 @@ public class User {
     @Column(nullable = false)
     private String email;
 
+    @NaturalId
+    @Column(nullable = false)
+    private String username;
+
     @Column(nullable = false)
     private String password;
 
     private String avatar;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "create_date")
-    private Date createDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate createDate;
 
-    private State state;
-
-    @ManyToOne
-    private Role role;
+    private EState state;
 }
