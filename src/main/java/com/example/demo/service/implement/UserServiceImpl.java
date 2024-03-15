@@ -41,8 +41,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<UserDto> getUserByUsername(String username) {
-        return Optional.empty();
+    public Optional<UserDto> getUserByEmailOrUsername(UserDto userDto) {
+        return null;
     }
 
     public void checkDuplicated(UserDto userDto) throws InValidException {
