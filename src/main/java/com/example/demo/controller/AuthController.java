@@ -19,7 +19,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<Object> register(RegisterDTO registerDTO) {
+    public ResponseEntity<Object> register(RegisterDTO registerDTO) throws Exception {
         authService.register(registerDTO);
         return ApiResponse.responseBuilder(HttpStatus.CREATED, GlobalMessage.SUCCESS, null);
     }

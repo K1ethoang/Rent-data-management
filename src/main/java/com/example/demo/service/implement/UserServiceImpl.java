@@ -7,6 +7,7 @@ import com.example.demo.message.UserMessage;
 import com.example.demo.model.DTO.user.UserDto;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.interfaces.UserService;
+import com.example.demo.utils.AuthUtils;
 import com.example.demo.utils.validator.UserValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -30,7 +31,7 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .email(userDto.getEmail())
                 .username(userDto.getUsername())
-                .password(userDto.getPassword())
+                .password(AuthUtils.encryptPassword(userDto.getPassword()))
                 .state(EState.ACTIVE)
                 .createDate(LocalDate.now())
                 .build();

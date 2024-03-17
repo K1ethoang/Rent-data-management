@@ -6,5 +6,5 @@ import com.example.demo.model.DTO.register.RegisterDTO;
 public interface AuthService {
     void login(LoginDTO loginDTO);
 
-    void register(RegisterDTO registerDTO);
+    void register(RegisterDTO registerDTO) throws Exception;
 }

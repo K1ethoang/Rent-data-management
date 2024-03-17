@@ -13,12 +13,15 @@ import com.example.demo.utils.validator.AuthValidator;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserService userService;
+    private final MailServiceImpl mailService;
+
 
     @Override
     public void login(LoginDTO loginDTO) throws InValidException {
@@ -49,9 +52,13 @@ public class AuthServiceImpl implements AuthService {
         UserDto userDto = UserDto.builder()
                 .email(registerDTO.getEmail())
                 .username(registerDTO.getUsername())
-                .password(AuthUtils.encryptPassword(passwordGenerator))
+                .password(passwordGenerator)
                 .build();
 
-        userService.createUser(userDto);
+        try {
+            userService.createUser(userDto);
+            mailService.sendMail(userDto);
+        } catch (MessagingException ignored) {
+        }
     }
 }
