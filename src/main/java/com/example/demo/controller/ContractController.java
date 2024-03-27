@@ -21,7 +21,6 @@ import java.io.*;
 @RestController
 @AllArgsConstructor
 @Log4j2
-@CrossOrigin
 @RequestMapping("/contracts")
 public class ContractController {
     public final ContractService contractService;
