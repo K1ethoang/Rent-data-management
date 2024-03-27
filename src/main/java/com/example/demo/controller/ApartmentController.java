@@ -21,7 +21,6 @@ import java.io.*;
 @RestController
 @AllArgsConstructor
 @Log4j2
-@CrossOrigin
 @RequestMapping("/apartments")
 public class ApartmentController {
     private final ApartmentService apartmentService;

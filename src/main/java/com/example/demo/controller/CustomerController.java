@@ -24,7 +24,6 @@ import java.io.*;
 @RestController // @RestController dùng cho API còn @Controller dùng cho return View HTML
 @AllArgsConstructor
 @Log4j2
-@CrossOrigin
 @RequestMapping("/customers") // Endpoint gốc là /customers
 public class CustomerController {
     private final CustomerService customerService;
