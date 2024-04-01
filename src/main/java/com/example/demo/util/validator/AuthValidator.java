@@ -1,4 +1,4 @@
-package com.example.demo.utils.validator;
+package com.example.demo.util.validator;
 
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NotNullException;
@@ -6,7 +6,7 @@ import com.example.demo.message.AuthMessage;
 import com.example.demo.message.UserMessage;
 import com.example.demo.model.DTO.login.LoginDTO;
 import com.example.demo.model.DTO.register.RegisterDTO;
-import com.example.demo.utils.AuthUtils;
+import com.example.demo.util.AuthUtils;
 
 public class AuthValidator {
     public static void notNullEmailOrUsername(String emailOrUsername) throws NotNullException {

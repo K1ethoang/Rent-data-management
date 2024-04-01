@@ -1,4 +1,4 @@
-package com.example.demo.helpers;
+package com.example.demo.helper;
 
 import com.example.demo.entity.Apartment;
 import com.example.demo.entity.Contract;
@@ -8,7 +8,7 @@ import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.apartment.ApartmentDTO;
 import com.example.demo.model.DTO.contract.ContractDTO;
 import com.example.demo.model.DTO.customer.CustomerDTO;
-import com.example.demo.utils.MyUtils;
+import com.example.demo.util.MyUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -290,7 +290,7 @@ public class CsvHelper {
                 printer.printRecord(row);
             } else {
                 List<String> newHeader = new ArrayList<>(Arrays.asList(CONTRACT_HEADER));
-                newHeader.add(0,"ID");
+                newHeader.add(0, "ID");
 
                 printer.printRecord(newHeader);
                 for (Contract contract : contractList) {

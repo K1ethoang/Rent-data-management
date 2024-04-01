@@ -1,18 +1,19 @@
-package com.example.demo.utils.validator;
+package com.example.demo.util.validator;
 
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NotNullException;
 import com.example.demo.message.ApartmentMessage;
 import com.example.demo.model.DTO.apartment.ApartmentDTO;
 import com.example.demo.model.DTO.apartment.ApartmentUpdateDTO;
-import com.example.demo.utils.MyUtils;
+import com.example.demo.util.MyUtils;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class ApartmentValidator {
 
     public static void notNullAddress(String address) throws NotNullException {
-        if (address == null || address.trim().isEmpty()) throw new NotNullException(ApartmentMessage.NOT_NULL_ADDRESS);
+        if (address == null || address.trim().isEmpty())
+            throw new NotNullException(ApartmentMessage.NOT_NULL_ADDRESS);
     }
 
     public static void notNullRetailPrice(String retailPrice) throws NotNullException {

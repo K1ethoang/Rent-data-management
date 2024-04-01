@@ -1,4 +1,4 @@
-package com.example.demo.utils;
+package com.example.demo.util;
 
 import net.bytebuddy.utility.RandomString;
 import org.mindrot.jbcrypt.BCrypt;

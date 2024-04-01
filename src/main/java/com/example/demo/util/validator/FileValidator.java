@@ -1,4 +1,4 @@
-package com.example.demo.utils.validator;
+package com.example.demo.util.validator;
 
 import com.example.demo.exception.InValidException;
 import com.example.demo.message.FileMessage;

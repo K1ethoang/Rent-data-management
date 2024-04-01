@@ -1,10 +1,10 @@
-package com.example.demo.utils.validator;
+package com.example.demo.util.validator;
 
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NotNullException;
 import com.example.demo.message.UserMessage;
 import com.example.demo.model.DTO.user.UserDto;
-import com.example.demo.utils.AuthUtils;
+import com.example.demo.util.AuthUtils;
 
 public class UserValidator {
     public static void notNullEmail(String email) throws NotNullException {
