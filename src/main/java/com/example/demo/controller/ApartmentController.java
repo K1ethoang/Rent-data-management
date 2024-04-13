@@ -31,12 +31,13 @@ public class ApartmentController {
 
     // [GET] /apartments/
     @GetMapping("")
-    public ResponseEntity<Object> getApartmentList(@RequestParam(defaultValue =
-            DEFAULT_PAGE_NUMBER) int page,
-                                                   @RequestParam(defaultValue =
-                                                           DEFAULT_PAGE_SIZE) int pageSize,
-                                                   @RequestParam(defaultValue =
-                                                           DEFAULT_SORT_BY) String sortBy) {
+    public ResponseEntity<Object> getApartmentList(
+            @RequestParam(defaultValue =
+                    DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(defaultValue =
+                    DEFAULT_PAGE_SIZE) int pageSize,
+            @RequestParam(defaultValue =
+                    DEFAULT_SORT_BY) String sortBy) {
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
 
