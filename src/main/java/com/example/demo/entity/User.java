@@ -4,13 +4,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NaturalId;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import java.io.Serializable;
-import java.time.LocalDate;
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Builder
 @AllArgsConstructor
@@ -18,7 +21,9 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
-public class User implements Serializable {
+@ToString
+@EntityListeners(AuditingEntityListener.class)
+public class User implements UserDetails {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
@@ -35,11 +40,58 @@ public class User implements Serializable {
     @Column(nullable = false)
     private String password;
 
-    private String avatar;
-
-    @Column(name = "create_date")
+    @Column(name = "create_date", updatable = false, nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate createDate;
+    @CreatedDate
+    private LocalDateTime createDate;
 
-    private EState state;
+    private boolean status;
+
+    @Column(name = "refresh_token")
+    private String refreshToken;
+
+    @Column(name = "exp_reset_password_token")
+    private LocalDateTime expResetPasswordToken;
+
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(getRole().getName().name()));
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isStatus();
+    }
 }

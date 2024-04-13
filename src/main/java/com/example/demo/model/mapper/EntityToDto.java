@@ -38,12 +38,13 @@ public class EntityToDto {
 
     public static UserDto userToDto(User user) {
         return UserDto.builder()
+                .id(user.getId())
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .avatar(user.getAvatar())
-                .createDate(user.getCreateDate())
-                .state(user.getState())
+                .createDate(user.getCreateDate().toString())
+                .status(user.isStatus())
+                .role(user.getRole())
                 .build();
     }
 }

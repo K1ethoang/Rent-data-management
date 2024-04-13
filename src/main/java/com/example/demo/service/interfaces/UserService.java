@@ -1,12 +1,10 @@
 package com.example.demo.service.interfaces;
 
-import com.example.demo.entity.User;
 import com.example.demo.model.DTO.user.UserDto;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
-import java.util.Optional;
-
-public interface UserService {
+public interface UserService extends UserDetailsService {
     void createUser(UserDto userDto);
 
-    Optional<User> getUserByEmailOrUsername(UserDto userDto);
+    UserDto getUserDetailsFromToken(String token);
 }

@@ -2,18 +2,12 @@ package com.example.demo.util.validator;
 
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NotNullException;
-import com.example.demo.message.AuthMessage;
 import com.example.demo.message.UserMessage;
 import com.example.demo.model.DTO.login.LoginDTO;
 import com.example.demo.model.DTO.register.RegisterDTO;
 import com.example.demo.util.AuthUtils;
 
 public class AuthValidator {
-    public static void notNullEmailOrUsername(String emailOrUsername) throws NotNullException {
-        if (emailOrUsername == null || emailOrUsername.trim().isEmpty())
-            throw new NotNullException(AuthMessage.EMAIL_USERNAME_REQUIRED);
-    }
-
     public static void notNullEmail(String email) throws NotNullException {
         if (email == null || email.trim().isEmpty())
             throw new NotNullException(UserMessage.EMAIL_REQUIRED);
@@ -40,7 +34,7 @@ public class AuthValidator {
     }
 
     public static void validatorLoginDTO(LoginDTO loginDTO) {
-        notNullEmailOrUsername(loginDTO.getEmailOrUsername());
+        notNullUsername(loginDTO.getUsername());
         notNullPassword(loginDTO.getPassword());
     }
 

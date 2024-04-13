@@ -27,7 +27,8 @@ public class MailServiceImpl {
 
         boolean html = true;
         helper.setText("<b>Hi " + userDto.getUsername() + "</b>," +
-                        "<br><i>This is your password: <b>" + userDto.getPassword() + "</b>. </i>" +
+                        "<br><i>Your username: <b>" + userDto.getUsername() + "</b></i>" +
+                        "<br><i>Your password: <b>" + userDto.getPassword() + "</b></i>" +
                         "<br>Do not share this email with anyone!",
                 html);
 
