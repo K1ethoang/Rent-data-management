@@ -12,20 +12,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.util.Arrays;
-
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
-    private static final String[] AUTH_WHITE_LIST = {
-            "/v3/api-docs/**",
-            "/swagger-ui/**",
-            "/v2/api-docs/**",
-            "/swagger-resources/**"
-    };
-
     private final JwtAuthFilter jwtAuthFilter;
 
     @Bean
@@ -40,7 +31,20 @@ public class SecurityConfig {
         http.exceptionHandling();
 
         http.authorizeHttpRequests()
-                .antMatchers("/auth/**", Arrays.toString(AUTH_WHITE_LIST)).permitAll()
+                .antMatchers(
+                        "/auth/**",
+                        "/v3/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-resources",
+                        "/swagger-resources/**",
+                        "/configuration/ui",
+                        "/configuration/security",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/swagger-ui/index.html",
+                        "/webjars/swagger-ui/**"
+                ).permitAll()
+
                 .anyRequest().authenticated();
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
