@@ -33,4 +33,4 @@ build/
 .vscode/
 
 ### FILE ###
-!**/src/main/resources/.env.dev
+*.env.dev
