@@ -1,4 +1,4 @@
-package com.example.demo.util.validator;
+package com.example.demo.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 
 public class JwtUtil {
+    public static final String BEARER_PREFIX = "Bearer ";
     private static final String SECRET_KEY =
             "mj5UiXDGeiUWpdAaVg8aS4UOYa2Pj5Pi";
     private static final long EXPIRED_AT = 5 * 60 * 1000; // 5 min (Millisecond)

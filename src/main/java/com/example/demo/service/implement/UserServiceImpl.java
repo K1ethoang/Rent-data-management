@@ -13,7 +13,7 @@ import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.interfaces.UserService;
 import com.example.demo.util.AuthUtils;
-import com.example.demo.util.validator.JwtUtil;
+import com.example.demo.util.JwtUtil;
 import com.example.demo.util.validator.UserValidator;
 import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
@@ -60,12 +60,10 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    /**
-     * @param token
-     * @return
-     */
     @Override
-    public UserDto getUserDetailsFromToken(String token) throws JwtException, NotFoundException {
+    public UserDto getUserDetailsFromToken(String authorizationHeader) throws JwtException, NotFoundException {
+        String token = authorizationHeader.substring(JwtUtil.BEARER_PREFIX.length());
+
         if (JwtUtil.isAccessTokenExpired(token)) {
             throw new JwtException("Token is expired");
         }
@@ -73,10 +71,10 @@ public class UserServiceImpl implements UserService {
         String username = JwtUtil.extractUsername(token);
         Optional<User> user = userRepository.findUserByUsername(username);
 
-        if (user.isPresent())
-            return EntityToDto.userToDto(user.get());
+        if (user.isEmpty())
+            throw new NotFoundException(UserMessage.NOT_FOUND);
 
-        throw new NotFoundException(UserMessage.NOT_FOUND);
+        return EntityToDto.userToDto(user.get());
     }
 
     public void checkDuplicated(UserDto userDto) throws InValidException {
