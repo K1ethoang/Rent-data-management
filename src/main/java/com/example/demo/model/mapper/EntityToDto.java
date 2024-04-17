@@ -43,7 +43,7 @@ public class EntityToDto {
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .createDate(user.getCreateDate().toString())
-                .status(user.isStatus())
+                .status(user.getStatus())
                 .role(user.getRole())
                 .build();
     }

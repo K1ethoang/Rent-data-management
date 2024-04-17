@@ -45,10 +45,13 @@ public class User implements UserDetails {
     @CreatedDate
     private LocalDateTime createDate;
 
-    private boolean status;
+    private Boolean status;
 
     @Column(name = "refresh_token")
     private String refreshToken;
+
+    @Column(name = "exp_refresh_token")
+    private LocalDateTime expRefreshToken;
 
     @Column(name = "exp_reset_password_token")
     private LocalDateTime expResetPasswordToken;
@@ -92,6 +95,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isStatus();
+        return status;
     }
 }

@@ -2,6 +2,7 @@ package com.example.demo.service.interfaces;
 
 import com.example.demo.model.DTO.jwt.JwtResponseDTO;
 import com.example.demo.model.DTO.login.LoginDTO;
+import com.example.demo.model.DTO.refreshToken.RefreshTokenDTO;
 import com.example.demo.model.DTO.register.RegisterDTO;
 
 public interface AuthService {
@@ -9,5 +10,7 @@ public interface AuthService {
 
     void register(RegisterDTO registerDTO);
 
-    void logout();
+    void logout(String token);
+
+    JwtResponseDTO refreshToken(RefreshTokenDTO refreshTokenDTO);
 }

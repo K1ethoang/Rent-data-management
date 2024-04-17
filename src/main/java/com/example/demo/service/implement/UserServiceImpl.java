@@ -26,14 +26,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 @Log4j2
 public class UserServiceImpl implements UserService {
+    private static final long EXPIRED_RT = 7 * 24 * 60 * 60; // 7 days (Second)
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final boolean DEFAULT_STATUS = true;
@@ -61,11 +64,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserDetailsFromToken(String authorizationHeader) throws JwtException, NotFoundException {
-        String token = authorizationHeader.substring(JwtUtil.BEARER_PREFIX.length());
-
+    public UserDto getUserDetailsFromToken(String token) throws JwtException, NotFoundException {
         if (JwtUtil.isAccessTokenExpired(token)) {
-            throw new JwtException("Token is expired");
+            throw new JwtException(AuthMessage.TOKEN_EXPIRED);
         }
 
         String username = JwtUtil.extractUsername(token);
@@ -75,6 +76,57 @@ public class UserServiceImpl implements UserService {
             throw new NotFoundException(UserMessage.NOT_FOUND);
 
         return EntityToDto.userToDto(user.get());
+    }
+
+    @Override
+    public UserDto getUserDetailsFromRefreshToken(String token) throws InValidException, JwtException {
+        Optional<User> userOptional = userRepository.findUserByRefreshToken(token);
+
+        if (userOptional.isEmpty())
+            throw new InValidException(AuthMessage.REFRESH_TOKEN_INVALID);
+
+        User user = userOptional.get();
+
+        if (LocalDateTime.now().isAfter((user.getExpRefreshToken()))) {
+            throw new JwtException(AuthMessage.TOKEN_EXPIRED);
+        }
+
+        return EntityToDto.userToDto(user);
+    }
+
+    @Override
+    public String updateRefreshToken(String userId) throws NotFoundException {
+        User user = getUser(userId);
+
+        user.setRefreshToken(UUID.randomUUID().toString());
+
+        userRepository.save(user);
+        return user.getRefreshToken();
+    }
+
+    @Override
+    public String createRefreshToken(String userId) {
+        User user = getUser(userId);
+
+        user.setRefreshToken(UUID.randomUUID().toString());
+        user.setExpRefreshToken(LocalDateTime.now().plusSeconds(EXPIRED_RT));
+
+        userRepository.save(user);
+        return user.getRefreshToken();
+    }
+
+    @Override
+    public UserDto getUserDTO(String userId) {
+        return EntityToDto.userToDto(getUser(userId));
+    }
+
+    @Override
+    public User getUser(String userId) throws NotFoundException {
+        Optional<User> userOptional = userRepository.findUserById(userId);
+
+        if (userOptional.isEmpty()) throw new NotFoundException(UserMessage.NOT_FOUND);
+
+        return userOptional.get();
     }
 
     public void checkDuplicated(UserDto userDto) throws InValidException {
