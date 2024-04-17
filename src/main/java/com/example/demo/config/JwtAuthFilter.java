@@ -23,9 +23,6 @@ import java.util.regex.Pattern;
 @Log4j2
 @AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-    private final String AUTHORIZATION_HEADER = "Authorization";
-    private final String PREFIX_BEARER = "Bearer ";
-
     private final UserService userService;
 
     public boolean isBypassToken(@NonNull HttpServletRequest request) {
@@ -41,7 +38,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 "/swagger-ui.html",
                 "/swagger-ui/index.html",
                 "/webjars/swagger-ui/**",
-                "/auth"
+                "/logout"
         };
 
         String requestPath = request.getServletPath();
@@ -71,14 +68,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
 
-            final String authHeader = request.getHeader(AUTHORIZATION_HEADER);
+            final String authHeader = request.getHeader(JwtUtil.AUTHORIZATION_HEADER);
 
-            if (authHeader == null || !authHeader.startsWith(PREFIX_BEARER)) {
+            if (authHeader == null || !authHeader.startsWith(JwtUtil.BEARER_PREFIX)) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
                 return;
             }
 
-            final String token = authHeader.substring(PREFIX_BEARER.length());
+            final String token = authHeader.substring(JwtUtil.BEARER_PREFIX.length());
             final String username = JwtUtil.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
