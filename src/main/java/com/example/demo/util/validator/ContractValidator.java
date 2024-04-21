@@ -1,11 +1,11 @@
-package com.example.demo.utils.validator;
+package com.example.demo.util.validator;
 
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NotNullException;
 import com.example.demo.message.ContractMessage;
 import com.example.demo.model.DTO.contract.ContractDTO;
 import com.example.demo.model.DTO.contract.ContractUpdateDTO;
-import com.example.demo.utils.MyUtils;
+import com.example.demo.util.MyUtils;
 import lombok.extern.log4j.Log4j2;
 
 import java.time.LocalDate;

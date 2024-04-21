@@ -7,7 +7,7 @@ import com.example.demo.exception.DuplicatedException;
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.helpers.CsvHelper;
+import com.example.demo.helper.CsvHelper;
 import com.example.demo.message.ContractMessage;
 import com.example.demo.message.FileMessage;
 import com.example.demo.message.GlobalMessage;
@@ -19,9 +19,9 @@ import com.example.demo.repository.ContractRepository;
 import com.example.demo.service.interfaces.ApartmentService;
 import com.example.demo.service.interfaces.ContractService;
 import com.example.demo.service.interfaces.CustomerService;
-import com.example.demo.utils.MyUtils;
-import com.example.demo.utils.validator.ContractValidator;
-import com.example.demo.utils.validator.FileValidator;
+import com.example.demo.util.MyUtils;
+import com.example.demo.util.validator.ContractValidator;
+import com.example.demo.util.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -35,7 +35,7 @@ import java.util.*;
 @Service
 @AllArgsConstructor
 @Log4j2
-public class ContractServiceImp implements ContractService {
+public class ContractServiceImpl implements ContractService {
     private final ContractRepository contractRepository;
     private final CustomerService customerService;
     private final ApartmentService apartmentService;
@@ -252,8 +252,8 @@ public class ContractServiceImp implements ContractService {
     }
 
     @Override
-    public Map<String, Object> search(String query, Pageable pageable){
-        if(query == null || query.trim().isEmpty())
+    public Map<String, Object> search(String query, Pageable pageable) {
+        if (query == null || query.trim().isEmpty())
             throw new InValidException(GlobalMessage.NOT_NULL_QUERY);
 
         Map<String, Object> result = new HashMap<>();

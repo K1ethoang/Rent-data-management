@@ -1,4 +1,4 @@
-package com.example.demo.utils;
+package com.example.demo.util;
 
 import lombok.extern.log4j.Log4j2;
 

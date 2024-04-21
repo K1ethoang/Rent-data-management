@@ -1,11 +1,11 @@
-package com.example.demo.utils.validator;
+package com.example.demo.util.validator;
 
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NotNullException;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.model.DTO.customer.CustomerDTO;
 import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
-import com.example.demo.utils.MyUtils;
+import com.example.demo.util.MyUtils;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2

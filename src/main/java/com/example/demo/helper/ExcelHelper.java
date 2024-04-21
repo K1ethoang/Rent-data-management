@@ -1,4 +1,4 @@
-package com.example.demo.helpers;
+package com.example.demo.helper;
 
 import com.example.demo.exception.InValidException;
 import com.example.demo.message.FileMessage;

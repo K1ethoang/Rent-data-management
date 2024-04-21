@@ -5,7 +5,7 @@ import com.example.demo.exception.DuplicatedException;
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
 import com.example.demo.exception.NotFoundException;
-import com.example.demo.helpers.CsvHelper;
+import com.example.demo.helper.CsvHelper;
 import com.example.demo.message.ApartmentMessage;
 import com.example.demo.message.FileMessage;
 import com.example.demo.message.GlobalMessage;
@@ -15,11 +15,10 @@ import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.ApartmentRepository;
 import com.example.demo.service.interfaces.ApartmentService;
-import com.example.demo.utils.validator.ApartmentValidator;
-import com.example.demo.utils.validator.FileValidator;
+import com.example.demo.util.validator.ApartmentValidator;
+import com.example.demo.util.validator.FileValidator;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,7 +30,7 @@ import java.util.*;
 @Service
 @AllArgsConstructor
 @Log4j2
-public class ApartmentServiceImp implements ApartmentService {
+public class ApartmentServiceImpl implements ApartmentService {
     private final ApartmentRepository apartmentRepository;
 
     @Override
@@ -222,8 +221,8 @@ public class ApartmentServiceImp implements ApartmentService {
     }
 
     @Override
-    public Map<String, Object> search(String query, Pageable pageable) throws InValidException{
-        if(query == null || query.trim().isEmpty())
+    public Map<String, Object> search(String query, Pageable pageable) throws InValidException {
+        if (query == null || query.trim().isEmpty())
             throw new InValidException(GlobalMessage.NOT_NULL_QUERY);
 
         Map<String, Object> result = new HashMap<>();

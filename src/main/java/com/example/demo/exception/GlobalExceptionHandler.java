@@ -5,8 +5,9 @@ import com.example.demo.response.ErrorResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.nio.file.AccessDeniedException;
 
 @Log4j2
 @RestControllerAdvice
@@ -32,13 +33,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DuplicatedException.class)
-    public ErrorResponse handlerNoContentException(DuplicatedException e) {
+    public ErrorResponse handlerDuplicatedException(DuplicatedException e) {
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ErrorResponse handlerAccessDeniedException(AccessDeniedException e) {
+        return new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), e.getMessage());
     }
 
     // Exception hệ thống
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handlerException(Exception e) {
         return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage());
     }
