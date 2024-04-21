@@ -18,10 +18,7 @@ import com.example.demo.util.validator.UserValidator;
 import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -29,14 +26,12 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 @Log4j2
 public class UserServiceImpl implements UserService {
-    private static final long EXPIRED_RT = 7 * 24 * 60 * 60; // 7 days (Second)
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final boolean DEFAULT_STATUS = true;
@@ -95,25 +90,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String updateRefreshToken(String userId) throws NotFoundException {
-        User user = getUser(userId);
+    public UserDto getUserByUsername(String username) throws NotFoundException {
+        Optional<User> userOptional = userRepository.findUserByUsername(username);
 
-        user.setRefreshToken(UUID.randomUUID().toString());
+        if (userOptional.isEmpty()) throw new NotFoundException(UserMessage.NOT_FOUND);
 
-        userRepository.save(user);
-        return user.getRefreshToken();
+        User user = userOptional.get();
+
+        return EntityToDto.userToDto(user);
     }
 
-    @Override
-    public String createRefreshToken(String userId) {
-        User user = getUser(userId);
-
-        user.setRefreshToken(UUID.randomUUID().toString());
-        user.setExpRefreshToken(LocalDateTime.now().plusSeconds(EXPIRED_RT));
-
-        userRepository.save(user);
-        return user.getRefreshToken();
-    }
 
     @Override
     public UserDto getUserDTO(String userId) {
@@ -139,20 +125,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> userOptional = userRepository.findUserByUsername(username);
-
-        if (userOptional.isEmpty())
-            throw new UsernameNotFoundException(UserMessage.NOT_FOUND);
-
-        User user = userOptional.get();
+        User user =
+                userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(UserMessage.NOT_FOUND));
 
         List<SimpleGrantedAuthority> grantedAuthorities =
                 user.getAuthorities().stream().map(authority -> new SimpleGrantedAuthority(authority.getAuthority())).collect(Collectors.toList());
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(username, null,
-                grantedAuthorities);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         return new org.springframework.security.core.userdetails.User(user.getUsername(),
                 user.getPassword(), grantedAuthorities);

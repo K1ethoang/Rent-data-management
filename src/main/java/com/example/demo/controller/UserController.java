@@ -21,8 +21,7 @@ public class UserController {
 
     @GetMapping("/details")
     public ResponseEntity<Object> details(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader(JwtUtil.AUTHORIZATION_HEADER);
-        String token = authorizationHeader.substring(JwtUtil.BEARER_PREFIX.length());
+        String token = JwtUtil.getTokenFromRequest(request);
 
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
                 userService.getUserDetailsFromToken(token));

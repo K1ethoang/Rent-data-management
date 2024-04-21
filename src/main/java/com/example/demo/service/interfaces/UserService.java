@@ -11,9 +11,7 @@ public interface UserService extends UserDetailsService {
 
     UserDto getUserDetailsFromRefreshToken(String token);
 
-    String updateRefreshToken(String userId);
-
-    String createRefreshToken(String userId);
+    UserDto getUserByUsername(String username);
 
     UserDto getUserDTO(String userId);
 

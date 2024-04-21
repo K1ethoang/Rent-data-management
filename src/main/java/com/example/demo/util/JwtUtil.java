@@ -6,6 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.crypto.SecretKey;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 public class JwtUtil {
@@ -60,5 +61,14 @@ public class JwtUtil {
 
     public static String extractUsername(String token) {
         return extractAllClaims(token).getIssuer();
+    }
+
+    public static String getTokenFromRequest(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader(JwtUtil.AUTHORIZATION_HEADER);
+        String token = null;
+
+        token = authorizationHeader.substring(JwtUtil.BEARER_PREFIX.length());
+
+        return token;
     }
 }

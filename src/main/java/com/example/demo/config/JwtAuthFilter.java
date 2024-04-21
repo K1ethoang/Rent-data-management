@@ -1,5 +1,6 @@
 package com.example.demo.config;
 
+import com.example.demo.service.interfaces.TokenService;
 import com.example.demo.service.interfaces.UserService;
 import com.example.demo.util.JwtUtil;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserService userService;
+    private final TokenService tokenService;
 
     public boolean isBypassToken(@NonNull HttpServletRequest request) {
         String[] bypassToken = {
@@ -78,10 +80,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             final String token = authHeader.substring(JwtUtil.BEARER_PREFIX.length());
             final String username = JwtUtil.extractUsername(token);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (username != null) {
                 UserDetails userDetails = userService.loadUserByUsername(username);
+                String tokenFromDb = tokenService.getAccessToken(username);
 
-                if (JwtUtil.isValidAccessToken(token, userDetails)) {
+                if (JwtUtil.isValidAccessToken(token, userDetails) && token.equals(tokenFromDb)) {
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(userDetails, null,
                                     userDetails.getAuthorities());
@@ -92,7 +95,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
             chain.doFilter(request, response);
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.NaturalId;
@@ -38,6 +39,7 @@ public class User implements UserDetails {
     private String username;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column(name = "create_date", updatable = false, nullable = false)
@@ -46,6 +48,9 @@ public class User implements UserDetails {
     private LocalDateTime createDate;
 
     private Boolean status;
+
+    @Column(name = "access_token")
+    private String accessToken;
 
     @Column(name = "refresh_token")
     private String refreshToken;

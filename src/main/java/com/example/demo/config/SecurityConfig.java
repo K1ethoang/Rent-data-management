@@ -28,8 +28,6 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors().disable().csrf().disable();
 
-        http.exceptionHandling();
-
         http.authorizeHttpRequests()
                 .antMatchers(
                         "/auth/**",
@@ -54,3 +52,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+

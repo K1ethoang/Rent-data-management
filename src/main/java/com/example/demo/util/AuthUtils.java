@@ -11,9 +11,9 @@ public class AuthUtils {
     /* kiểm tra username
      * Bắt đầu bằng chữ cái
      * Những ký tự còn lại có thể là chữ cái, chữ số và gạch dưới
-     * Độ dài: nhỏ nhất là 8, lớn nhất là 25
+     * Độ dài: nhỏ nhất là 4, lớn nhất là 25
      * */
-    public final static String REGEX_VALID_USERNAME = "^[A-Za-z][A-Za-z0-9_]{7,24}$";
+    public final static String REGEX_VALID_USERNAME = "^[A-Za-z][A-Za-z0-9_]{4,24}$";
     private final static int DEFAULT_LENGTH_PASSWORD_GENERATOR = 10;
     private static final BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
 

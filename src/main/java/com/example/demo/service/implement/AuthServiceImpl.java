@@ -12,6 +12,7 @@ import com.example.demo.model.DTO.register.RegisterDTO;
 import com.example.demo.model.DTO.user.UserDto;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.interfaces.AuthService;
+import com.example.demo.service.interfaces.TokenService;
 import com.example.demo.service.interfaces.UserService;
 import com.example.demo.util.AuthUtils;
 import com.example.demo.util.JwtUtil;
@@ -19,19 +20,18 @@ import com.example.demo.util.validator.AuthValidator;
 import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 @Log4j2
 public class AuthServiceImpl implements AuthService {
     private final UserService userService;
+    private final TokenService tokenService;
     private final MailServiceImpl mailService;
     private final UserRepository userRepository;
 
@@ -47,21 +47,20 @@ public class AuthServiceImpl implements AuthService {
             throw new InValidException(AuthMessage.CHECK_ACCOUNT);
         }
 
-        JwtResponseDTO jwtResponseDTO = JwtResponseDTO.builder()
-                .accessToken(JwtUtil.createAccessToken(userDetails))
-                .refreshToken(null)
-                .build();
-
-        UserDto user = userService.getUserDetailsFromToken(jwtResponseDTO.getAccessToken());
+        UserDto user = userService.getUserByUsername(userDetails.getUsername());
 
         if (!user.isStatus())
             throw new InValidException(AuthMessage.BLOCKED_USER);
 
-        String refreshToken = userService.createRefreshToken(user.getId());
+        String refreshToken = tokenService.createRefreshToken(user.getId());
+        String accessToken = JwtUtil.createAccessToken(userDetails);
 
-        jwtResponseDTO.setRefreshToken(refreshToken);
+        tokenService.updateAccessToken(user.getId(), accessToken);
 
-        return jwtResponseDTO;
+        return JwtResponseDTO.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
 
     @Override
@@ -83,25 +82,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void logout(String token) throws JwtException, NotFoundException {
-        if (JwtUtil.isAccessTokenExpired(token)) {
-            throw new JwtException(AuthMessage.TOKEN_EXPIRED);
-        }
-
+    public void logout(String token) throws JwtException, NotFoundException, InValidException {
         String username = JwtUtil.extractUsername(token);
-        Optional<User> userOptional = userRepository.findUserByUsername(username);
+        User user =
+                userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException(UserMessage.NOT_FOUND));
 
-        if (userOptional.isEmpty())
-            throw new NotFoundException(UserMessage.NOT_FOUND);
+        String tokenFromDb = user.getAccessToken();
 
-        User user = userOptional.get();
-
-        user.setExpRefreshToken(null);
-        user.setRefreshToken(null);
-
-        SecurityContextHolder.clearContext();
-
-        userRepository.save(user);
+        if (tokenFromDb != null && tokenFromDb.equals(token)) {
+            user.setAccessToken(null);
+            user.setRefreshToken(null);
+            user.setExpRefreshToken(null);
+            userRepository.save(user);
+        } else throw new InValidException(AuthMessage.TOKEN_EXPIRED);
     }
 
     @Override
@@ -115,15 +108,15 @@ public class AuthServiceImpl implements AuthService {
 
         UserDetails userDetails = userService.loadUserByUsername(user.getUsername());
 
+        String refreshToken = tokenService.updateRefreshToken(user.getId());
+        String accessToken = JwtUtil.createAccessToken(userDetails);
+
         JwtResponseDTO jwtResponseDTO = JwtResponseDTO.builder()
-                .accessToken(JwtUtil.createAccessToken(userDetails))
-                .refreshToken(null)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
 
-
-        String refreshToken = userService.updateRefreshToken(user.getId());
-
-        jwtResponseDTO.setRefreshToken(refreshToken);
+        tokenService.updateAccessToken(user.getId(), accessToken);
 
         return jwtResponseDTO;
     }
