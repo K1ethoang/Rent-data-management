@@ -29,7 +29,7 @@ public class CustomerController {
     private final CustomerService customerService;
     private final String DEFAULT_PAGE_NUMBER = "0";
     private final String DEFAULT_PAGE_SIZE = "10";
-    private final String DEFAULT_SORT_BY = "age";
+    private final String DEFAULT_SORT_BY = "dob";
 
     // [GET] /customers
     @GetMapping("")

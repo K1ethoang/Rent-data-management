@@ -84,7 +84,7 @@ public class ApartmentController {
                                                            DEFAULT_PAGE_SIZE) int pageSize,
                                                    @RequestParam(defaultValue =
                                                            DEFAULT_SORT_BY) String sortBy,
-                                                   @RequestParam("q") String query) {
+                                                   @RequestParam(value = "q") String query) {
 
         Pageable pageable = PageRequest.of(page, pageSize, Sort.by(sortBy));
 

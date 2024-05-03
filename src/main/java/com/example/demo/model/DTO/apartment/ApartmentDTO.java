@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApartmentDTO {
+    private String id;
     private String address;
     private String retailPrice;
     private String numberOfRoom;

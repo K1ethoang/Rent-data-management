@@ -39,13 +39,14 @@ public class ApartmentValidator {
     public static void validatorApartmentDTO(ApartmentDTO apartmentDTO) {
         notNullAddress(apartmentDTO.getAddress());
         notNullRetailPrice(apartmentDTO.getRetailPrice());
-        invalidRetailPrice(apartmentDTO.getRetailPrice());
         notNullNumberOfRoom(apartmentDTO.getNumberOfRoom());
+
+        invalidRetailPrice(apartmentDTO.getRetailPrice());
         invalidNumberOfRoom(apartmentDTO.getNumberOfRoom());
 
         apartmentDTO.setAddress(apartmentDTO.getAddress().trim());
         apartmentDTO.setRetailPrice(apartmentDTO.getRetailPrice().trim());
-        apartmentDTO.setRetailPrice(MyUtils.formatMoney(apartmentDTO.getRetailPrice()));
+        apartmentDTO.setRetailPrice(String.valueOf(MyUtils.stringToDouble(apartmentDTO.getRetailPrice().trim())));
         apartmentDTO.setNumberOfRoom(apartmentDTO.getNumberOfRoom().trim());
     }
 
@@ -58,6 +59,7 @@ public class ApartmentValidator {
         if (apartmentUpdateDTO.getRetailPrice() != null) {
             notNullRetailPrice(apartmentUpdateDTO.getRetailPrice());
             invalidRetailPrice(apartmentUpdateDTO.getRetailPrice());
+            apartmentUpdateDTO.setRetailPrice(String.valueOf(MyUtils.stringToDouble(apartmentUpdateDTO.getRetailPrice().trim())));
             apartmentUpdateDTO.setRetailPrice(apartmentUpdateDTO.getRetailPrice().trim());
         }
 

@@ -37,13 +37,16 @@ public class ApartmentServiceImpl implements ApartmentService {
     public Map<String, Object> getAll(Pageable pageable) throws NoContentException {
         Map<String, Object> result = new HashMap<>();
 
-        Page<Apartment> pageResult =
+        Page<Apartment> pageEntity =
                 apartmentRepository.findAll(pageable);
 
-        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
+        Page<ApartmentDTO> pageDto =
+                pageEntity.map(EntityToDto::apartmentToDto);
+
+        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageDto);
 
         result.put("page", apiPageableDTO);
-        result.put("apartments", pageResult.getContent());
+        result.put("apartments", pageDto.getContent());
 
         return result;
     }
@@ -72,7 +75,7 @@ public class ApartmentServiceImpl implements ApartmentService {
 
         Apartment apartment = Apartment.builder()
                 .address(apartmentToCreate.getAddress())
-                .retailPrice(apartmentToCreate.getRetailPrice())
+                .retailPrice(Double.parseDouble(apartmentToCreate.getRetailPrice()))
                 .numberOfRoom(Integer.parseInt(apartmentToCreate.getNumberOfRoom()))
                 .build();
 
@@ -94,19 +97,15 @@ public class ApartmentServiceImpl implements ApartmentService {
                 .build();
 
         if (apartmentUpdate.getAddress() != null) {
-//            apartmentFromDB.setAddress(apartmentUpdate.getAddress());
             tempApartment.setAddress(apartmentUpdate.getAddress());
         }
         if (apartmentUpdate.getRetailPrice() != null) {
-//            apartmentFromDB.setRetailPrice(apartmentUpdate.getRetailPrice());
-            tempApartment.setRetailPrice(apartmentUpdate.getRetailPrice());
+            tempApartment.setRetailPrice(Double.parseDouble(apartmentUpdate.getRetailPrice()));
         }
         if (apartmentUpdate.getNumberOfRoom() != null) {
-//            apartmentFromDB.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom()));
             tempApartment.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom()));
         }
 
-//        checkDuplicated(EntityToDto.apartmentToDto(apartmentFromDB));
         checkDuplicated(EntityToDto.apartmentToDto(tempApartment));
 
         apartmentFromDB.setRetailPrice(tempApartment.getRetailPrice());
@@ -172,7 +171,7 @@ public class ApartmentServiceImpl implements ApartmentService {
             Apartment apartmentToAdd = Apartment.builder()
                     .address(apartmentList.get(i).getAddress())
                     .numberOfRoom(Integer.parseInt(apartmentList.get(i).getNumberOfRoom()))
-                    .retailPrice(apartmentList.get(i).getRetailPrice())
+                    .retailPrice(Double.parseDouble(apartmentList.get(i).getRetailPrice()))
                     .build();
 
 
@@ -200,7 +199,8 @@ public class ApartmentServiceImpl implements ApartmentService {
 
             if (!apartmentDTO.getAddress().equalsIgnoreCase(apartmentToCheck.getAddress()))
                 continue;
-            if (!apartmentDTO.getRetailPrice().equals(apartmentToCheck.getRetailPrice())) continue;
+            if (!apartmentDTO.getRetailPrice().equals(apartmentToCheck.getRetailPrice()))
+                continue;
             if (!apartmentDTO.getNumberOfRoom().equals(apartmentToCheck.getNumberOfRoom()))
                 continue;
 
@@ -214,7 +214,10 @@ public class ApartmentServiceImpl implements ApartmentService {
     @Override
     public File exportCsv(boolean getTemplate) {
         try {
-            return CsvHelper.exportApartments(apartmentRepository.findAll(), getTemplate);
+            List<ApartmentDTO> apartmentDTOS = new ArrayList<>();
+            apartmentRepository.findAll().forEach(apartment -> apartmentDTOS.add(EntityToDto.apartmentToDto(apartment)));
+            return CsvHelper.exportApartments(apartmentDTOS,
+                    getTemplate);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -227,13 +230,14 @@ public class ApartmentServiceImpl implements ApartmentService {
 
         Map<String, Object> result = new HashMap<>();
 
-        Page<Apartment> pageResult =
-                apartmentRepository.search(query.trim(), pageable);
+        Page<Apartment> pageEntity =
+                apartmentRepository.search(query, pageable);
+        Page<ApartmentDTO> pageDTOS = pageEntity.map(EntityToDto::apartmentToDto);
 
-        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
+        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageDTOS);
 
         result.put("page", apiPageableDTO);
-        result.put("apartments", pageResult.getContent());
+        result.put("apartments", pageDTOS.getContent());
 
         return result;
     }

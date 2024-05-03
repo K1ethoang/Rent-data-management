@@ -1,12 +1,15 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Nationalized;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -21,15 +24,19 @@ public class Customer {
     @Column(updatable = false, insertable = false)
     private String id;
 
-    @Column(name = "first_name", length = 50)
-    private String firstName;
+    @Column(name = "full_name", length = 100)
+    private String fullName;
 
-    @Column(name = "last_name", length = 50)
-    private String lastName;
-
+    @Nationalized
     private String address;
 
-    private int age;
+    @Column(name = "citizen_id")
+    private String citizenId;
 
-    private String status;
+    @Column(name = "date_of_birth")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dob;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
 }

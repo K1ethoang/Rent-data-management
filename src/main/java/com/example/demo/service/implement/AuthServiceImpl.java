@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserDto user = userService.getUserByUsername(userDetails.getUsername());
 
-        if (!user.isStatus())
+        if (!user.getActive())
             throw new InValidException(AuthMessage.BLOCKED_USER);
 
         String refreshToken = tokenService.createRefreshToken(user.getId());
@@ -103,7 +103,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserDto user = userService.getUserDetailsFromRefreshToken(refreshTokenDTO.getRefreshToken());
 
-        if (!user.isStatus())
+        if (!user.getActive())
             throw new InValidException(AuthMessage.BLOCKED_USER);
 
         UserDetails userDetails = userService.loadUserByUsername(user.getUsername());

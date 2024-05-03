@@ -2,17 +2,10 @@ package com.example.demo.model.DTO.user;
 
 import com.example.demo.entity.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class UserDto {
-    private String id;
+public class UserUpdateDto {
     private String email;
     private String username;
     @JsonIgnore
