@@ -12,27 +12,36 @@ import com.example.demo.model.DTO.user.UserDto;
 public class EntityToDto {
     public static CustomerDTO customerToDto(Customer customer) {
         return CustomerDTO.builder()
-                .age(String.valueOf(customer.getAge()))
-                .firstName(customer.getFirstName())
-                .lastName(customer.getLastName())
+                .id(customer.getId())
+                .fullName(customer.getFullName())
+                .citizenId(customer.getCitizenId())
                 .address(customer.getAddress())
+                .dob(customer.getDob().toString())
+                .phoneNumber(customer.getPhoneNumber())
                 .build();
     }
 
     public static ApartmentDTO apartmentToDto(Apartment apartment) {
         return ApartmentDTO.builder()
+                .id(apartment.getId())
                 .address(apartment.getAddress())
-                .retailPrice(apartment.getRetailPrice())
+                .retailPrice(String.valueOf(apartment.getRetailPrice()))
                 .numberOfRoom(String.valueOf(apartment.getNumberOfRoom()))
                 .build();
     }
 
     public static ContractDTO contractToDto(Contract contract) {
         return ContractDTO.builder()
+                .id(contract.getId())
+                .customerId(contract.getId())
+                .customerId(contract.getCustomer().getId())
+                .apartmentId(contract.getApartment().getId())
                 .startDate(contract.getStartDate().toString())
                 .endDate(contract.getEndDate().toString())
-                .apartmentId(contract.getApartment().getId())
-                .customerId(contract.getCustomer().getId())
+                .createDate(contract.getCreateDate().toString())
+                .retailPrice(contract.getRetailPrice().toString())
+                .total(contract.getTotal().toString())
+                .userId(contract.getUser().getId())
                 .build();
     }
 
@@ -42,8 +51,9 @@ public class EntityToDto {
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .password(user.getPassword())
-                .createDate(user.getCreateDate().toString())
-                .status(user.getStatus())
+                .createDate(String.valueOf(user.getCreateDate()))
+                .fullname(user.getFullname())
+                .active(user.getActive())
                 .role(user.getRole())
                 .build();
     }

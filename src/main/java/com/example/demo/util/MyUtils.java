@@ -6,6 +6,7 @@ import java.text.NumberFormat;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 
 @Log4j2
 public final class MyUtils {
@@ -51,5 +52,9 @@ public final class MyUtils {
 
     public static String cleanPath(String path) {
         return path.split("\\.")[0];
+    }
+
+    public static long getMonthBetweenTwoLocalDate(LocalDate startDate, LocalDate endDate) {
+        return ChronoUnit.MONTHS.between(startDate, endDate);
     }
 }

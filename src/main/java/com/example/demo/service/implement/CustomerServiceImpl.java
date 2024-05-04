@@ -25,13 +25,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
 @AllArgsConstructor
 @Log4j2
 public class CustomerServiceImpl implements CustomerService {
-    public static final String DEFAULT_STATUS = "Normal";
     private final CustomerRepository customerRepository;
 
 
@@ -39,13 +39,14 @@ public class CustomerServiceImpl implements CustomerService {
     public Map<String, Object> getAll(Pageable pageable) throws NoContentException {
         Map<String, Object> result = new HashMap<>();
 
-        Page<Customer> page =
+        Page<Customer> pageEntity =
                 customerRepository.findAll(pageable);
+        Page<CustomerDTO> PageDTOS = pageEntity.map(EntityToDto::customerToDto);
 
-        APIPageableDTO pageableResult = new APIPageableDTO(page);
+        APIPageableDTO pageableResult = new APIPageableDTO(PageDTOS);
 
         result.put("page", pageableResult);
-        result.put("customers", page.getContent());
+        result.put("customers", PageDTOS.getContent());
 
         return result;
     }
@@ -72,13 +73,12 @@ public class CustomerServiceImpl implements CustomerService {
 
         checkDuplicated(customerDTO);
 
-        //    private final ModelMapper mapper;
         Customer customer = Customer.builder()
-                .firstName(customerDTO.getFirstName())
-                .lastName(customerDTO.getLastName())
+                .fullName(customerDTO.getFullName())
+                .citizenId(customerDTO.getCitizenId())
                 .address(customerDTO.getAddress())
-                .status(DEFAULT_STATUS)
-                .age(Integer.parseInt(customerDTO.getAge()))
+                .dob(LocalDate.parse(customerDTO.getDob()))
+                .phoneNumber(customerDTO.getPhoneNumber())
                 .build();
 
         customerRepository.save(customer);
@@ -103,32 +103,31 @@ public class CustomerServiceImpl implements CustomerService {
 
         Customer storedCustomer = getCustomer(id);
 
-        Customer tempCustomer = Customer.builder()
-                .address(storedCustomer.getAddress())
-                .firstName(storedCustomer.getFirstName())
-                .lastName(storedCustomer.getLastName())
-                .age(storedCustomer.getAge())
-                .build();
+        CustomerDTO tempCustomer = EntityToDto.customerToDto(storedCustomer);
 
-        if (customerToUpdate.getFirstName() != null) {
-            tempCustomer.setFirstName(customerToUpdate.getFirstName());
+        if (customerToUpdate.getFullName() != null) {
+            tempCustomer.setFullName(customerToUpdate.getFullName());
         }
-        if (customerToUpdate.getLastName() != null) {
-            tempCustomer.setLastName(customerToUpdate.getLastName());
+        if (customerToUpdate.getDob() != null) {
+            tempCustomer.setDob(customerToUpdate.getDob());
         }
         if (customerToUpdate.getAddress() != null) {
             tempCustomer.setAddress(customerToUpdate.getAddress());
         }
-        if (customerToUpdate.getAge() != null) {
-            tempCustomer.setAge(Integer.parseInt(customerToUpdate.getAge()));
+        if (customerToUpdate.getCitizenId() != null) {
+            tempCustomer.setCitizenId(customerToUpdate.getCitizenId());
+        }
+        if (customerToUpdate.getPhoneNumber() != null) {
+            tempCustomer.setPhoneNumber(customerToUpdate.getPhoneNumber());
         }
 
-        checkDuplicated(EntityToDto.customerToDto(tempCustomer));
+        checkDuplicated(tempCustomer);
 
+        storedCustomer.setFullName(tempCustomer.getFullName());
         storedCustomer.setAddress(tempCustomer.getAddress());
-        storedCustomer.setFirstName(tempCustomer.getFirstName());
-        storedCustomer.setLastName(tempCustomer.getLastName());
-        storedCustomer.setAge(tempCustomer.getAge());
+        storedCustomer.setPhoneNumber(tempCustomer.getPhoneNumber());
+        storedCustomer.setDob(LocalDate.parse(tempCustomer.getDob()));
+        storedCustomer.setCitizenId(tempCustomer.getCitizenId());
 
         customerRepository.save(storedCustomer);
 
@@ -147,24 +146,20 @@ public class CustomerServiceImpl implements CustomerService {
     public void checkDuplicated(CustomerDTO customerToCheck) throws DuplicatedException {
         List<Customer> customerList = customerRepository.findAll();
 
-        boolean isDuplicate = false;
-
         for (Customer customer : customerList) {
+            // kiểm tra xem có phải customer đang check có trong danh sách không
+            if (customerToCheck.getId() != null && customerToCheck.getId().equals(customer.getId()))
+                continue;
+
             CustomerDTO customerFromList = EntityToDto.customerToDto(customer);
 
-            if (!customerFromList.getFirstName().equalsIgnoreCase(customerToCheck.getFirstName()))
-                continue;
-            if (!customerFromList.getLastName().equalsIgnoreCase(customerToCheck.getLastName()))
-                continue;
-            if (!customerFromList.getAddress().equalsIgnoreCase(customerToCheck.getAddress()))
-                continue;
-            if (!customerFromList.getAge().equals(customerToCheck.getAge())) continue;
-
-            isDuplicate = true;
-            break;
+            if (customerFromList.getPhoneNumber().equals(customerToCheck.getPhoneNumber())) {
+                throw new DuplicatedException(CustomerMessage.DUPLICATED_PHONE_NUMBER);
+            }
+            if (customerFromList.getCitizenId().equals(customerToCheck.getCitizenId())) {
+                throw new DuplicatedException(CustomerMessage.DUPLICATED_CITIZEN_ID);
+            }
         }
-
-        if (isDuplicate) throw new DuplicatedException(CustomerMessage.CUSTOMER_EXIST);
     }
 
     @Override
@@ -199,11 +194,11 @@ public class CustomerServiceImpl implements CustomerService {
             }
 
             Customer customerToAdd = Customer.builder()
-                    .firstName(customerList.get(i).getFirstName())
-                    .lastName(customerList.get(i).getLastName())
+                    .fullName(customerList.get(i).getFullName())
+                    .citizenId(customerList.get(i).getCitizenId())
+                    .dob(LocalDate.parse(customerList.get(i).getDob()))
+                    .phoneNumber(customerList.get(i).getPhoneNumber())
                     .address(customerList.get(i).getAddress())
-                    .status(CustomerServiceImpl.DEFAULT_STATUS)
-                    .age(Integer.parseInt(customerList.get(i).getAge()))
                     .build();
 
             customerRepository.save(customerToAdd);
@@ -222,7 +217,9 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public File exportCsv(boolean getTemplate) {
         try {
-            return CsvHelper.exportCustomers(customerRepository.findAll(), getTemplate);
+            List<CustomerDTO> customerDTOS = new ArrayList<>();
+            customerRepository.findAll().forEach(customer -> customerDTOS.add(EntityToDto.customerToDto(customer)));
+            return CsvHelper.exportCustomers(customerDTOS, getTemplate);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -235,13 +232,13 @@ public class CustomerServiceImpl implements CustomerService {
 
         Map<String, Object> result = new HashMap<>();
 
-        Page<Customer> page =
-                customerRepository.search(query.trim(), pageable);
+        Page<Customer> pageEntity = customerRepository.search(query.trim(), pageable);
+        Page<CustomerDTO> pageDTOS = pageEntity.map(EntityToDto::customerToDto);
 
-        APIPageableDTO pageableResult = new APIPageableDTO(page);
+        APIPageableDTO pageableResult = new APIPageableDTO(pageDTOS);
 
         result.put("page", pageableResult);
-        result.put("customers", page.getContent());
+        result.put("customers", pageDTOS.getContent());
 
         return result;
     }

@@ -12,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -42,12 +43,14 @@ public class User implements UserDetails {
     @JsonIgnore
     private String password;
 
+    private String fullname;
+
     @Column(name = "create_date", updatable = false, nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
     @CreatedDate
-    private LocalDateTime createDate;
+    private LocalDate createDate;
 
-    private Boolean status;
+    private Boolean active;
 
     @Column(name = "access_token")
     private String accessToken;
@@ -57,12 +60,6 @@ public class User implements UserDetails {
 
     @Column(name = "exp_refresh_token")
     private LocalDateTime expRefreshToken;
-
-    @Column(name = "exp_reset_password_token")
-    private LocalDateTime expResetPasswordToken;
-
-    @Column(name = "reset_password_token")
-    private String resetPasswordToken;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
@@ -100,6 +97,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return status;
+        return active;
     }
 }

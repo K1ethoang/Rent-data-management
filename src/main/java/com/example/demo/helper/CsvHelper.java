@@ -1,8 +1,5 @@
 package com.example.demo.helper;
 
-import com.example.demo.entity.Apartment;
-import com.example.demo.entity.Contract;
-import com.example.demo.entity.Customer;
 import com.example.demo.exception.InValidException;
 import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.apartment.ApartmentDTO;
@@ -27,10 +24,11 @@ public class CsvHelper {
     public static final String TYPE = "text/csv";
 
     // Header row
-    public static final String[] CUSTOMER_HEADER = {"First Name", "Last Name", "Address", "Age"};
+    public static final String[] CUSTOMER_HEADER = {"Full name", "Citizen id", "Address", "Date " +
+            "of birth", "Phone number"};
     public static final String[] APARTMENT_HEADER = {"Address", "Number of room", "Retail price"};
     public static final String[] CONTRACT_HEADER = {"Customer ID", "Apartment ID", "Start Date",
-            "End Date"};
+            "End Date", "Create date", "Retail price", "Total", "User ID"};
 
     public static boolean hasCsvFormat(MultipartFile file) {
         return (TYPE.equals(file.getContentType()));
@@ -68,10 +66,11 @@ public class CsvHelper {
             for (CSVRecord record : csvRecords) {
                 try {
                     CustomerDTO customerDTO = CustomerDTO.builder()
-                            .firstName(record.get(CUSTOMER_HEADER[0]))
-                            .lastName(record.get(CUSTOMER_HEADER[1]))
+                            .fullName(record.get(CUSTOMER_HEADER[0]))
+                            .citizenId(record.get(CUSTOMER_HEADER[1]))
                             .address(record.get(CUSTOMER_HEADER[2]))
-                            .age(record.get(CUSTOMER_HEADER[3]))
+                            .dob(record.get(CUSTOMER_HEADER[3]))
+                            .phoneNumber(record.get(CUSTOMER_HEADER[4]))
                             .build();
 
                     customerList.add(customerDTO);
@@ -167,6 +166,10 @@ public class CsvHelper {
                         .apartmentId(record.get(CONTRACT_HEADER[1]))
                         .startDate(record.get(CONTRACT_HEADER[2]))
                         .endDate(record.get(CONTRACT_HEADER[3]))
+                        .createDate(record.get(CONTRACT_HEADER[4]))
+                        .retailPrice(record.get(CONTRACT_HEADER[5]))
+                        .total(record.get(CONTRACT_HEADER[6]))
+                        .userId(record.get(CONTRACT_HEADER[7]))
                         .build();
 
                 contractList.add(contractDTO);
@@ -178,7 +181,7 @@ public class CsvHelper {
         }
     }
 
-    public static File exportCustomers(List<Customer> customerList, boolean getTemplate) throws Exception {
+    public static File exportCustomers(List<CustomerDTO> customerList, boolean getTemplate) throws Exception {
         final String NAME_FILE = "customer_" + MyUtils.getDateNow() +
                 ".csv";
 
@@ -193,10 +196,11 @@ public class CsvHelper {
             if (getTemplate) {
                 printer.printRecord(Arrays.stream(CUSTOMER_HEADER).toArray());
 
-                row.add("Kiet");
-                row.add("Hoang");
+                row.add("Hoàng Gia Kiệt");
+                row.add("0123456789012");
                 row.add("239 Dien Bien Phu, Di An, Binh Duong");
-                row.add("21");
+                row.add("2003-01-12");
+                row.add("0892341453");
 
                 printer.printRecord(row);
             } else {
@@ -205,12 +209,13 @@ public class CsvHelper {
 
                 printer.printRecord(Arrays.stream(newHeader).toArray());
 
-                for (Customer customer : customerList) {
+                for (CustomerDTO customer : customerList) {
                     row.add(customer.getId());
-                    row.add(customer.getFirstName());
-                    row.add(customer.getLastName());
+                    row.add(customer.getFullName());
+                    row.add(customer.getCitizenId());
                     row.add(customer.getAddress());
-                    row.add(customer.getAge());
+                    row.add(customer.getDob());
+                    row.add(customer.getPhoneNumber());
 
                     printer.printRecord(row);
                     row.clear();
@@ -224,7 +229,7 @@ public class CsvHelper {
         }
     }
 
-    public static File exportApartments(List<Apartment> apartmentList, boolean getTemplate) throws Exception {
+    public static File exportApartments(List<ApartmentDTO> apartmentList, boolean getTemplate) throws Exception {
         final String NAME_FILE = "apartment_" + MyUtils.getDateNow() +
                 ".csv";
 
@@ -250,7 +255,7 @@ public class CsvHelper {
 
                 printer.printRecord(Arrays.stream(newHeader).toArray());
 
-                for (Apartment apartment : apartmentList) {
+                for (ApartmentDTO apartment : apartmentList) {
                     row.add(apartment.getId());
                     row.add(apartment.getAddress());
                     row.add(apartment.getNumberOfRoom());
@@ -267,7 +272,7 @@ public class CsvHelper {
         }
     }
 
-    public static File exportContracts(List<Contract> contractList, boolean getTemplate) throws Exception {
+    public static File exportContracts(List<ContractDTO> contractList, boolean getTemplate) throws Exception {
         final String NAME_FILE = "contract_" + MyUtils.getDateNow() +
                 ".csv";
 
@@ -282,10 +287,14 @@ public class CsvHelper {
             if (getTemplate) {
                 printer.printRecord(Arrays.stream(CONTRACT_HEADER).toArray());
 
-                row.add("<Customer ID>");
-                row.add("<Apartment ID>");
-                row.add("<YYYY-MM-DD>");
-                row.add("<YYYY-MM-DD>");
+                row.add("4683fef4-61f1-4186-8fab-be6855f164f5");
+                row.add("ea05f3a6-e8f6-4da7-9535-064aeaf2a9f9");
+                row.add("2023-04-17");
+                row.add("2025-04-17");
+                row.add("2025-04-15");
+                row.add("2300000");
+                row.add("43000000");
+                row.add("7c9081fe-41ef-4a6f-89e0-c371afdc694f");
 
                 printer.printRecord(row);
             } else {
@@ -293,12 +302,16 @@ public class CsvHelper {
                 newHeader.add(0, "ID");
 
                 printer.printRecord(newHeader);
-                for (Contract contract : contractList) {
+                for (ContractDTO contract : contractList) {
                     row.add(contract.getId());
-                    row.add(contract.getCustomer().getId());
-                    row.add(contract.getApartment().getId());
+                    row.add(contract.getCustomerId());
+                    row.add(contract.getApartmentId());
                     row.add(contract.getStartDate());
                     row.add(contract.getEndDate());
+                    row.add(contract.getCreateDate());
+                    row.add(contract.getRetailPrice());
+                    row.add(contract.getTotal());
+                    row.add(contract.getUserId());
 
                     printer.printRecord(row);
                     row.clear();

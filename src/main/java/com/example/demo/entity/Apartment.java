@@ -24,7 +24,7 @@ public class Apartment {
     private String address;
 
     @Column(name = "retail_price")
-    private String retailPrice;
+    private double retailPrice;
 
     @Column(name = "number_of_room")
     private int numberOfRoom;

@@ -10,8 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CustomerDTO {
-    private String firstName;
-    private String lastName;
+    private String id;
     private String address;
-    private String age;
+    private String fullName;
+    private String citizenId;
+    private String dob;
+    private String phoneNumber;
 }

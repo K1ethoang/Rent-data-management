@@ -5,20 +5,24 @@ import com.example.demo.exception.NotNullException;
 import com.example.demo.message.CustomerMessage;
 import com.example.demo.model.DTO.customer.CustomerDTO;
 import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
+import com.example.demo.util.AuthUtils;
 import com.example.demo.util.MyUtils;
 import lombok.extern.log4j.Log4j2;
 
+import java.time.LocalDate;
+
 @Log4j2
 public class CustomerValidator {
+    private static int LENGTH_OF_CITIZEN_ID = 12;
 
-    private static void notNullFirstname(String firstName) throws NotNullException {
-        if (firstName == null || firstName.trim().isEmpty())
-            throw new NotNullException(CustomerMessage.NOT_NULL_FIRST_NAME);
+    private static void notNullFullname(String fullName) throws NotNullException {
+        if (fullName == null || fullName.trim().isEmpty())
+            throw new NotNullException(CustomerMessage.NOT_NULL_FULL_NAME);
     }
 
-    private static void notNullLastname(String lastName) throws NotNullException {
-        if (lastName == null || lastName.trim().isEmpty())
-            throw new NotNullException(CustomerMessage.NOT_NULL_LAST_NAME);
+    private static void notNullCitizenId(String citizenId) throws NotNullException {
+        if (citizenId == null || citizenId.trim().isEmpty())
+            throw new NotNullException(CustomerMessage.NOT_NULL_CITIZEN_ID);
     }
 
     private static void notNullAddress(String address) throws NotNullException {
@@ -26,43 +30,54 @@ public class CustomerValidator {
             throw new NotNullException(CustomerMessage.NOT_NULL_ADDRESS);
     }
 
-    private static void notNullAge(String age) throws NotNullException {
-        if (age == null || age.trim().isEmpty())
-            throw new NotNullException(CustomerMessage.NOT_NULL_AGE);
+    private static void notNullDob(String dob) throws NotNullException {
+        if (dob == null || dob.trim().isEmpty())
+            throw new NotNullException(CustomerMessage.NOT_NULL_DOB);
     }
 
-    private static void notNullStatus(String status) throws NotNullException {
-        if (status == null || status.trim().isEmpty())
-            throw new NotNullException(CustomerMessage.NOT_NULL_STATUS);
+    private static void notNullPhoneNumber(String phoneNumber) throws NotNullException {
+        if (phoneNumber == null || phoneNumber.trim().isEmpty())
+            throw new NotNullException(CustomerMessage.NOT_NULL_PHONE_NUMBER);
     }
 
-    private static void invalidAge(String age) throws InValidException {
-        if (!(MyUtils.stringToInteger(age.trim()) >= 18))
-            throw new InValidException(CustomerMessage.INVALID_AGE);
+    private static void invalidDob(String dob) throws InValidException {
+        LocalDate dateOfBirth = MyUtils.stringToDate(dob.trim());
+        if (dateOfBirth == null || dateOfBirth.equals(LocalDate.now()))
+            throw new InValidException(CustomerMessage.INVALID_DOB);
+    }
+
+    private static void invalidPhoneNumber(String phoneNumber) throws InValidException {
+        if (!AuthUtils.isValidPhoneNumber(phoneNumber))
+            throw new InValidException(CustomerMessage.INVALID_PHONE_NUMBER);
+    }
+
+    private static void invalidCitizenId(String citizenId) throws InValidException {
+        if (!AuthUtils.isValidCitizenId(citizenId))
+            throw new InValidException(CustomerMessage.INVALID_CITIZEN_ID);
     }
 
     public static void validatorCustomerDTO(CustomerDTO customerDTO) {
-        notNullFirstname(customerDTO.getFirstName());
-        notNullLastname(customerDTO.getLastName());
+        notNullFullname(customerDTO.getFullName());
         notNullAddress(customerDTO.getAddress());
-        notNullAge(customerDTO.getAge());
-        invalidAge(customerDTO.getAge());
+        notNullCitizenId(customerDTO.getCitizenId());
+        notNullPhoneNumber(customerDTO.getPhoneNumber());
+        notNullDob(customerDTO.getDob());
 
+        invalidCitizenId(customerDTO.getCitizenId());
+        invalidPhoneNumber(customerDTO.getPhoneNumber());
+        invalidDob(customerDTO.getDob());
+
+        customerDTO.setFullName(customerDTO.getFullName().trim());
         customerDTO.setAddress(customerDTO.getAddress().trim());
-        customerDTO.setFirstName(customerDTO.getFirstName().trim());
-        customerDTO.setLastName(customerDTO.getLastName().trim());
-        customerDTO.setAge(customerDTO.getAge().trim());
+        customerDTO.setDob(customerDTO.getDob().trim());
+        customerDTO.setCitizenId(customerDTO.getCitizenId().trim());
+        customerDTO.setPhoneNumber(customerDTO.getPhoneNumber().trim());
     }
 
     public static void validatorCustomerUpdateDTO(CustomerUpdateDTO customerUpdateDTO) {
-        if (customerUpdateDTO.getFirstName() != null) {
-            notNullFirstname(customerUpdateDTO.getFirstName());
-            customerUpdateDTO.setFirstName(customerUpdateDTO.getFirstName().trim());
-        }
-
-        if (customerUpdateDTO.getLastName() != null) {
-            notNullLastname(customerUpdateDTO.getLastName());
-            customerUpdateDTO.setLastName(customerUpdateDTO.getLastName().trim());
+        if (customerUpdateDTO.getFullName() != null) {
+            notNullPhoneNumber(customerUpdateDTO.getFullName());
+            customerUpdateDTO.setFullName(customerUpdateDTO.getFullName().trim());
         }
 
         if (customerUpdateDTO.getAddress() != null) {
@@ -70,10 +85,22 @@ public class CustomerValidator {
             customerUpdateDTO.setAddress(customerUpdateDTO.getAddress().trim());
         }
 
-        if (customerUpdateDTO.getAge() != null) {
-            notNullAge(customerUpdateDTO.getAge());
-            invalidAge(customerUpdateDTO.getAge());
-            customerUpdateDTO.setAge(customerUpdateDTO.getAge().trim());
+        if (customerUpdateDTO.getDob() != null) {
+            notNullDob(customerUpdateDTO.getDob());
+            invalidDob(customerUpdateDTO.getCitizenId());
+            customerUpdateDTO.setDob(customerUpdateDTO.getDob().trim());
+        }
+
+        if (customerUpdateDTO.getCitizenId() != null) {
+            notNullCitizenId(customerUpdateDTO.getCitizenId());
+            invalidCitizenId(customerUpdateDTO.getCitizenId());
+            customerUpdateDTO.setDob(customerUpdateDTO.getCitizenId().trim());
+        }
+
+        if (customerUpdateDTO.getPhoneNumber() != null) {
+            notNullPhoneNumber(customerUpdateDTO.getPhoneNumber());
+            invalidPhoneNumber(customerUpdateDTO.getPhoneNumber());
+            customerUpdateDTO.setPhoneNumber(customerUpdateDTO.getPhoneNumber().trim());
         }
     }
 }
