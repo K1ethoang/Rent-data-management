@@ -32,6 +32,8 @@ public class EntityToDto {
 
     public static ContractDTO contractToDto(Contract contract) {
         return ContractDTO.builder()
+                .id(contract.getId())
+                .customerId(contract.getId())
                 .customerId(contract.getCustomer().getId())
                 .apartmentId(contract.getApartment().getId())
                 .startDate(contract.getStartDate().toString())

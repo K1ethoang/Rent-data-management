@@ -12,7 +12,10 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Log4j2
-public class ContractValidator {
+public class
+ContractValidator {
+    private static int MINIMUM_MONTH = 1;
+
     public static void notNullStartDate(String startDate) throws NotNullException {
         if (startDate == null || startDate.trim().isEmpty())
             throw new NotNullException(ContractMessage.NOT_NULL_START_DATE);
@@ -33,6 +36,11 @@ public class ContractValidator {
             throw new NotNullException(ContractMessage.NOT_NULL_APARTMENT_ID);
     }
 
+    public static void notNullUserId(String userId) throws NotNullException {
+        if (userId == null || userId.trim().isEmpty())
+            throw new NotNullException(ContractMessage.NOT_NULL_USER_ID);
+    }
+
     public static void invalidStartDate(String startDate) throws InValidException {
         if (MyUtils.stringToDate(startDate.trim()) == null)
             throw new InValidException(ContractMessage.INVALID_START_DATE);
@@ -44,23 +52,26 @@ public class ContractValidator {
     }
 
     public static void invalidStartDateAndEndDate(LocalDate startDate, LocalDate endDate) throws InValidException {
-        if (startDate.isAfter(endDate) || startDate.isEqual(endDate))
-            throw new InValidException(ContractMessage.START_DATE_LESS_THAN_END_DATE);
+        if ((startDate.isAfter(endDate) || startDate.isEqual(endDate)) || MyUtils.getMonthBetweenTwoLocalDate(startDate, endDate) < MINIMUM_MONTH)
+            throw new InValidException(ContractMessage.START_DATE_LESS_THAN_END_DATE + " and " + ContractMessage.MINIMUM_1_MONTH);
     }
 
     public static void validatorContractDTO(ContractDTO contractDTO) {
         notNullStartDate(contractDTO.getStartDate());
-        invalidStartDate(contractDTO.getStartDate());
         notNullEndDate(contractDTO.getEndDate());
-        invalidEndDate(contractDTO.getEndDate());
-        invalidStartDateAndEndDate(Objects.requireNonNull(MyUtils.stringToDate(contractDTO.getStartDate())), Objects.requireNonNull(MyUtils.stringToDate(contractDTO.getEndDate())));
         notNullCustomerId(contractDTO.getCustomerId());
         notNullApartmentId(contractDTO.getApartmentId());
+        notNullUserId(contractDTO.getUserId());
+
+        invalidStartDate(contractDTO.getStartDate());
+        invalidEndDate(contractDTO.getEndDate());
+        invalidStartDateAndEndDate(Objects.requireNonNull(MyUtils.stringToDate(contractDTO.getStartDate())), Objects.requireNonNull(MyUtils.stringToDate(contractDTO.getEndDate())));
 
         contractDTO.setStartDate(contractDTO.getStartDate().trim());
         contractDTO.setEndDate(contractDTO.getEndDate().trim());
         contractDTO.setApartmentId(contractDTO.getApartmentId().trim());
         contractDTO.setCustomerId(contractDTO.getCustomerId().trim());
+        contractDTO.setUserId(contractDTO.getUserId().trim());
     }
 
     public static void validatorContactUpdateDTO(ContractUpdateDTO contractUpdateDTO) {

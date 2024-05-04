@@ -147,6 +147,7 @@ public class CustomerServiceImpl implements CustomerService {
         List<Customer> customerList = customerRepository.findAll();
 
         for (Customer customer : customerList) {
+            // kiểm tra xem có phải customer đang check có trong danh sách không
             if (customerToCheck.getId() != null && customerToCheck.getId().equals(customer.getId()))
                 continue;
 

@@ -1,6 +1,5 @@
 package com.example.demo.helper;
 
-import com.example.demo.entity.Contract;
 import com.example.demo.exception.InValidException;
 import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.apartment.ApartmentDTO;
@@ -273,7 +272,7 @@ public class CsvHelper {
         }
     }
 
-    public static File exportContracts(List<Contract> contractList, boolean getTemplate) throws Exception {
+    public static File exportContracts(List<ContractDTO> contractList, boolean getTemplate) throws Exception {
         final String NAME_FILE = "contract_" + MyUtils.getDateNow() +
                 ".csv";
 
@@ -303,16 +302,16 @@ public class CsvHelper {
                 newHeader.add(0, "ID");
 
                 printer.printRecord(newHeader);
-                for (Contract contract : contractList) {
+                for (ContractDTO contract : contractList) {
                     row.add(contract.getId());
-                    row.add(contract.getCustomer().getId());
-                    row.add(contract.getApartment().getId());
+                    row.add(contract.getCustomerId());
+                    row.add(contract.getApartmentId());
                     row.add(contract.getStartDate());
                     row.add(contract.getEndDate());
                     row.add(contract.getCreateDate());
                     row.add(contract.getRetailPrice());
                     row.add(contract.getTotal());
-                    row.add(contract.getUser().getId());
+                    row.add(contract.getUserId());
 
                     printer.printRecord(row);
                     row.clear();

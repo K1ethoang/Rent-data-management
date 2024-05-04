@@ -3,6 +3,7 @@ package com.example.demo.service.implement;
 import com.example.demo.entity.Apartment;
 import com.example.demo.entity.Contract;
 import com.example.demo.entity.Customer;
+import com.example.demo.entity.User;
 import com.example.demo.exception.DuplicatedException;
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
@@ -19,6 +20,7 @@ import com.example.demo.repository.ContractRepository;
 import com.example.demo.service.interfaces.ApartmentService;
 import com.example.demo.service.interfaces.ContractService;
 import com.example.demo.service.interfaces.CustomerService;
+import com.example.demo.service.interfaces.UserService;
 import com.example.demo.util.MyUtils;
 import com.example.demo.util.validator.ContractValidator;
 import com.example.demo.util.validator.FileValidator;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -39,17 +42,19 @@ public class ContractServiceImpl implements ContractService {
     private final ContractRepository contractRepository;
     private final CustomerService customerService;
     private final ApartmentService apartmentService;
+    private final UserService userService;
 
     @Override
     public Map<String, Object> getAll(Pageable pageable) throws NoContentException {
         Map<String, Object> result = new HashMap<>();
 
-        Page<Contract> pageResult = contractRepository.findAll(pageable);
+        Page<Contract> pageEntity = contractRepository.findAll(pageable);
+        Page<ContractDTO> pageDto = pageEntity.map(EntityToDto::contractToDto);
 
-        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
+        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageDto);
 
         result.put("page", apiPageableDTO);
-        result.put("contracts", pageResult.getContent());
+        result.put("contracts", pageDto.getContent());
 
         return result;
     }
@@ -73,21 +78,28 @@ public class ContractServiceImpl implements ContractService {
     public ContractDTO create(ContractDTO contractDTO) {
         ContractValidator.validatorContractDTO(contractDTO);
 
-        checkDuplicated(contractDTO);
+        checkApartmentInUsing(contractDTO);
 
         Customer customerFromDB = customerService.getCustomer(contractDTO.getCustomerId());
         Apartment apartmentFromDB = apartmentService.getApartment(contractDTO.getApartmentId());
+        User userFromDB = userService.getUser(contractDTO.getUserId());
+
+        LocalDate startDate = LocalDate.parse(contractDTO.getStartDate());
+        LocalDate endDate = LocalDate.parse(contractDTO.getEndDate());
 
         Contract contractToCreate = Contract.builder()
-                .startDate(MyUtils.stringToDate(contractDTO.getStartDate()))
-                .endDate(MyUtils.stringToDate(contractDTO.getEndDate()))
+                .startDate(startDate)
+                .endDate(endDate)
+                .total(calculateTotal(startDate, endDate, apartmentFromDB))
+                .retailPrice(apartmentFromDB.getRetailPrice())
                 .customer(customerFromDB)
                 .apartment(apartmentFromDB)
+                .user(userFromDB)
                 .build();
 
-        contractRepository.save(contractToCreate);
+        Contract StoredContract = contractRepository.save(contractToCreate);
 
-        return contractDTO;
+        return EntityToDto.contractToDto(StoredContract);
     }
 
     @Override
@@ -96,12 +108,7 @@ public class ContractServiceImpl implements ContractService {
 
         Contract storedContract = getContract(id);
 
-        Contract tempContract = Contract.builder()
-                .startDate(storedContract.getStartDate())
-                .endDate(storedContract.getEndDate())
-                .customer(storedContract.getCustomer())
-                .apartment(storedContract.getApartment())
-                .build();
+        Contract tempContract = storedContract;
 
         if (contractUpdate.getCustomerId() != null) {
             Customer storedCustomer = customerService.getCustomer(contractUpdate.getCustomerId());
@@ -122,23 +129,34 @@ public class ContractServiceImpl implements ContractService {
         ContractValidator.invalidStartDateAndEndDate(tempContract.getStartDate(),
                 tempContract.getEndDate());
 
-        checkDuplicated(EntityToDto.contractToDto(tempContract));
+        checkApartmentInUsing(EntityToDto.contractToDto(tempContract));
 
         storedContract.setStartDate(tempContract.getStartDate());
         storedContract.setEndDate(tempContract.getEndDate());
         storedContract.setCustomer(tempContract.getCustomer());
         storedContract.setApartment(tempContract.getApartment());
 
-        contractRepository.save(storedContract);
+        // Update price and total
+        storedContract.setTotal(calculateTotal(storedContract.getStartDate(),
+                storedContract.getEndDate(), storedContract.getApartment()));
+        storedContract.setRetailPrice(storedContract.getApartment().getRetailPrice());
 
-        return EntityToDto.contractToDto(storedContract);
+        return EntityToDto.contractToDto(contractRepository.save(storedContract));
     }
 
     @Override
-    public ContractDTO delete(String id) throws NotFoundException {
+    public ContractDTO delete(String id) throws NotFoundException, InValidException {
         Contract contract = getContract(id);
 
-        contractRepository.delete(contract);
+        // Kiểm tra xem hợp đồng này đang còn hiệu lực không
+
+        LocalDate dateNow = LocalDate.parse(MyUtils.getDateNow());
+        if (dateNow.isBefore(contract.getStartDate()) || dateNow.isAfter(contract.getEndDate())) {
+            contractRepository.delete(contract);
+        } else {
+            throw new InValidException(ContractMessage.APARTMENT_USING);
+        }
+
 
         return EntityToDto.contractToDto(contract);
     }
@@ -184,7 +202,7 @@ public class ContractServiceImpl implements ContractService {
             }
 
             try {
-                checkDuplicated(contractList.get(i));
+                checkApartmentInUsing(contractList.get(i));
             } catch (DuplicatedException e) {
                 failedRows = failedRows.concat((i + 1) + " , ");
                 continue;
@@ -221,31 +239,34 @@ public class ContractServiceImpl implements ContractService {
         return response;
     }
 
-    public void checkDuplicated(ContractDTO contractToCheck) throws DuplicatedException {
-        List<Contract> contractList = contractRepository.findAll();
+    public void checkApartmentInUsing(ContractDTO contractToCheck) throws InValidException {
+        List<Contract> contractListByApartmentId =
+                contractRepository.getContractsByApartment_Id(contractToCheck.getApartmentId());
 
-        boolean isDuplicate = false;
+        LocalDate startDateOfNewContract = LocalDate.parse(contractToCheck.getStartDate());
+        LocalDate endDateOfNewContract = LocalDate.parse(contractToCheck.getEndDate());
 
-        for (Contract contract : contractList) {
-            ContractDTO contractFromList = EntityToDto.contractToDto(contract);
-
-            if (!contractFromList.getStartDate().equals(contractToCheck.getStartDate())) continue;
-            if (!contractFromList.getEndDate().equals(contractToCheck.getEndDate())) continue;
-            if (!contractFromList.getCustomerId().equals(contractToCheck.getCustomerId())) continue;
-            if (!contractFromList.getApartmentId().equals(contractToCheck.getApartmentId()))
+        for (Contract contract : contractListByApartmentId) {
+            // kiểm tra xem có phải contract đang check có trong danh sách không
+            if (contractToCheck.getId() != null && contractToCheck.getId().equals(contract.getId()))
                 continue;
 
-            isDuplicate = true;
-            break;
+            if (!(endDateOfNewContract.isBefore(contract.getStartDate()) || startDateOfNewContract.isAfter(contract.getEndDate())))
+                throw new InValidException(ContractMessage.APARTMENT_USING);
         }
-
-        if (isDuplicate) throw new DuplicatedException(ContractMessage.CONTRACT_EXIST);
     }
+
+    public double calculateTotal(LocalDate startDate, LocalDate endDate, Apartment apartment) {
+        return MyUtils.getMonthBetweenTwoLocalDate(startDate, endDate) * apartment.getRetailPrice();
+    }
+
 
     @Override
     public File exportCsv(Boolean getTemplate) {
         try {
-            return CsvHelper.exportContracts(contractRepository.findAll(), getTemplate);
+            List<ContractDTO> contractDTOList = new ArrayList<>();
+            contractRepository.findAll().forEach(contract -> contractDTOList.add(EntityToDto.contractToDto(contract)));
+            return CsvHelper.exportContracts(contractDTOList, getTemplate);
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -258,13 +279,13 @@ public class ContractServiceImpl implements ContractService {
 
         Map<String, Object> result = new HashMap<>();
 
-        Page<Contract> pageResult =
-                contractRepository.search(query.trim(), pageable);
+        Page<Contract> pageEntity = contractRepository.search(query.trim(), pageable);
+        Page<ContractDTO> pageDTOS = pageEntity.map(EntityToDto::contractToDto);
 
-        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResult);
+        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageDTOS);
 
         result.put("page", apiPageableDTO);
-        result.put("contracts", pageResult.getContent());
+        result.put("contracts", pageDTOS.getContent());
 
         return result;
     }

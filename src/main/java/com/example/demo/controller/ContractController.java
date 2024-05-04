@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 
@@ -65,11 +64,11 @@ public class ContractController {
     }
 
     // [POST] : contracts/import
-    @PostMapping("/import")
-    public ResponseEntity<Object> importCsvContract(@RequestParam("file") MultipartFile[] files) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
-                contractService.loadContracts(files));
-    }
+//    @PostMapping("/import")
+//    public ResponseEntity<Object> importCsvContract(@RequestParam("file") MultipartFile[] files) {
+//        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+//                contractService.loadContracts(files));
+//    }
 
     // [GET] : /contracts/search
     @GetMapping("/search")
