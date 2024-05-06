@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -64,6 +65,7 @@ public class ApartmentController {
     }
 
     // [DELETE] /apartments/delete/:id
+    @PreAuthorize("hasAuthority('MANAGER')")
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Object> delete(@PathVariable String id) {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, apartmentService.delete(id));
