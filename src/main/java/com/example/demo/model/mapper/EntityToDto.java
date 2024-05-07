@@ -52,9 +52,9 @@ public class EntityToDto {
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .createDate(String.valueOf(user.getCreateDate()))
-                .fullname(user.getFullname())
+                .fullName(user.getFullName())
                 .active(user.getActive())
-                .role(user.getRole())
+                .role(user.getRole().getName().name())
                 .build();
     }
 }

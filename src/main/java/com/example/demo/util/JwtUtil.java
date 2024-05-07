@@ -63,6 +63,10 @@ public class JwtUtil {
         return extractAllClaims(token).getIssuer();
     }
 
+    public static String extractRole(String token) {
+        return extractAllClaims(token).get("role").toString();
+    }
+
     public static String getTokenFromRequest(HttpServletRequest request) {
         String authorizationHeader = request.getHeader(JwtUtil.AUTHORIZATION_HEADER);
         String token = null;

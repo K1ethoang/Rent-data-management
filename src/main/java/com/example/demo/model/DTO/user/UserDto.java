@@ -1,6 +1,5 @@
 package com.example.demo.model.DTO.user;
 
-import com.example.demo.entity.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,10 +14,10 @@ public class UserDto {
     private String id;
     private String email;
     private String username;
+    private String fullName;
     @JsonIgnore
     private String password;
-    private String fullname;
     private String createDate;
     private Boolean active;
-    private Role role;
+    private String role;
 }

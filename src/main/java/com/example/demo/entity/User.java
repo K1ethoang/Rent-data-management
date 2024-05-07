@@ -43,7 +43,8 @@ public class User implements UserDetails {
     @JsonIgnore
     private String password;
 
-    private String fullname;
+    @Column(name = "full_name")
+    private String fullName;
 
     @Column(name = "create_date", updatable = false, nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd")
