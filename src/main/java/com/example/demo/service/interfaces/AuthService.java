@@ -13,4 +13,6 @@ public interface AuthService {
     void logout(String token);
 
     JwtResponseDTO refreshToken(RefreshTokenDTO refreshTokenDTO);
+
+    void resetPassword(String email);
 }

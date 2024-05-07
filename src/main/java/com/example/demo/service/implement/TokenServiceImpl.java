@@ -22,7 +22,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public String updateRefreshToken(String userId) throws NotFoundException {
-        User user = userService.getUser(userId);
+        User user = userService.getUserById(userId);
 
         user.setRefreshToken(UUID.randomUUID().toString());
 
@@ -31,9 +31,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String createRefreshToken(String userId) {
-        User user = userService.getUser(userId);
-
+    public String createRefreshToken(User user) {
         user.setRefreshToken(UUID.randomUUID().toString());
         user.setExpRefreshToken(LocalDateTime.now().plusSeconds(EXPIRED_RT));
 
@@ -42,7 +40,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     public void updateAccessToken(String userId, String token) {
-        User user = userService.getUser(userId);
+        User user = userService.getUserById(userId);
 
         user.setAccessToken(token);
         userRepository.save(user);

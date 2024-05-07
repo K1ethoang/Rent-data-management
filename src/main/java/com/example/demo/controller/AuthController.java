@@ -45,4 +45,11 @@ public class AuthController {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
                 authService.refreshToken(refreshTokenDTO));
     }
+
+    // [POST] /auth/resetPassword?email=...
+    @PostMapping("/resetPassword")
+    public ResponseEntity<Object> refreshToken(@RequestParam("email") String email) {
+        authService.resetPassword(email);
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, null);
+    }
 }

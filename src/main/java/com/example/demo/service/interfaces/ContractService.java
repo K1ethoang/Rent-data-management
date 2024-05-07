@@ -16,7 +16,7 @@ public interface ContractService {
 
     ContractDTO create(ContractDTO contractDTO);
 
-    ContractDTO update(String id, ContractUpdateDTO contractUpdate);
+    ContractDTO update(String id, ContractUpdateDTO contractUpdate, String token);
 
     ContractDTO delete(String id);
 

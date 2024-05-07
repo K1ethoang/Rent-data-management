@@ -1,6 +1,7 @@
 package com.example.demo.service.interfaces;
 
 import com.example.demo.entity.User;
+import com.example.demo.model.DTO.ChangePasswordDto;
 import com.example.demo.model.DTO.user.UserDto;
 import com.example.demo.model.DTO.user.UserUpdateDto;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,8 @@ public interface UserService extends UserDetailsService {
 
     void updateUser(String id, UserUpdateDto userUpdateDto, String token);
 
+    void changePassword(String id, ChangePasswordDto userUpdateDto, String token);
+
     void blockUser(String id);
 
     void unBlockUser(String id);
@@ -23,9 +26,13 @@ public interface UserService extends UserDetailsService {
 
     UserDto getUserDetailsFromRefreshToken(String token);
 
-    UserDto getUserByUsername(String username);
+    User getUserByUsername(String username);
+
+    User getUserByUsernameOrEmail(String username);
 
     UserDto getUserDTO(String userId);
 
-    User getUser(String userId);
+    User getUserById(String userId);
+
+    User getUserByEmail(String email);
 }

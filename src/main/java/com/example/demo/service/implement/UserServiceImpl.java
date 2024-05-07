@@ -3,12 +3,10 @@ package com.example.demo.service.implement;
 import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.enumuration.ERole;
-import com.example.demo.exception.DuplicatedException;
-import com.example.demo.exception.InValidException;
-import com.example.demo.exception.NoContentException;
-import com.example.demo.exception.NotFoundException;
+import com.example.demo.exception.*;
 import com.example.demo.message.AuthMessage;
 import com.example.demo.message.UserMessage;
+import com.example.demo.model.DTO.ChangePasswordDto;
 import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.DTO.user.UserDto;
 import com.example.demo.model.DTO.user.UserUpdateDto;
@@ -24,7 +22,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -81,7 +78,7 @@ public class UserServiceImpl implements UserService {
 
         User user = User.builder()
                 .email(userDto.getEmail())
-                .username(userDto.getUsername())
+                .username(userDto.getEmail())
                 .password(AuthUtils.encodePassword(DEFAULT_PASSWORD))
                 .active(DEFAULT_STATUS)
                 .fullName(userDto.getFullName())
@@ -92,13 +89,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateUser(String id, UserUpdateDto userUpdateDto, String token) throws JwtException, InValidException {
+    public void updateUser(String id, UserUpdateDto userUpdateDto, String token) throws JwtException, InValidException, ForbiddenException {
         if (JwtUtil.isAccessTokenExpired(token)) {
             throw new JwtException(AuthMessage.TOKEN_EXPIRED);
         }
+
         // Kiểm tra có phai user đó đang cập nhật profile mình không
         String username = JwtUtil.extractUsername(token);
-        User userFromDb = getUser(id);
+        User userFromDb = getUserById(id);
 
         if (JwtUtil.extractRole(token).equals(ERole.MANAGER.toString()) || username.equals(userFromDb.getUsername())) {
             UserValidator.validatorUserUpdateDTO(userUpdateDto);
@@ -108,9 +106,6 @@ public class UserServiceImpl implements UserService {
             // Update cho role staff
             if (userUpdateDto.getEmail() != null) {
                 tempUser.setEmail(userUpdateDto.getEmail());
-            }
-            if (userUpdateDto.getUsername() != null) {
-                tempUser.setUsername(userUpdateDto.getUsername());
             }
             if (userUpdateDto.getFullName() != null) {
                 tempUser.setFullName(userUpdateDto.getFullName());
@@ -134,19 +129,43 @@ public class UserServiceImpl implements UserService {
             if (roleNew.isEmpty()) throw new NotFoundException(AuthMessage.ROLE_NOT_FOUND);
 
             userFromDb.setEmail(tempUser.getEmail());
-            userFromDb.setUsername(tempUser.getUsername());
             userFromDb.setFullName(tempUser.getFullName());
             userFromDb.setActive(tempUser.getActive());
             userFromDb.setRole(roleNew.get());
 
             userRepository.save(userFromDb);
         } else
-            throw new InValidException(HttpStatus.FORBIDDEN.toString());
+            throw new ForbiddenException();
+    }
+
+    @Override
+    public void changePassword(String id, ChangePasswordDto changePasswordDto, String token) throws ForbiddenException {
+        if (JwtUtil.isAccessTokenExpired(token)) {
+            throw new JwtException(AuthMessage.TOKEN_EXPIRED);
+        }
+
+        // Kiểm tra có phai user đó đang cập nhật profile mình không
+        String username = JwtUtil.extractUsername(token);
+        User userFromDb = getUserById(id);
+
+        if (username.equals(userFromDb.getUsername())) {
+            UserValidator.validatorChangePasswordDTO(changePasswordDto);
+
+            // Kiểm tra password hiện tại có đúng không
+            if (!AuthUtils.isValidPassword(changePasswordDto.getCurrentPassword(), userFromDb.getPassword())) {
+                throw new InValidException(UserMessage.CURRENT_PASSWORD_NOT_MATCH);
+            }
+
+            userFromDb.setPassword(AuthUtils.encodePassword(changePasswordDto.getNewPassword()));
+            userRepository.save(userFromDb);
+
+        } else
+            throw new ForbiddenException();
     }
 
     @Override
     public void blockUser(String id) {
-        User userFromDb = getUser(id);
+        User userFromDb = getUserById(id);
 
         userFromDb.setActive(BLOCK_STATUS);
 
@@ -155,7 +174,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void unBlockUser(String id) {
-        User userFromDb = getUser(id);
+        User userFromDb = getUserById(id);
 
         userFromDb.setActive(UN_BLOCK_STATUS);
 
@@ -194,25 +213,41 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto getUserByUsername(String username) throws NotFoundException {
+    public User getUserByUsername(String username) throws NotFoundException {
         Optional<User> userOptional = userRepository.findUserByUsername(username);
 
         if (userOptional.isEmpty()) throw new NotFoundException(UserMessage.NOT_FOUND);
 
-        User user = userOptional.get();
+        return userOptional.get();
+    }
 
-        return EntityToDto.userToDto(user);
+    @Override
+    public User getUserByUsernameOrEmail(String username) throws NotFoundException {
+        Optional<User> userOptional = userRepository.findUserByUsernameOrEmail(username, username);
+
+        if (userOptional.isEmpty()) throw new NotFoundException(UserMessage.NOT_FOUND);
+
+        return userOptional.get();
     }
 
 
     @Override
     public UserDto getUserDTO(String userId) {
-        return EntityToDto.userToDto(getUser(userId));
+        return EntityToDto.userToDto(getUserById(userId));
     }
 
     @Override
-    public User getUser(String userId) throws NotFoundException {
+    public User getUserById(String userId) throws NotFoundException {
         Optional<User> userOptional = userRepository.findUserById(userId);
+
+        if (userOptional.isEmpty()) throw new NotFoundException(UserMessage.NOT_FOUND);
+
+        return userOptional.get();
+    }
+
+    @Override
+    public User getUserByEmail(String email) throws NotFoundException {
+        Optional<User> userOptional = userRepository.findUserByEmail(email);
 
         if (userOptional.isEmpty()) throw new NotFoundException(UserMessage.NOT_FOUND);
 
@@ -228,13 +263,11 @@ public class UserServiceImpl implements UserService {
             if (userToCheck.getId() != null && userToCheck.getId().equals(user.getId()))
                 continue;
 
+            // Mỗi tài khoản chỉ có duy nhất 1 username và 1 email
             UserDto userFromList = EntityToDto.userToDto(user);
 
-            if (userFromList.getEmail().equals(userToCheck.getUsername())) {
+            if (userFromList.getUsername().equals(userToCheck.getEmail()) || userFromList.getEmail().equals(userToCheck.getEmail())) {
                 throw new DuplicatedException(UserMessage.EMAIL_ALREADY_EXIST);
-            }
-            if (userFromList.getUsername().equals(userToCheck.getUsername())) {
-                throw new DuplicatedException(UserMessage.USERNAME_ALREADY_EXIST);
             }
         }
     }

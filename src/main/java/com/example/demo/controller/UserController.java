@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.message.GlobalMessage;
+import com.example.demo.model.DTO.ChangePasswordDto;
 import com.example.demo.model.DTO.user.UserDto;
 import com.example.demo.model.DTO.user.UserUpdateDto;
 import com.example.demo.response.ApiResponse;
@@ -83,6 +84,17 @@ public class UserController {
     @PostMapping("/unblock/{id}")
     public ResponseEntity<Object> unblock(@PathVariable("id") String id) {
         userService.unBlockUser(id);
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, null);
+    }
+
+    // [POST] /users/changePassword/:id
+
+    @PostMapping("/changePassword/{id}")
+    public ResponseEntity<Object> changePassword(@PathVariable("id") String id,
+                                                 @RequestBody ChangePasswordDto changePasswordDto
+            , HttpServletRequest request) {
+        String token = JwtUtil.getTokenFromRequest(request);
+        userService.changePassword(id, changePasswordDto, token);
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, null);
     }
 }

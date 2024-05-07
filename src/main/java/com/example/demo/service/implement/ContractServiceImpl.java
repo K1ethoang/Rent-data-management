@@ -4,11 +4,10 @@ import com.example.demo.entity.Apartment;
 import com.example.demo.entity.Contract;
 import com.example.demo.entity.Customer;
 import com.example.demo.entity.User;
-import com.example.demo.exception.DuplicatedException;
-import com.example.demo.exception.InValidException;
-import com.example.demo.exception.NoContentException;
-import com.example.demo.exception.NotFoundException;
+import com.example.demo.enumuration.ERole;
+import com.example.demo.exception.*;
 import com.example.demo.helper.CsvHelper;
+import com.example.demo.message.AuthMessage;
 import com.example.demo.message.ContractMessage;
 import com.example.demo.message.FileMessage;
 import com.example.demo.message.GlobalMessage;
@@ -21,9 +20,11 @@ import com.example.demo.service.interfaces.ApartmentService;
 import com.example.demo.service.interfaces.ContractService;
 import com.example.demo.service.interfaces.CustomerService;
 import com.example.demo.service.interfaces.UserService;
+import com.example.demo.util.JwtUtil;
 import com.example.demo.util.MyUtils;
 import com.example.demo.util.validator.ContractValidator;
 import com.example.demo.util.validator.FileValidator;
+import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -82,7 +83,7 @@ public class ContractServiceImpl implements ContractService {
 
         Customer customerFromDB = customerService.getCustomer(contractDTO.getCustomerId());
         Apartment apartmentFromDB = apartmentService.getApartment(contractDTO.getApartmentId());
-        User userFromDB = userService.getUser(contractDTO.getUserId());
+        User userFromDB = userService.getUserById(contractDTO.getUserId());
 
         LocalDate startDate = LocalDate.parse(contractDTO.getStartDate());
         LocalDate endDate = LocalDate.parse(contractDTO.getEndDate());
@@ -103,45 +104,58 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public ContractDTO update(String id, ContractUpdateDTO contractUpdate) {
-        ContractValidator.validatorContactUpdateDTO(contractUpdate);
+    public ContractDTO update(String id, ContractUpdateDTO contractUpdate, String token) throws JwtException, ForbiddenException {
+        if (JwtUtil.isAccessTokenExpired(token)) {
+            throw new JwtException(AuthMessage.TOKEN_EXPIRED);
+        }
+
+
+        // Kiểm tra có phải user update làm hợp đồng này không
+        String username = JwtUtil.extractUsername(token);
+        User userFromDb = userService.getUserByUsername(username);
 
         Contract storedContract = getContract(id);
 
-        Contract tempContract = storedContract;
+        if (JwtUtil.extractRole(token).equals(ERole.MANAGER.toString()) || storedContract.getUser().getId().equals(userFromDb.getId())) {
+            ContractValidator.validatorContactUpdateDTO(contractUpdate);
 
-        if (contractUpdate.getCustomerId() != null) {
-            Customer storedCustomer = customerService.getCustomer(contractUpdate.getCustomerId());
-            tempContract.setCustomer(storedCustomer);
-        }
-        if (contractUpdate.getApartmentId() != null) {
-            Apartment storedApartment =
-                    apartmentService.getApartment(contractUpdate.getApartmentId());
-            tempContract.setApartment(storedApartment);
-        }
-        if (contractUpdate.getStartDate() != null) {
-            tempContract.setStartDate(MyUtils.stringToDate(contractUpdate.getStartDate()));
-        }
-        if (contractUpdate.getEndDate() != null) {
-            tempContract.setEndDate(MyUtils.stringToDate(contractUpdate.getEndDate()));
-        }
+            Contract tempContract = storedContract;
 
-        ContractValidator.invalidStartDateAndEndDate(tempContract.getStartDate(),
-                tempContract.getEndDate());
+            if (contractUpdate.getCustomerId() != null) {
+                Customer storedCustomer = customerService.getCustomer(contractUpdate.getCustomerId());
+                tempContract.setCustomer(storedCustomer);
+            }
+            if (contractUpdate.getApartmentId() != null) {
+                Apartment storedApartment =
+                        apartmentService.getApartment(contractUpdate.getApartmentId());
+                tempContract.setApartment(storedApartment);
+            }
+            if (contractUpdate.getStartDate() != null) {
+                tempContract.setStartDate(MyUtils.stringToDate(contractUpdate.getStartDate()));
+            }
+            if (contractUpdate.getEndDate() != null) {
+                tempContract.setEndDate(MyUtils.stringToDate(contractUpdate.getEndDate()));
+            }
 
-        checkApartmentInUsing(EntityToDto.contractToDto(tempContract));
+            ContractValidator.invalidStartDateAndEndDate(tempContract.getStartDate(),
+                    tempContract.getEndDate());
 
-        storedContract.setStartDate(tempContract.getStartDate());
-        storedContract.setEndDate(tempContract.getEndDate());
-        storedContract.setCustomer(tempContract.getCustomer());
-        storedContract.setApartment(tempContract.getApartment());
+            checkApartmentInUsing(EntityToDto.contractToDto(tempContract));
 
-        // Update price and total
-        storedContract.setTotal(calculateTotal(storedContract.getStartDate(),
-                storedContract.getEndDate(), storedContract.getApartment()));
-        storedContract.setRetailPrice(storedContract.getApartment().getRetailPrice());
+            storedContract.setStartDate(tempContract.getStartDate());
+            storedContract.setEndDate(tempContract.getEndDate());
+            storedContract.setCustomer(tempContract.getCustomer());
+            storedContract.setApartment(tempContract.getApartment());
 
-        return EntityToDto.contractToDto(contractRepository.save(storedContract));
+            // Update price and total
+            storedContract.setTotal(calculateTotal(storedContract.getStartDate(),
+                    storedContract.getEndDate(), storedContract.getApartment()));
+            storedContract.setRetailPrice(storedContract.getApartment().getRetailPrice());
+
+            return EntityToDto.contractToDto(contractRepository.save(storedContract));
+
+        } else
+            throw new ForbiddenException();
     }
 
     @Override

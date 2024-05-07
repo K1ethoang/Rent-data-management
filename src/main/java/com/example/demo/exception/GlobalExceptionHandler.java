@@ -22,6 +22,11 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ErrorResponse handlerForbiddenException(ForbiddenException e) {
+        return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());
+    }
+
     @ExceptionHandler(NotNullException.class)
     public ErrorResponse handlerNotNullException(NotNullException e) {
         return new ErrorResponse(e.getHttpStatus().value(), e.getMessage());

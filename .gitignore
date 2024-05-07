@@ -34,3 +34,4 @@ build/
 
 ### FILE ###
 *.env.dev
+!/src/main/java/com/example/demo/controller/AuthController.java

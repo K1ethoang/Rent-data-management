@@ -10,5 +10,7 @@ public class AuthMessage {
     public final static String BLOCKED_USER = "This user is blocked";
     public final static String TOKEN_EXPIRED = "Token is expired";
     public final static String REFRESH_TOKEN_REQUIRED = "Refresh token is required";
+    public final static String ERROR_SEND_MAIL = "Have went wrong when send mail, please try " +
+            "again";
 
 }

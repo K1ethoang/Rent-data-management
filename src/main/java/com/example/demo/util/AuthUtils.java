@@ -11,7 +11,7 @@ public class AuthUtils {
     /* kiểm tra username
      * Bắt đầu bằng chữ cái
      * Những ký tự còn lại có thể là chữ cái, chữ số và gạch dưới
-     * Độ dài: nhỏ nhất là 4, lớn nhất là 25
+     * Độ dài: nhỏ nhất là 5, lớn nhất là 25
      * */
     public final static String REGEX_VALID_USERNAME = "[A-Za-z][A-Za-z0-9_]{4,24}";
     public final static String REGEX_VALID_PHONE_NUMBER = "0(3[2-9]|5[689]|7[06-9]|8[1-68-9]|9[0-46-9])[0-9]{7}";

@@ -31,11 +31,12 @@ public class User implements UserDetails {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
 
-    @NaturalId // định nghĩa cho các trường mà mặc định no là unique (vd: Số CCCD, email)
+    // định nghĩa cho các trường mà mặc định no là unique (vd: Số CCCD, email)
+    @NaturalId(mutable = true)
     @Column(nullable = false)
     private String email;
 
-    @NaturalId
+    @NaturalId(mutable = true)
     @Column(nullable = false)
     private String username;
 

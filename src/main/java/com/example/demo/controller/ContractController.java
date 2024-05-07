@@ -5,6 +5,7 @@ import com.example.demo.model.DTO.contract.ContractDTO;
 import com.example.demo.model.DTO.contract.ContractUpdateDTO;
 import com.example.demo.response.ApiResponse;
 import com.example.demo.service.interfaces.ContractService;
+import com.example.demo.util.JwtUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.FileUtils;
@@ -16,6 +17,7 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 
 @RestController
@@ -54,8 +56,12 @@ public class ContractController {
 
     // [UPDATE] : contracts/update/:id
     @PostMapping("/update/{id}")
-    public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody ContractUpdateDTO contractUpdate) {
-        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, contractService.update(id, contractUpdate));
+    public ResponseEntity<Object> update(@PathVariable("id") String id,
+                                         @RequestBody ContractUpdateDTO contractUpdate,
+                                         HttpServletRequest request) {
+        String token = JwtUtil.getTokenFromRequest(request);
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                contractService.update(id, contractUpdate, token));
     }
 
     // [DELETE] : contracts/delete/:id

@@ -21,7 +21,6 @@ import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -39,21 +38,23 @@ public class AuthServiceImpl implements AuthService {
     public JwtResponseDTO login(LoginDTO loginDTO) throws InValidException {
         AuthValidator.validatorLoginDTO(loginDTO);
 
-        UserDetails userDetails = null;
-
+        User user = null;
         try {
-            userDetails = userService.loadUserByUsername(loginDTO.getUsername());
-        } catch (UsernameNotFoundException e) {
+            user = userService.getUserByUsernameOrEmail(loginDTO.getUsername());
+
+        } catch (NotFoundException e) {
             throw new InValidException(AuthMessage.CHECK_ACCOUNT);
         }
 
-        UserDto user = userService.getUserByUsername(userDetails.getUsername());
+        if (!AuthUtils.isValidPassword(loginDTO.getPassword(), user.getPassword()))
+            throw new InValidException(AuthMessage.CHECK_ACCOUNT);
 
         if (!user.getActive())
             throw new InValidException(AuthMessage.BLOCKED_USER);
 
-        String refreshToken = tokenService.createRefreshToken(user.getId());
-        String accessToken = JwtUtil.createAccessToken(userDetails);
+        String refreshToken = tokenService.createRefreshToken(user);
+        String accessToken =
+                JwtUtil.createAccessToken(userService.loadUserByUsername(user.getUsername()));
 
         tokenService.updateAccessToken(user.getId(), accessToken);
 
@@ -74,7 +75,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         try {
             userService.createUser(userDto);
-            mailService.sendMail(userDto);
+            mailService.sendMailRegisterSuccess(userDto);
 
         } catch (MessagingException e) {
             throw new RuntimeException(e);
@@ -84,8 +85,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void logout(String token) throws JwtException, NotFoundException, InValidException {
         String username = JwtUtil.extractUsername(token);
-        User user =
-                userRepository.findUserByUsername(username).orElseThrow(() -> new NotFoundException(UserMessage.NOT_FOUND));
+        User user = userService.getUserByUsername(username);
 
         String tokenFromDb = user.getAccessToken();
 
@@ -94,7 +94,8 @@ public class AuthServiceImpl implements AuthService {
             user.setRefreshToken(null);
             user.setExpRefreshToken(null);
             userRepository.save(user);
-        } else throw new InValidException(AuthMessage.TOKEN_EXPIRED);
+        } else
+            throw new InValidException(AuthMessage.TOKEN_EXPIRED);
     }
 
     @Override
@@ -119,5 +120,27 @@ public class AuthServiceImpl implements AuthService {
         tokenService.updateAccessToken(user.getId(), accessToken);
 
         return jwtResponseDTO;
+    }
+
+    @Override
+    public void resetPassword(String email) throws InValidException, NotFoundException {
+        if (!AuthUtils.isValidEmail(email))
+            throw new InValidException(UserMessage.EMAIL_INVALID);
+
+        // Tìm xem có user nào với email này không
+        User userFromDb = userService.getUserByEmail(email);
+
+        String newPassword = AuthUtils.generatePassword();
+
+        // Gửi mail
+        try {
+            // Cập nhật mật khẩu mới vào database
+            userFromDb.setPassword(AuthUtils.encodePassword(newPassword));
+            userRepository.save(userFromDb);
+
+            mailService.sendMailNewPassword(email, newPassword);
+        } catch (MessagingException e) {
+            throw new RuntimeException(AuthMessage.ERROR_SEND_MAIL);
+        }
     }
 }
