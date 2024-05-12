@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserDto userDto = UserDto.builder()
                 .email(registerDTO.getEmail())
-                .username(registerDTO.getUsername())
+                .fullName(registerDTO.getFullName())
                 .password(AuthUtils.generatePassword())
                 .build();
         try {
