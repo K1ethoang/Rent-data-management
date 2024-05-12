@@ -15,6 +15,11 @@ public class AuthValidator {
             throw new NotNullException(UserMessage.EMAIL_REQUIRED);
     }
 
+    public static void notNullFullName(String fullName) throws NotNullException {
+        if (fullName == null || fullName.trim().isEmpty())
+            throw new NotNullException(UserMessage.FULLNAME_REQUIRED);
+    }
+
     public static void notNullUsername(String username) throws NotNullException {
         if (username == null || username.trim().isEmpty())
             throw new NotNullException(AuthMessage.USERNAME_REQUIRED);
@@ -48,11 +53,10 @@ public class AuthValidator {
     public static void validatorRegisterDTO(RegisterDTO registerDTO) {
         notNullEmail(registerDTO.getEmail());
         inValidEmail(registerDTO.getEmail());
-        notNullUsername(registerDTO.getUsername());
-        inValidUsername(registerDTO.getUsername());
+        notNullFullName(registerDTO.getFullName());
 
         registerDTO.setEmail(registerDTO.getEmail().trim());
-        registerDTO.setUsername(registerDTO.getUsername().trim());
+        registerDTO.setFullName(registerDTO.getFullName().trim());
     }
 
     public static void validatorRefreshTokenDTO(RefreshTokenDTO refreshTokenDTO) {

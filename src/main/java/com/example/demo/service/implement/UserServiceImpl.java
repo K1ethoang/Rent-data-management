@@ -27,6 +27,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +41,9 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final MailServiceImpl mailService;
     private final boolean DEFAULT_STATUS = true;
-    private final String DEFAULT_PASSWORD = "123@456";
+    private final String DEFAULT_PASSWORD = "Abc@12345";
     private final boolean BLOCK_STATUS = false;
     private final boolean UN_BLOCK_STATUS = true;
 
@@ -79,7 +81,8 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .email(userDto.getEmail())
                 .username(userDto.getEmail())
-                .password(AuthUtils.encodePassword(DEFAULT_PASSWORD))
+                .password(AuthUtils.encodePassword(userDto.getPassword() == null ?
+                        DEFAULT_PASSWORD : userDto.getPassword()))
                 .active(DEFAULT_STATUS)
                 .fullName(userDto.getFullName())
                 .role(role.get())
@@ -106,6 +109,15 @@ public class UserServiceImpl implements UserService {
             // Update cho role staff
             if (userUpdateDto.getEmail() != null) {
                 tempUser.setEmail(userUpdateDto.getEmail());
+
+                // Nếu email được cập nhật -> gửi mail
+                if (!userFromDb.getEmail().equals(tempUser.getEmail())) {
+                    try {
+                        mailService.sendMailEmailChanged(userFromDb.getEmail(), tempUser.getEmail());
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(AuthMessage.ERROR_SEND_MAIL);
+                    }
+                }
             }
             if (userUpdateDto.getFullName() != null) {
                 tempUser.setFullName(userUpdateDto.getFullName());
