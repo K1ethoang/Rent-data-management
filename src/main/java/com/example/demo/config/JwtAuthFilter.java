@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,6 +45,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         };
 
         String requestPath = request.getServletPath();
+
+        if (request.getMethod().equals(HttpMethod.OPTIONS.name())) return true;
 
         for (String bypass : bypassToken) {
 
