@@ -118,4 +118,13 @@ public class ContractController {
                 file.delete();
         }
     }
+
+    // [GET] /contracts/statistic
+    @PreAuthorize("hasAuthority('MANAGER')")
+    @GetMapping("/statistic")
+    public ResponseEntity<Object> statistic(@RequestParam int nowYear) {
+
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                contractService.statistic(nowYear));
+    }
 }

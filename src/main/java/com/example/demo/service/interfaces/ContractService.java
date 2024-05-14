@@ -27,4 +27,6 @@ public interface ContractService {
     File exportCsv(Boolean getTemplate);
 
     Map<String, Object> search(String query, Pageable pageable);
+
+    Map<String, Object> statistic(int nowYear);
 }

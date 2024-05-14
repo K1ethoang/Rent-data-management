@@ -30,4 +30,6 @@ public interface ApartmentService {
     File exportCsv(boolean getTemplate);
 
     Map<String, Object> search(String query, Pageable pageable);
+
+    Map<String, Object> statistic();
 }

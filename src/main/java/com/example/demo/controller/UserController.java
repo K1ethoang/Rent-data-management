@@ -88,7 +88,6 @@ public class UserController {
     }
 
     // [POST] /users/changePassword/:id
-
     @PostMapping("/changePassword/{id}")
     public ResponseEntity<Object> changePassword(@PathVariable("id") String id,
                                                  @RequestBody ChangePasswordDto changePasswordDto
@@ -96,5 +95,13 @@ public class UserController {
         String token = JwtUtil.getTokenFromRequest(request);
         userService.changePassword(id, changePasswordDto, token);
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS, null);
+    }
+
+    //[GET] /users/statistic
+    @PreAuthorize("hasAuthority('MANAGER')")
+    @GetMapping("/statistic")
+    public ResponseEntity<Object> statistic() {
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                userService.statistic());
     }
 }

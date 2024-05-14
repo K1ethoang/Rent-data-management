@@ -112,4 +112,12 @@ public class CustomerController {
                 file.delete();
         }
     }
+
+    // [GET] /customers/statistic
+    @PreAuthorize("hasAuthority('MANAGER')")
+    @GetMapping("/statistic")
+    public ResponseEntity<Object> statistic() {
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                customerService.statistic());
+    }
 }

@@ -266,6 +266,16 @@ public class UserServiceImpl implements UserService {
         return userOptional.get();
     }
 
+
+    @Override
+    public Map<String, Object> statistic() {
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("count", userRepository.count());
+
+        return res;
+    }
+
     // Không được trùng username, email
     public void checkDuplicated(UserDto userToCheck) throws DuplicatedException {
         List<User> userList = userRepository.findAll();

@@ -3,8 +3,6 @@ package com.example.demo.service.interfaces;
 import com.example.demo.entity.Customer;
 import com.example.demo.model.DTO.customer.CustomerDTO;
 import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
-import com.example.demo.model.DTO.paging.APIPageableDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,5 +30,7 @@ public interface CustomerService {
 
     File exportCsv(boolean getTemplate);
 
-    Map<String, Object> search(String query,Pageable pageable);
+    Map<String, Object> search(String query, Pageable pageable);
+
+    Map<String, Object> statistic();
 }
