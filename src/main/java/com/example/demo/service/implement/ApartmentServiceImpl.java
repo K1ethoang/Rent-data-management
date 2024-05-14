@@ -241,4 +241,13 @@ public class ApartmentServiceImpl implements ApartmentService {
 
         return result;
     }
+
+    @Override
+    public Map<String, Object> statistic() {
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("count", apartmentRepository.count());
+        
+        return res;
+    }
 }

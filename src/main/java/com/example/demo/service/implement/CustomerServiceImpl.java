@@ -242,4 +242,13 @@ public class CustomerServiceImpl implements CustomerService {
 
         return result;
     }
+
+    @Override
+    public Map<String, Object> statistic() {
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("count", customerRepository.count());
+
+        return res;
+    }
 }

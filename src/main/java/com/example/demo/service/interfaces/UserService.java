@@ -35,4 +35,6 @@ public interface UserService extends UserDetailsService {
     User getUserById(String userId);
 
     User getUserByEmail(String email);
+
+    Map<String, Object> statistic();
 }

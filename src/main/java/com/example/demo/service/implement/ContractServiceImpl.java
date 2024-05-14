@@ -303,4 +303,14 @@ public class ContractServiceImpl implements ContractService {
 
         return result;
     }
+
+    @Override
+    public Map<String, Object> statistic(int nowYear) {
+        Map<String, Object> res = new HashMap<>();
+
+        res.put("count", contractRepository.count());
+        res.put("total_revenue", contractRepository.getTotalAmount());
+
+        return res;
+    }
 }

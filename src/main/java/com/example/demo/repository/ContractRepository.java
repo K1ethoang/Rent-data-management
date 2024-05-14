@@ -17,4 +17,7 @@ public interface ContractRepository extends JpaRepository<Contract, String> {
     Page<Contract> search(@Param("query") String query, Pageable pageable);
 
     List<Contract> getContractsByApartment_Id(String apartmentId);
+
+    @Query("select sum(c.total) from Contract c")
+    double getTotalAmount();
 }

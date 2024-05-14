@@ -120,4 +120,11 @@ public class ApartmentController {
         }
     }
 
+    // [GET] /apartments/statistic
+    @PreAuthorize("hasAuthority('MANAGER')")
+    @GetMapping("/statistic")
+    public ResponseEntity<Object> statistic() {
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                apartmentService.statistic());
+    }
 }
