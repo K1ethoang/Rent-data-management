@@ -109,15 +109,6 @@ public class UserServiceImpl implements UserService {
             // Update cho role staff
             if (userUpdateDto.getEmail() != null) {
                 tempUser.setEmail(userUpdateDto.getEmail());
-
-                // Nếu email được cập nhật -> gửi mail
-                if (!userFromDb.getEmail().equals(tempUser.getEmail())) {
-                    try {
-                        mailService.sendMailEmailChanged(userFromDb.getEmail(), tempUser.getEmail());
-                    } catch (MessagingException e) {
-                        throw new RuntimeException(AuthMessage.ERROR_SEND_MAIL);
-                    }
-                }
             }
             if (userUpdateDto.getFullName() != null) {
                 tempUser.setFullName(userUpdateDto.getFullName());
@@ -135,8 +126,17 @@ public class UserServiceImpl implements UserService {
 
             checkDuplicated(tempUser);
 
+            // Nếu email được cập nhật -> gửi mail
+            if (!userFromDb.getEmail().equals(tempUser.getEmail())) {
+                try {
+                    mailService.sendMailEmailChanged(userFromDb.getEmail(), tempUser.getEmail());
+                } catch (MessagingException e) {
+                    throw new RuntimeException(AuthMessage.ERROR_SEND_MAIL);
+                }
+            }
+
             Optional<Role> roleNew =
-                    roleRepository.findRoleByName(ERole.STAFF);
+                    roleRepository.findRoleByName(ERole.valueOf(tempUser.getRole()));
 
             if (roleNew.isEmpty()) throw new NotFoundException(AuthMessage.ROLE_NOT_FOUND);
 
