@@ -204,10 +204,10 @@ public class CsvHelper {
 
                 printer.printRecord(row);
             } else {
-                String[] newHeader = Arrays.copyOf(CUSTOMER_HEADER, CUSTOMER_HEADER.length + 1);
-                newHeader[0] = "ID";
+                List<String> newHeader = new ArrayList<>(Arrays.asList(CUSTOMER_HEADER));
+                newHeader.add(0, "ID");
 
-                printer.printRecord(Arrays.stream(newHeader).toArray());
+                printer.printRecord(newHeader);
 
                 for (CustomerDTO customer : customerList) {
                     row.add(customer.getId());
@@ -250,10 +250,10 @@ public class CsvHelper {
 
                 printer.printRecord(row);
             } else {
-                String[] newHeader = Arrays.copyOf(APARTMENT_HEADER, APARTMENT_HEADER.length + 1);
-                newHeader[0] = "ID";
+                List<String> newHeader = new ArrayList<>(Arrays.asList(APARTMENT_HEADER));
+                newHeader.add(0, "ID");
 
-                printer.printRecord(Arrays.stream(newHeader).toArray());
+                printer.printRecord(newHeader);
 
                 for (ApartmentDTO apartment : apartmentList) {
                     row.add(apartment.getId());
