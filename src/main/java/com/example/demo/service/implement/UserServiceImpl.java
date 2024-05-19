@@ -13,7 +13,6 @@ import com.example.demo.model.DTO.user.UserUpdateDto;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
-import com.example.demo.service.interfaces.AuthService;
 import com.example.demo.service.interfaces.UserService;
 import com.example.demo.util.AuthUtils;
 import com.example.demo.util.JwtUtil;
@@ -43,8 +42,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final MailServiceImpl mailService;
-    private final AuthService authService;
-
     private final boolean DEFAULT_STATUS = true;
     private final String DEFAULT_PASSWORD = "Abc@12345";
     private final boolean BLOCK_STATUS = false;
@@ -118,7 +115,7 @@ public class UserServiceImpl implements UserService {
             }
 
             // Update chỉ có manager
-            if (JwtUtil.extractRole(token).equals(ERole.MANAGER.toString())) {
+            if (JwtUtil.extractRole(token).equals(ERole.MANAGER.toString()) && tempUser.getRole().equals(ERole.STAFF.toString())) {
                 if (userUpdateDto.getActive() != null) {
                     tempUser.setActive(userUpdateDto.getActive());
                 }
