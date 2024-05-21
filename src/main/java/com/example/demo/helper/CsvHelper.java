@@ -5,6 +5,7 @@ import com.example.demo.message.FileMessage;
 import com.example.demo.model.DTO.apartment.ApartmentDTO;
 import com.example.demo.model.DTO.contract.ContractDTO;
 import com.example.demo.model.DTO.customer.CustomerDTO;
+import com.example.demo.model.DTO.user.UserDto;
 import com.example.demo.util.MyUtils;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
@@ -29,6 +30,9 @@ public class CsvHelper {
     public static final String[] APARTMENT_HEADER = {"Address", "Number of room", "Retail price"};
     public static final String[] CONTRACT_HEADER = {"Customer ID", "Apartment ID", "Start Date",
             "End Date", "Create date", "Retail price", "Total", "User ID"};
+    public static final String[] USER_HEADER = {"Full name", "Username", "Email", "Create date",
+            "Role",
+            "Is Active"};
 
     public static boolean hasCsvFormat(MultipartFile file) {
         return (TYPE.equals(file.getContentType()));
@@ -187,8 +191,7 @@ public class CsvHelper {
 
         final String NAME_FILE_TEMPLATE = "customer_template.csv";
 
-        try (CSVPrinter printer = new CSVPrinter(new FileWriter(getTemplate ? NAME_FILE_TEMPLATE
-                : NAME_FILE),
+        try (CSVPrinter printer = new CSVPrinter(new OutputStreamWriter(new FileOutputStream(getTemplate ? NAME_FILE_TEMPLATE : NAME_FILE), StandardCharsets.UTF_8),
                 CSVFormat.EXCEL)) {
 
             List<Object> row = new ArrayList<>();
@@ -235,8 +238,7 @@ public class CsvHelper {
 
         final String NAME_FILE_TEMPLATE = "apartment_template.csv";
 
-        try (CSVPrinter printer = new CSVPrinter(new FileWriter(getTemplate ? NAME_FILE_TEMPLATE
-                : NAME_FILE),
+        try (CSVPrinter printer = new CSVPrinter(new OutputStreamWriter(new FileOutputStream(getTemplate ? NAME_FILE_TEMPLATE : NAME_FILE), StandardCharsets.UTF_8),
                 CSVFormat.EXCEL)) {
 
             List<Object> row = new ArrayList<>();
@@ -278,8 +280,7 @@ public class CsvHelper {
 
         final String NAME_FILE_TEMPLATE = "contract_template.csv";
 
-        try (CSVPrinter printer = new CSVPrinter(new FileWriter(getTemplate ? NAME_FILE_TEMPLATE
-                : NAME_FILE),
+        try (CSVPrinter printer = new CSVPrinter(new OutputStreamWriter(new FileOutputStream(getTemplate ? NAME_FILE_TEMPLATE : NAME_FILE), StandardCharsets.UTF_8),
                 CSVFormat.EXCEL)) {
 
             List<Object> row = new ArrayList<>();
@@ -319,6 +320,57 @@ public class CsvHelper {
             }
 
             return new File(getTemplate ? NAME_FILE_TEMPLATE
+                    : NAME_FILE);
+        } catch (IOException e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+
+    public static File exportUsers(List<UserDto> userList, boolean getTemplate) throws Exception {
+        final String NAME_FILE = "user_" + MyUtils.getDateNow() +
+                ".csv";
+
+        final String NAME_FILE_TEMPLATE = "user_template.csv";
+
+        try (CSVPrinter printer = new CSVPrinter(new OutputStreamWriter(new FileOutputStream(getTemplate ? NAME_FILE_TEMPLATE : NAME_FILE), StandardCharsets.UTF_8),
+                CSVFormat.EXCEL)) {
+
+            List<Object> row = new ArrayList<>();
+
+            if (getTemplate) {
+                printer.printRecord(Arrays.stream(USER_HEADER).toArray());
+
+                row.add("Hoàng Gia Kiệt");
+                row.add("example@gmail.com");
+                row.add("example@gmail.com");
+                row.add("2024-03-12");
+                row.add("STAFF");
+                row.add("True");
+
+                printer.printRecord(row);
+            } else {
+                List<String> newHeader = new ArrayList<>(Arrays.asList(USER_HEADER));
+                newHeader.add(0, "ID");
+
+                printer.printRecord(newHeader);
+
+                for (UserDto user : userList) {
+                    row.add(user.getId());
+                    row.add(user.getFullName());
+                    row.add(user.getUsername());
+                    row.add(user.getEmail());
+                    row.add(user.getCreateDate());
+                    row.add(user.getRole());
+                    row.add(user.getActive());
+
+                    printer.printRecord(row);
+                    row.clear();
+                }
+            }
+
+            return new
+
+                    File(getTemplate ? NAME_FILE_TEMPLATE
                     : NAME_FILE);
         } catch (IOException e) {
             throw new Exception(e.getMessage());

@@ -7,6 +7,7 @@ import com.example.demo.model.DTO.user.UserUpdateDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.io.File;
 import java.util.Map;
 
 public interface UserService extends UserDetailsService {
@@ -37,4 +38,6 @@ public interface UserService extends UserDetailsService {
     User getUserByEmail(String email);
 
     Map<String, Object> statistic();
+
+    File exportCsv(boolean getTemplate);
 }

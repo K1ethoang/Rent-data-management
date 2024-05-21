@@ -9,15 +9,20 @@ import com.example.demo.service.interfaces.UserService;
 import com.example.demo.util.JwtUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.FileUtils;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.*;
 
 @RestController
 @AllArgsConstructor
@@ -103,5 +108,31 @@ public class UserController {
     public ResponseEntity<Object> statistic() {
         return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
                 userService.statistic());
+    }
+
+    // [GET] /users/export
+    @GetMapping("/export")
+    public ResponseEntity<Object> exportCsv(@RequestParam(value = "getTemplate",
+            defaultValue = "false") boolean getTemplate) {
+        HttpHeaders responseHeader = new HttpHeaders();
+
+        File file = null;
+        try {
+            file = userService.exportCsv(getTemplate);
+            byte[] data = FileUtils.readFileToByteArray(file);
+
+            responseHeader.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            responseHeader.set(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=" + file.getName());
+            InputStream inputStream = new BufferedInputStream(new ByteArrayInputStream(data));
+            InputStreamResource inputStreamResource = new InputStreamResource(inputStream);
+
+            return new ResponseEntity<>(inputStreamResource, responseHeader, HttpStatus.OK);
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage());
+        } finally {
+            if (file != null)
+                file.delete();
+        }
     }
 }

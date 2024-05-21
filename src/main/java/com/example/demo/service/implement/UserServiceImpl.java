@@ -4,6 +4,7 @@ import com.example.demo.entity.Role;
 import com.example.demo.entity.User;
 import com.example.demo.enumuration.ERole;
 import com.example.demo.exception.*;
+import com.example.demo.helper.CsvHelper;
 import com.example.demo.message.AuthMessage;
 import com.example.demo.message.UserMessage;
 import com.example.demo.model.DTO.ChangePasswordDto;
@@ -28,11 +29,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import java.io.File;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -277,6 +276,17 @@ public class UserServiceImpl implements UserService {
         res.put("count", userRepository.count());
 
         return res;
+    }
+
+    @Override
+    public File exportCsv(boolean getTemplate) {
+        try {
+            List<UserDto> userDtos = new ArrayList<>();
+            userRepository.findAll().forEach(user -> userDtos.add(EntityToDto.userToDto(user)));
+            return CsvHelper.exportUsers(userDtos, getTemplate);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     // Không được trùng username, email
