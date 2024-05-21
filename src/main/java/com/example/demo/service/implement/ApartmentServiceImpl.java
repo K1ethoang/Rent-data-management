@@ -90,27 +90,23 @@ public class ApartmentServiceImpl implements ApartmentService {
 
         Apartment apartmentFromDB = getApartment(id);
 
-        Apartment tempApartment = Apartment.builder()
-                .address(apartmentFromDB.getAddress())
-                .retailPrice(apartmentFromDB.getRetailPrice())
-                .numberOfRoom(apartmentFromDB.getNumberOfRoom())
-                .build();
+        ApartmentDTO tempApartment = EntityToDto.apartmentToDto(apartmentFromDB);
 
         if (apartmentUpdate.getAddress() != null) {
             tempApartment.setAddress(apartmentUpdate.getAddress());
         }
         if (apartmentUpdate.getRetailPrice() != null) {
-            tempApartment.setRetailPrice(Double.parseDouble(apartmentUpdate.getRetailPrice()));
+            tempApartment.setRetailPrice(apartmentUpdate.getRetailPrice());
         }
         if (apartmentUpdate.getNumberOfRoom() != null) {
-            tempApartment.setNumberOfRoom(Integer.parseInt(apartmentUpdate.getNumberOfRoom()));
+            tempApartment.setNumberOfRoom(apartmentUpdate.getNumberOfRoom());
         }
 
-        checkDuplicated(EntityToDto.apartmentToDto(tempApartment));
+        checkDuplicated(tempApartment);
 
-        apartmentFromDB.setRetailPrice(tempApartment.getRetailPrice());
+        apartmentFromDB.setRetailPrice(Double.parseDouble(tempApartment.getRetailPrice()));
         apartmentFromDB.setAddress(tempApartment.getAddress());
-        apartmentFromDB.setNumberOfRoom(tempApartment.getNumberOfRoom());
+        apartmentFromDB.setNumberOfRoom(Integer.parseInt(tempApartment.getNumberOfRoom()));
 
         apartmentRepository.save(apartmentFromDB);
 
@@ -196,6 +192,9 @@ public class ApartmentServiceImpl implements ApartmentService {
 
         for (Apartment apartment : apartmentList) {
             ApartmentDTO apartmentDTO = EntityToDto.apartmentToDto(apartment);
+
+            if (apartmentDTO.getId().equals(apartmentToCheck.getId()))
+                continue;
 
             if (!apartmentDTO.getAddress().equalsIgnoreCase(apartmentToCheck.getAddress()))
                 continue;
