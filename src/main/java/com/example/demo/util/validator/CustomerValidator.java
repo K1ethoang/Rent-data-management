@@ -87,14 +87,14 @@ public class CustomerValidator {
 
         if (customerUpdateDTO.getDob() != null) {
             notNullDob(customerUpdateDTO.getDob());
-            invalidDob(customerUpdateDTO.getCitizenId());
+            invalidDob(customerUpdateDTO.getDob());
             customerUpdateDTO.setDob(customerUpdateDTO.getDob().trim());
         }
 
         if (customerUpdateDTO.getCitizenId() != null) {
             notNullCitizenId(customerUpdateDTO.getCitizenId());
             invalidCitizenId(customerUpdateDTO.getCitizenId());
-            customerUpdateDTO.setDob(customerUpdateDTO.getCitizenId().trim());
+            customerUpdateDTO.setCitizenId(customerUpdateDTO.getCitizenId().trim());
         }
 
         if (customerUpdateDTO.getPhoneNumber() != null) {

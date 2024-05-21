@@ -369,7 +369,6 @@ public class CsvHelper {
             }
 
             return new
-
                     File(getTemplate ? NAME_FILE_TEMPLATE
                     : NAME_FILE);
         } catch (IOException e) {

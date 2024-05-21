@@ -104,6 +104,8 @@ public class CustomerServiceImpl implements CustomerService {
         Customer storedCustomer = getCustomer(id);
 
         CustomerDTO tempCustomer = EntityToDto.customerToDto(storedCustomer);
+        log.info(tempCustomer);
+        log.info(customerToUpdate);
 
         if (customerToUpdate.getFullName() != null) {
             tempCustomer.setFullName(customerToUpdate.getFullName());
@@ -123,11 +125,14 @@ public class CustomerServiceImpl implements CustomerService {
 
         checkDuplicated(tempCustomer);
 
+        log.info(tempCustomer);
+        log.info(customerToUpdate);
+
         storedCustomer.setFullName(tempCustomer.getFullName());
         storedCustomer.setAddress(tempCustomer.getAddress());
         storedCustomer.setPhoneNumber(tempCustomer.getPhoneNumber());
-        storedCustomer.setDob(LocalDate.parse(tempCustomer.getDob()));
         storedCustomer.setCitizenId(tempCustomer.getCitizenId());
+        storedCustomer.setDob(LocalDate.parse(tempCustomer.getDob()));
 
         customerRepository.save(storedCustomer);
 
