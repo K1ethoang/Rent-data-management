@@ -67,6 +67,13 @@ public class UserController {
         return ApiResponse.responseBuilder(HttpStatus.CREATED, GlobalMessage.SUCCESS, null);
     }
 
+    // [GET] /users/:id
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getUser(@PathVariable("id") String id) {
+        return ApiResponse.responseBuilder(HttpStatus.OK, GlobalMessage.SUCCESS,
+                userService.getUserDTO(id));
+    }
+
     // [POST] /users/update/:id
     @PostMapping("/update/{id}")
     public ResponseEntity<Object> update(@PathVariable("id") String id,
