@@ -246,8 +246,12 @@ public class ApartmentServiceImpl implements ApartmentService {
     public Map<String, Object> statistic() {
         Map<String, Object> res = new HashMap<>();
 
-        res.put("count", apartmentRepository.count());
-        
+        long count = apartmentRepository.count();
+
+        if (count == 0) return null;
+
+        res.put("count", count);
+
         return res;
     }
 }

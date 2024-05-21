@@ -273,7 +273,11 @@ public class UserServiceImpl implements UserService {
     public Map<String, Object> statistic() {
         Map<String, Object> res = new HashMap<>();
 
-        res.put("count", userRepository.count());
+        long count = userRepository.count();
+
+        if (count == 0) return null;
+
+        res.put("count", count);
 
         return res;
     }

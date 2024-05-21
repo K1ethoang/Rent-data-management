@@ -308,7 +308,13 @@ public class ContractServiceImpl implements ContractService {
     public Map<String, Object> statistic(int nowYear) {
         Map<String, Object> res = new HashMap<>();
 
-        res.put("count", contractRepository.count());
+        long count = contractRepository.count();
+
+        if (count == 0) return null;
+
+        res.put("count", count);
+
+        res.put("count", count);
         res.put("total_revenue", contractRepository.getTotalAmount());
 
         return res;
