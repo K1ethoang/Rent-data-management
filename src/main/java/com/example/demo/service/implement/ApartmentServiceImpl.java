@@ -1,6 +1,7 @@
 package com.example.demo.service.implement;
 
 import com.example.demo.entity.Apartment;
+import com.example.demo.entity.Contract;
 import com.example.demo.exception.DuplicatedException;
 import com.example.demo.exception.InValidException;
 import com.example.demo.exception.NoContentException;
@@ -14,6 +15,7 @@ import com.example.demo.model.DTO.apartment.ApartmentUpdateDTO;
 import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
 import com.example.demo.repository.ApartmentRepository;
+import com.example.demo.repository.ContractRepository;
 import com.example.demo.service.interfaces.ApartmentService;
 import com.example.demo.util.validator.ApartmentValidator;
 import com.example.demo.util.validator.FileValidator;
@@ -32,6 +34,7 @@ import java.util.*;
 @Log4j2
 public class ApartmentServiceImpl implements ApartmentService {
     private final ApartmentRepository apartmentRepository;
+    private final ContractRepository contractRepository;
 
     @Override
     public Map<String, Object> getAll(Pageable pageable) throws NoContentException {
@@ -114,9 +117,13 @@ public class ApartmentServiceImpl implements ApartmentService {
     }
 
     @Override
-    public ApartmentDTO delete(String id) {
+    public ApartmentDTO delete(String id) throws InValidException {
         // Check apartment has in DB
         Apartment apartmentToDelete = getApartment(id);
+
+        if (checkApartmentIsUsed(id)) {
+            throw new InValidException(ApartmentMessage.APARTMENT_IN_CONTRACT);
+        }
 
         apartmentRepository.delete(apartmentToDelete);
 
@@ -253,4 +260,12 @@ public class ApartmentServiceImpl implements ApartmentService {
 
         return res;
     }
+
+    boolean checkApartmentIsUsed(String apartmentId) {
+        List<Contract> contractList = contractRepository.getContractsByApartment_Id(apartmentId);
+
+        if (contractList.isEmpty()) return false;
+        return true;
+    }
+
 }

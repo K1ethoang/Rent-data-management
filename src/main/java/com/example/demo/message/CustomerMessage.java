@@ -16,6 +16,7 @@ public class CustomerMessage {
 
     // Invalid
     public static final String INVALID_DOB = "Dob must be less than now date";
+    public static final String CUSTOMER_IN_CONTRACT = "Customer is in a contract";
     public static final String INVALID_PHONE_NUMBER = "Phone number must is number and right " +
             "format";
     public static final String INVALID_CITIZEN_ID = "Length of citizen id must is number and " +

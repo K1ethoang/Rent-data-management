@@ -1,5 +1,6 @@
 package com.example.demo.service.implement;
 
+import com.example.demo.entity.Contract;
 import com.example.demo.entity.Customer;
 import com.example.demo.exception.DuplicatedException;
 import com.example.demo.exception.InValidException;
@@ -13,6 +14,7 @@ import com.example.demo.model.DTO.customer.CustomerDTO;
 import com.example.demo.model.DTO.customer.CustomerUpdateDTO;
 import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
+import com.example.demo.repository.ContractRepository;
 import com.example.demo.repository.CustomerRepository;
 import com.example.demo.service.interfaces.CustomerService;
 import com.example.demo.util.validator.CustomerValidator;
@@ -33,6 +35,7 @@ import java.util.*;
 @Log4j2
 public class CustomerServiceImpl implements CustomerService {
     private final CustomerRepository customerRepository;
+    private final ContractRepository contractRepository;
 
 
     @Override
@@ -140,8 +143,12 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public CustomerDTO delete(String id) throws NotFoundException {
+    public CustomerDTO delete(String id) throws InValidException {
         Customer customerToDelete = getCustomer(id);
+
+        if (checkApartmentIsUsed(id)) {
+            throw new InValidException(CustomerMessage.CUSTOMER_IN_CONTRACT);
+        }
 
         customerRepository.delete(customerToDelete);
 
@@ -259,5 +266,12 @@ public class CustomerServiceImpl implements CustomerService {
         res.put("count", count);
 
         return res;
+    }
+
+    boolean checkApartmentIsUsed(String apartmentId) {
+        List<Contract> contractList = contractRepository.getContractsByApartment_Id(apartmentId);
+
+        if (contractList.isEmpty()) return false;
+        return true;
     }
 }
