@@ -18,6 +18,8 @@ public interface ContractRepository extends JpaRepository<Contract, String> {
 
     List<Contract> getContractsByApartment_Id(String apartmentId);
 
+    List<Contract> getContractsByCustomer_Id(String customerId);
+
     @Query("select sum(c.total) from Contract c")
     double getTotalAmount();
 }

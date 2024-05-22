@@ -269,7 +269,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     boolean checkApartmentIsUsed(String apartmentId) {
-        List<Contract> contractList = contractRepository.getContractsByApartment_Id(apartmentId);
+        List<Contract> contractList = contractRepository.getContractsByCustomer_Id(apartmentId);
 
         if (contractList.isEmpty()) return false;
         return true;
