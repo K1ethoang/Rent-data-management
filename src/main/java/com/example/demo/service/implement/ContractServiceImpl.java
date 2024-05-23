@@ -12,6 +12,7 @@ import com.example.demo.message.ContractMessage;
 import com.example.demo.message.FileMessage;
 import com.example.demo.message.GlobalMessage;
 import com.example.demo.model.DTO.contract.ContractDTO;
+import com.example.demo.model.DTO.contract.ContractResponse;
 import com.example.demo.model.DTO.contract.ContractUpdateDTO;
 import com.example.demo.model.DTO.paging.APIPageableDTO;
 import com.example.demo.model.mapper.EntityToDto;
@@ -50,12 +51,12 @@ public class ContractServiceImpl implements ContractService {
         Map<String, Object> result = new HashMap<>();
 
         Page<Contract> pageEntity = contractRepository.findAll(pageable);
-        Page<ContractDTO> pageDto = pageEntity.map(EntityToDto::contractToDto);
+        Page<ContractResponse> pageResponse = pageEntity.map(EntityToDto::ContractToResponse);
 
-        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageDto);
+        APIPageableDTO apiPageableDTO = new APIPageableDTO(pageResponse);
 
         result.put("page", apiPageableDTO);
-        result.put("contracts", pageDto.getContent());
+        result.put("contracts", pageResponse.getContent());
 
         return result;
     }
