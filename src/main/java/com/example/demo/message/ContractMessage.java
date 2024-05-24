@@ -13,7 +13,7 @@ public class ContractMessage {
     public static final String NOT_NULL_CUSTOMER_ID = "Customer Id is not null";
 
     public static final String NOT_NULL_APARTMENT_ID = "Apartment Id is not null";
-    public static final String NOT_NULL_USER_ID = "Apartment Id is not null";
+    public static final String NOT_NULL_USER_ID = "User Id is not null";
 
     public static final String INCORRECT_FORMAT_DATE = "Date must be in \"yyyy-MM-dd\" format";
     public static final String INVALID_START_DATE = "Start Date is invalid or not be in " +
