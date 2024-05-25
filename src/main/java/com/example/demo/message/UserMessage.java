@@ -15,4 +15,5 @@ public class UserMessage {
             "Những ký tự còn lại có thể là chữ cái, chữ số và gạch dưới. " +
             "Độ dài: nhỏ nhất là 5, lớn nhất là 25";
     public final static String NOT_FOUND = "User not found";
+    public final static String CAN_NOT_BLOCK_MANAGER = "Can not block manager";
 }

@@ -175,8 +175,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void blockUser(String id) {
+    public void blockUser(String id) throws InValidException {
         User userFromDb = getUserById(id);
+
+        if (userFromDb.getRole().getName().equals(ERole.MANAGER))
+            throw new InValidException(UserMessage.CAN_NOT_BLOCK_MANAGER);
 
         userFromDb.setActive(BLOCK_STATUS);
 
