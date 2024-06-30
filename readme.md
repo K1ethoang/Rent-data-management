@@ -25,6 +25,7 @@
 
 - Clone this repository
 - Make sure you are using JDK 17
+- Install extension [Lombok](https://projectlombok.org/) in IntelliJ IDEA
 
 ### 1. Update `.env`
 
