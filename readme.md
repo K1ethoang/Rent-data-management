@@ -21,13 +21,18 @@
 - Paging
 - Searching
 
+# Updates:
+- [2024.10.29] 
+  - Update init **Role** & **first user** in database
+  - [Repo Frontend](https://github.com/Bie-NHD/Rent-management-dashboard)
+
 # How to run
 
 - Clone this repository
 - Make sure you are using JDK 17
 - Install extension [Lombok](https://projectlombok.org/) in IntelliJ IDEA
 
-### 1. Update `.env`
+### 1. Update `.env` (Optional - if you need to send mail)
 
 - Rename `.env.example` in `resources` folder to `.env.dev` and change your value to set up mail
   ```
@@ -40,8 +45,8 @@
 
 ### 2. Initial role entity
 
-- Open comment at the first time run project to add Role
-  ![img.png](img/initial-role.png)
+- Just run and do not care about that
+![initial-role-user.png](img%2Finitial-role-user.png)
 
 ### 3. Set up Database with docker
 

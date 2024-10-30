@@ -10,6 +10,8 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class ApartmentValidator {
+    public static final int MAX_ROOM = 20;
+    public static final double MAX_PRICE = 100000000000.0;
 
     public static void notNullAddress(String address) throws NotNullException {
         if (address == null || address.trim().isEmpty())
@@ -27,12 +29,12 @@ public class ApartmentValidator {
     }
 
     public static void invalidRetailPrice(String retailPrice) throws InValidException {
-        if (MyUtils.stringToDouble(retailPrice) < 0)
+        if (MyUtils.stringToDouble(retailPrice) <= 0 || MyUtils.stringToDouble(retailPrice) > MAX_PRICE)
             throw new InValidException(ApartmentMessage.INVALID_RETAIL_PRICE);
     }
 
     public static void invalidNumberOfRoom(String numberOfRoom) throws InValidException {
-        if (MyUtils.stringToInteger(numberOfRoom) <= 0)
+        if (MyUtils.stringToInteger(numberOfRoom) <= 0 || MyUtils.stringToInteger(numberOfRoom) > MAX_ROOM)
             throw new InValidException(ApartmentMessage.INVALID_NUMBER_OF_ROOM);
     }
 
