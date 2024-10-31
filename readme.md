@@ -22,6 +22,8 @@
 - Searching
 
 # Updates:
+- [2024.10.31]
+  - Update Selenium test `Login Page` and `Change Password Page`
 - [2024.10.29] 
   - Update init **Role** & **first user** in database
   - [Repo Frontend](https://github.com/Bie-NHD/Rent-management-dashboard)
