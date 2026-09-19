@@ -1,37 +1,47 @@
 # Rent data management
 
-- This is a project while I learn Spring boot (v2)
-- Tech:
-    - Spring boot
-    - Spring security
-    - Spring mail
-    - Maven
-    - JWT (Json Web Token)
-    - Docker (Run database)
-    - Swagger (Spring doc)
-- IDE:
-    - IntelliJ IDEA
+- Backend API for managing apartment rental data (apartments, customers, contracts, users) — built while learning Spring Boot (v2).
+- [Repo Frontend](https://github.com/Bie-NHD/Rent-management-dashboard)
 
-# Features:
+## Tech stack
 
-- Authentication, Authorization
-- CRUD
-- Validator (not null, format, check duplicate)
-- Import/Export (CSV)
-- Paging
-- Searching
+- **Framework**: Spring Boot 2.7 (Web, Data JPA, Data REST, Mail, DevTools)
+- **Security**: Spring Security + JWT (`jjwt` 0.12.5), role-based access (`MANAGER`, `STAFF`)
+- **Database**: MySQL 8.3 (via Docker), Hibernate/JPA
+- **API docs**: Springdoc OpenAPI / Swagger UI
+- **Import/Export**: Apache Commons CSV, Apache POI (Excel `.xlsx`)
+- **Testing**: JUnit 5, Spring Security Test, Testcontainers (MySQL), Selenium (UI tests)
+- **Build**: Maven, Java 11
+- **Other**: Lombok, Spring Mail (SMTP), Docker (database only)
 
-# Updates:
-- [2024.10.31]
-  - Update Selenium test `Login Page` and `Change Password Page`
-- [2024.10.29] 
-  - Update init **Role** & **first user** in database
-  - [Repo Frontend](https://github.com/Bie-NHD/Rent-management-dashboard)
+## Features
+
+- **Auth**: register, login, logout, refresh token, reset password (JWT-based)
+- **Users**: CRUD, block/unblock, change password, get current user details, statistics, export
+- **Apartments**: CRUD, search, paging, import (CSV), export, statistics
+- **Customers**: CRUD, search, paging, import (CSV), export, statistics
+- **Contracts**: CRUD, search, paging, export, statistics
+- **Validation**: not-null checks, format checks, duplicate checks, custom exceptions (`NotFoundException`, `DuplicatedException`, `ForbiddenException`, etc.) with a global exception handler
+- **Standardized API responses** (`ApiResponse` / `ErrorResponse`)
+- **Selenium UI tests** for Login Page and Change Password Page
+
+## Main entities
+
+- `User` (with `Role`: MANAGER / STAFF)
+- `Apartment`
+- `Customer`
+- `Contract`
+
+## Updates
+
+- [2025.03] Bump `poi-ooxml` to 5.4.0
+- [2024.10.31] Selenium tests for `Login Page` and `Change Password Page`
+- [2024.10.29] Init **Role** & **first user** in database
 
 # How to run
 
 - Clone this repository
-- Make sure you are using JDK 17
+- Make sure you are using JDK 11 (see `pom.xml` `java.version`)
 - Install extension [Lombok](https://projectlombok.org/) in IntelliJ IDEA
 
 ### 1. Update `.env` (Optional - if you need to send mail)
